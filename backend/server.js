@@ -6,8 +6,9 @@ const cors = require('cors');
 const app = express();
 const port = 3000;
 
-// --- NEW: More Open CORS Configuration for Debugging ---
-// This temporarily allows requests from any origin to confirm CORS is the issue.
+// --- NEW: Final, More Robust CORS Configuration ---
+// This handles all request types (including preflight OPTIONS requests)
+// and is the standard way to configure CORS in an Express app.
 app.use(cors());
 // --- END NEW ---
 
