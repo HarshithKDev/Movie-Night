@@ -1,12 +1,10 @@
 require('dotenv').config();
 const express = require('express');
 const { MongoClient, ServerApiVersion } = require('mongodb');
-const cors = require('cors');
 const http = require('http');
 const { WebSocketServer } = require('ws');
 const admin = require('firebase-admin');
 
-// --- Firebase Admin SDK Initialization ---
 const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
   ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
   : require('./firebase-service-account-key.json');
@@ -17,37 +15,27 @@ admin.initializeApp({
 });
 
 const bucket = admin.storage().bucket();
-// --- End Firebase Initialization ---
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// --- FINAL: Robust CORS Configuration ---
-const allowedOrigins = ['https://movienight2025.netlify.app'];
-
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
-
-app.options('*', cors()); // Handle preflight
-// --- END CORS SETUP ---
-
-// Middleware
 app.use(express.json());
+
+// --- ✅ Robust Manual CORS Middleware ---
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://movienight2025.netlify.app');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200); // Respond to preflight
+  }
+  next();
+});
+// ----------------------------------------
 
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
-// --- WebSocket Logic ---
 const rooms = {};
 wss.on('connection', (ws) => {
   ws.on('message', (message) => {
@@ -83,7 +71,6 @@ wss.on('connection', (ws) => {
   });
 });
 
-// --- MongoDB Connection and Routes ---
 const client = new MongoClient(process.env.MONGO_URI, {
   serverApi: { version: ServerApiVersion.v1, strict: true, deprecationErrors: true }
 });
@@ -96,7 +83,7 @@ async function run() {
     const db = client.db("movieNightDB");
     const roomsCollection = db.collection("rooms");
 
-    // --- Signed Upload URL Endpoint ---
+    // --- 🎬 Upload URL Generation Endpoint ---
     app.post('/api/generate-upload-url', async (req, res) => {
       const { fileName, fileType } = req.body;
 
@@ -124,7 +111,7 @@ async function run() {
       }
     });
 
-    // --- Room Creation ---
+    // --- 📽 Create Room ---
     app.post('/api/rooms', async (req, res) => {
       const { roomCode, fileId } = req.body;
       const newRoom = { roomCode, fileId, createdAt: new Date() };
@@ -132,7 +119,7 @@ async function run() {
       res.status(201).json(newRoom);
     });
 
-    // --- Get Room Info ---
+    // --- 🎞 Get Room Info ---
     app.get('/api/rooms/:roomCode', async (req, res) => {
       const { roomCode } = req.params;
       const room = await roomsCollection.findOne({ roomCode });
@@ -143,13 +130,13 @@ async function run() {
       }
     });
 
-    // --- Start the Server ---
+    // --- 🚀 Start Server ---
     server.listen(port, "0.0.0.0", () => {
-      console.log(`🚀 Server listening on port ${port}`);
+      console.log(`🚀 Server is running on port ${port}`);
     });
 
   } catch (err) {
-    console.error("❌ MongoDB connection failed", err);
+    console.error("❌ MongoDB connection failed:", err);
   }
 }
 
