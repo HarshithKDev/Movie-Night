@@ -65,9 +65,9 @@ async function run() {
       }
     });
 
-    app.listen(port, () => {
-      console.log(`Server listening on port ${port}`);
-    });
+    app.listen(port, "0.0.0.0", () => {
+  console.log(`Server listening on port ${port}`);
+});
 
   } catch(err) {
     console.error("Failed to connect to MongoDB", err);
