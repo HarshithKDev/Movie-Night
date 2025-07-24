@@ -4,6 +4,7 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 const http = require('http');
 const { WebSocketServer } = require('ws');
 const admin = require('firebase-admin');
+const cors = require('cors'); // ✅ Re-introduced the standard CORS library
 
 // --- Firebase Admin SDK Initialization ---
 const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
@@ -12,7 +13,6 @@ const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  // CORRECTED: The storage bucket name uses the .appspot.com domain.
   storageBucket: 'movienight-firebase.appspot.com'
 });
 
@@ -22,23 +22,14 @@ const bucket = admin.storage().bucket();
 const app = express();
 const port = process.env.PORT || 3000;
 
+// --- ✅ Definitive CORS Solution ---
+// This uses the standard `cors` library, which is the most robust way to
+// handle all types of cross-origin requests, including the failing preflight.
+app.use(cors());
+// ------------------------------------
+
 // Middleware
 app.use(express.json());
-
-// --- ✅ Robust Manual CORS Middleware ---
-// This is your excellent implementation that explicitly handles preflight requests.
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://movienight2025.netlify.app');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  
-  // Respond to the browser's security check (preflight request)
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-});
-// ----------------------------------------
 
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
