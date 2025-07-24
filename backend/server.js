@@ -6,8 +6,12 @@ const http = require('http');
 const { WebSocketServer } = require('ws');
 const admin = require('firebase-admin');
 
-// --- Firebase Admin SDK Initialization ---
-const serviceAccount = require('./firebase-service-account-key.json');
+// --- NEW: Firebase Admin SDK Initialization (Handles both local and deployed) ---
+// This code checks if the environment variable exists (on Render).
+// If it does, it parses it. If not, it falls back to the local file (for testing).
+const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
+  ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
+  : require('./firebase-service-account-key.json');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -71,7 +75,7 @@ async function run() {
   try {
     await client.connect();
     console.log("Successfully connected to MongoDB Atlas!");
-
+    
     const db = client.db("movieNightDB");
     const roomsCollection = db.collection("rooms");
 
