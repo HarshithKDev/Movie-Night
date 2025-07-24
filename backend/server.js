@@ -48,14 +48,19 @@ async function run() {
     // API Endpoint to get a room's fileId
     app.get('/api/rooms/:roomCode', async (req, res) => {
       const { roomCode } = req.params;
+      // --- THIS IS THE NEW DIAGNOSTIC LINE ---
+      console.log(`[${new Date().toISOString()}] Received request to find room: ${roomCode}`);
       try {
         const room = await roomsCollection.findOne({ roomCode });
         if (room) {
+          console.log(`... Found room ${roomCode} in database.`);
           res.status(200).json({ fileId: room.fileId });
         } else {
+          console.log(`... Could NOT find room ${roomCode} in database.`);
           res.status(404).json({ message: 'Room not found' });
         }
       } catch (error) {
+        console.error(`... Error while finding room ${roomCode}:`, error);
         res.status(500).json({ message: 'Failed to find room', error });
       }
     });
