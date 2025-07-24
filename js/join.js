@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // ✅ THIS IS THE DEFINITIVE FIX: Using your live Render URL
+            // Use your deployed Render URL here
             const backendUrl = 'https://movienight-backend-veka.onrender.com';
 
             fetch(`${backendUrl}/api/rooms/${enteredCode}`)
@@ -25,7 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(data => {
                 const fileId = data.fileId;
                 console.log(`Room ${enteredCode} found with file ${fileId}. Joining...`);
-                window.location.href = `watch.html?fileId=${encodeURIComponent(data.fileId)}&roomCode=${enteredCode}`;
+                // The fileId URL must be encoded before being put in the redirect URL
+                window.location.href = `watch.html?fileId=${encodeURIComponent(fileId)}&roomCode=${enteredCode}`;
             })
             .catch(error => {
                 showError(`Room "${enteredCode}" not found. Please check the code and try again.`);

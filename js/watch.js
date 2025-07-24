@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
-    const fileId = params.get('fileId');
+    // The fileId is now a full URL, so it needs to be decoded
+    const fileId = decodeURIComponent(params.get('fileId'));
     const roomCode = params.get('roomCode');
 
     const roomCodeEl = document.getElementById('room-code');
-    const videoPlayerEl = document.getElementById('video-player');
     const exitButtonEl = document.getElementById('exit-button');
     const copyButtonEl = document.getElementById('copy-button');
     const micBtn = document.getElementById('mic-btn');
@@ -18,56 +18,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- UI Setup ---
     roomCodeEl.textContent = roomCode;
-    // --- THIS IS THE FIX ---
-    // Switched back to the more reliable /preview URL for the iframe
-    videoPlayerEl.src = `https://docs.google.com/file/d/${fileId}/preview`;
+
+    // --- Video.js Player Initialization ---
+    // Get the new <video> element with the correct ID
+    const player = videojs('movie-player');
+    
+    // Set the source for the Video.js player
+    player.src({ src: fileId });
 
     // --- Video Call Setup ---
     joinAndDisplayLocalStream(roomCode);
 
     // --- WebSocket Connection for Video Sync ---
-    // Use your Render backend URL here. Replace 'movienight-backend.onrender.com' with your actual URL.
-    // The URL must start with wss:// (for secure WebSocket)
-    const wsUrl = 'wss://movienight-backend.onrender.com'.replace(/^http/, 'ws');
+    const wsUrl = 'wss://movienight-backend-veka.onrender.com'.replace(/^http/, 'ws');
     const ws = new WebSocket(wsUrl);
+    
+    // A flag to prevent echoing events back to the server
+    let receivedEvent = false;
 
     ws.onopen = () => {
         console.log('Connected to WebSocket server.');
-        // When the connection is open, send a message to join the specific room
         ws.send(JSON.stringify({ type: 'join', roomCode }));
     };
 
     ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        console.log('Received message from server:', data);
+        console.log('Received message:', data);
 
-        // IMPORTANT LIMITATION NOTE:
-        // The standard Google Drive embed does NOT provide a JavaScript API
-        // to control playback (play, pause, seek, get current time).
-        // The console logs below demonstrate that the real-time communication is working.
+        // Set the flag to true so we know this action came from the server
+        receivedEvent = true;
 
         switch (data.type) {
             case 'play':
-                console.log("Received 'play' command. Manual control required by user.");
+                player.play();
                 break;
             case 'pause':
-                console.log("Received 'pause' command. Manual control required by user.");
+                player.pause();
                 break;
             case 'seek':
-                console.log(`Received 'seek' command to ${data.time}. Manual control required.`);
+                // Set the player's time to the time sent by the server
+                player.currentTime(data.time);
                 break;
         }
+        
+        // Reset the flag shortly after, so user actions can be sent again
+        setTimeout(() => { receivedEvent = false; }, 100);
     };
 
-    ws.onclose = () => {
-        console.log('Disconnected from WebSocket server.');
-    };
+    ws.onclose = () => console.log('Disconnected from WebSocket server.');
+    ws.onerror = (error) => console.error('WebSocket error:', error);
 
-    ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-    };
-
-    // This function demonstrates how you would send playback events to the server.
+    // --- Sending Sync Events to the Server ---
+    
     function sendPlaybackEvent(type, time = null) {
         if (ws.readyState === WebSocket.OPEN) {
             const message = { type, roomCode };
@@ -75,14 +77,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 message.time = time;
             }
             ws.send(JSON.stringify(message));
-            console.log(`Sent '${type}' event to server.`);
         }
     }
     
+    // Listen for events on the player and send them to the server
+    player.on('play', () => {
+        if (receivedEvent) return; // Don't send an event we just received
+        console.log('Sending play event');
+        sendPlaybackEvent('play');
+    });
+
+    player.on('pause', () => {
+        if (receivedEvent) return; // Don't send an event we just received
+        console.log('Sending pause event');
+        sendPlaybackEvent('pause');
+    });
+
+    player.on('seeked', () => {
+        if (receivedEvent) return; // Don't send an event we just received
+        const currentTime = player.currentTime();
+        console.log(`Sending seek event to ${currentTime}`);
+        sendPlaybackEvent('seek', currentTime);
+    });
+
     // --- Button Event Listeners ---
     exitButtonEl.onclick = async () => {
         await leaveChannel();
-        ws.close(); // Close the WebSocket connection when exiting
+        ws.close();
         window.location.href = 'index.html';
     };
     
