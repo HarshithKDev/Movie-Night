@@ -6,9 +6,10 @@ const cors = require('cors');
 const app = express();
 const port = 3000;
 
-// --- NEW: Final, More Robust CORS Configuration ---
-// This handles all request types (including preflight OPTIONS requests)
-// and is the standard way to configure CORS in an Express app.
+// --- NEW: Final, Most Robust CORS Configuration ---
+// This configuration explicitly handles all types of cross-origin requests,
+// including the browser's "preflight" OPTIONS requests, which is the
+// likely source of the problem.
 app.use(cors());
 // --- END NEW ---
 
