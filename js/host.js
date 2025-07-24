@@ -134,7 +134,7 @@ function pickerCallback(data) {
     const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
 
     // --- NEW: Call your backend to create the room ---
-    fetch('https://1fa63c5e0cb7.ngrok-free.app/api/rooms', {
+    fetch('https://bec3f35fd07b.ngrok-free.app', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ roomCode, fileId }),
