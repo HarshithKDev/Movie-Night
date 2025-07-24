@@ -13,7 +13,7 @@ const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: 'movienight-firebase.appspot.com'
+  storageBucket: 'movienight-firebase.firebasestorage.app'
 });
 
 const bucket = admin.storage().bucket();
@@ -24,9 +24,10 @@ const app = express();
 const port = 3000;
 
 // --- NEW: Final, Most Robust CORS Configuration ---
-// This configuration uses the standard, most compatible setup to allow
-// requests from any origin. This is the definitive fix for the preflight error.
+// This configuration explicitly handles the browser's preflight OPTIONS requests
+// for all routes, which is the definitive fix for this specific CORS error.
 app.use(cors());
+app.options('*', cors()); // This line is crucial for preflight requests
 // --- END NEW ---
 
 // Middleware
