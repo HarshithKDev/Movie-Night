@@ -4,7 +4,7 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 const http = require('http');
 const { WebSocketServer } = require('ws');
 const admin = require('firebase-admin');
-const cors = require('cors'); // ✅ Re-introduced the standard CORS library
+// const cors = require('cors'); // We are replacing this with a manual solution
 
 // --- Firebase Admin SDK Initialization ---
 const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
@@ -22,10 +22,25 @@ const bucket = admin.storage().bucket();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// --- ✅ Definitive CORS Solution ---
-// This uses the standard `cors` library, which is the most robust way to
-// handle all types of cross-origin requests, including the failing preflight.
-app.use(cors());
+// --- ✅ Definitive Manual CORS Solution ---
+// This middleware gives us absolute control over the response headers
+// and explicitly handles the browser's preflight OPTIONS request.
+app.use((req, res, next) => {
+  // Set the allowed origin. We can make this more specific if needed.
+  res.header('Access-Control-Allow-Origin', '*');
+  // Set the allowed HTTP methods
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  // Set the allowed headers
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  // The browser sends an OPTIONS request first to check permissions.
+  // We need to respond to it with a 200 OK status to let the real request through.
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  
+  next();
+});
 // ------------------------------------
 
 // Middleware
