@@ -6,8 +6,16 @@ const cors = require('cors');
 const app = express();
 const port = 3000;
 
+// --- NEW: Explicit CORS Configuration ---
+// This tells our server to trust requests specifically from our Netlify app.
+const corsOptions = {
+  origin: 'https://movienight2025.netlify.app',
+  optionsSuccessStatus: 200 // For legacy browser support
+};
+app.use(cors(corsOptions));
+// --- END NEW ---
+
 // Middleware
-app.use(cors()); // Allows your frontend to talk to this server
 app.use(express.json()); // Allows the server to read JSON from requests
 
 // MongoDB Client Setup
@@ -20,7 +28,7 @@ async function run() {
     // Connect the client to the server
     await client.connect();
     console.log("Successfully connected to MongoDB Atlas!");
-
+    
     const db = client.db("movieNightDB"); // Your database name
     const roomsCollection = db.collection("rooms"); // Your collection name
 
