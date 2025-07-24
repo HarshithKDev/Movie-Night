@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadStatus = document.getElementById('upload-status');
     
     // Use your deployed Render URL here
-    const backendUrl = 'https://movienight-backend.onrender.com';
+    const backendUrl = 'https://movienight-backend-veka.onrender.com';
 
     // --- Event Listeners for File Input ---
     
