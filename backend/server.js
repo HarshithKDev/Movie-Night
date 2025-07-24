@@ -19,16 +19,27 @@ admin.initializeApp({
 const bucket = admin.storage().bucket();
 // --- End Firebase Initialization ---
 
-
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
-// --- NEW: Final, Most Robust CORS Configuration ---
-// This configuration explicitly handles the browser's preflight OPTIONS requests
-// for all routes, which is the definitive fix for this specific CORS error.
-app.use(cors());
-app.options('*', cors()); // This line is crucial for preflight requests
-// --- END NEW ---
+// --- FINAL: Robust CORS Configuration ---
+const allowedOrigins = ['https://movienight2025.netlify.app'];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+app.options('*', cors()); // Handle preflight
+// --- END CORS SETUP ---
 
 // Middleware
 app.use(express.json());
@@ -36,7 +47,7 @@ app.use(express.json());
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
-// (WebSocket server logic remains the same)
+// --- WebSocket Logic ---
 const rooms = {};
 wss.on('connection', (ws) => {
   ws.on('message', (message) => {
@@ -58,8 +69,11 @@ wss.on('connection', (ws) => {
           });
         }
       }
-    } catch (error) { console.error('WS message error:', error); }
+    } catch (error) {
+      console.error('WS message error:', error);
+    }
   });
+
   ws.on('close', () => {
     const { roomCode } = ws;
     if (roomCode && rooms[roomCode]) {
@@ -69,7 +83,7 @@ wss.on('connection', (ws) => {
   });
 });
 
-
+// --- MongoDB Connection and Routes ---
 const client = new MongoClient(process.env.MONGO_URI, {
   serverApi: { version: ServerApiVersion.v1, strict: true, deprecationErrors: true }
 });
@@ -77,40 +91,40 @@ const client = new MongoClient(process.env.MONGO_URI, {
 async function run() {
   try {
     await client.connect();
-    console.log("Successfully connected to MongoDB Atlas!");
-    
+    console.log("✅ Connected to MongoDB Atlas");
+
     const db = client.db("movieNightDB");
     const roomsCollection = db.collection("rooms");
 
-    // API Endpoint for generating upload URLs
+    // --- Signed Upload URL Endpoint ---
     app.post('/api/generate-upload-url', async (req, res) => {
-        const { fileName, fileType } = req.body;
-        if (!fileName || !fileType) {
-            return res.status(400).json({ message: 'fileName and fileType are required' });
-        }
+      const { fileName, fileType } = req.body;
 
-        const filePath = `videos/${Date.now()}-${fileName}`;
-        const file = bucket.file(filePath);
+      if (!fileName || !fileType) {
+        return res.status(400).json({ message: 'fileName and fileType are required' });
+      }
 
-        const options = {
-            version: 'v4',
-            action: 'write',
-            expires: Date.now() + 15 * 60 * 1000, // 15 minutes
-            contentType: fileType,
-        };
+      const filePath = `videos/${Date.now()}-${fileName}`;
+      const file = bucket.file(filePath);
 
-        try {
-            const [signedUrl] = await file.getSignedUrl(options);
-            const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
-            res.status(200).json({ signedUrl, publicUrl });
-        } catch (error) {
-            console.error("Failed to generate signed URL", error);
-            res.status(500).json({ message: 'Could not generate upload URL' });
-        }
+      const options = {
+        version: 'v4',
+        action: 'write',
+        expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+        contentType: fileType,
+      };
+
+      try {
+        const [signedUrl] = await file.getSignedUrl(options);
+        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
+        res.status(200).json({ signedUrl, publicUrl });
+      } catch (error) {
+        console.error("❌ Failed to generate signed URL", error);
+        res.status(500).json({ message: 'Could not generate upload URL' });
+      }
     });
 
-
-    // Existing API Endpoints
+    // --- Room Creation ---
     app.post('/api/rooms', async (req, res) => {
       const { roomCode, fileId } = req.body;
       const newRoom = { roomCode, fileId, createdAt: new Date() };
@@ -118,6 +132,7 @@ async function run() {
       res.status(201).json(newRoom);
     });
 
+    // --- Get Room Info ---
     app.get('/api/rooms/:roomCode', async (req, res) => {
       const { roomCode } = req.params;
       const room = await roomsCollection.findOne({ roomCode });
@@ -128,12 +143,13 @@ async function run() {
       }
     });
 
+    // --- Start the Server ---
     server.listen(port, "0.0.0.0", () => {
-      console.log(`Server listening on port ${port}`);
+      console.log(`🚀 Server listening on port ${port}`);
     });
 
-  } catch(err) {
-    console.error("Failed to connect to MongoDB", err);
+  } catch (err) {
+    console.error("❌ MongoDB connection failed", err);
   }
 }
 
