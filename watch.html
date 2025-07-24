@@ -52,24 +52,23 @@
         
         <!-- Video Player Section -->
         <section class="flex-1 bg-black flex items-center justify-center border-l border-b border-slate-700">
-            <iframe id="video-player" class="w-full h-full" frameborder="0" allowfullscreen></iframe>
+            <!-- THIS IS THE FIX: Added the 'sandbox' attribute to the iframe -->
+            <iframe id="video-player" class="w-full h-full" frameborder="0" allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
         </section>
 
         <!-- Participants Sidebar -->
         <aside id="participants-container" class="w-full sm:w-1/4 lg:w-1/5 bg-slate-800 border-l border-b border-slate-700 p-4 flex flex-col gap-4 overflow-y-auto">
             <h2 class="text-lg font-semibold text-center mb-2">Participants</h2>
             
-            <!-- NEW: Wrapper for the local player and its controls -->
+            <!-- Wrapper for the local player and its controls -->
             <div class="relative">
                 <!-- This container is now ONLY for the video stream -->
                 <div id="local-player-container" class="aspect-video bg-slate-700 rounded-lg overflow-hidden video-container">
                     <!-- Agora will inject the video here -->
                 </div>
                 
-                <!-- The "You" label is now positioned over the wrapper -->
                 <div class="absolute top-2 left-2 text-xs bg-black/50 px-2 py-1 rounded z-10 pointer-events-none">You</div>
 
-                <!-- The controls are also positioned over the wrapper and will not be deleted -->
                 <div class="video-controls">
                     <button id="mic-btn" class="p-2 bg-slate-600 rounded-full">
                         <svg class="w-5 h-5" fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 14q-1.25 0-2.125-.875T9 11V5q0-1.25.875-2.125T12 2q1.25 0 2.125.875T15 5v6q0 1.25-.875 2.125T12 14Zm-1 7v-3.05q-2.825-.2-4.912-2.1-2.088-1.9-2.088-4.6h2q0 2.225 1.638 3.862T12 17q2.225 0 3.862-1.638T17.5 11.5h2q0 2.7-2.088 4.6-2.087 1.9-4.912 2.1V21h-2Z"/></svg>
