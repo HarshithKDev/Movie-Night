@@ -2,7 +2,7 @@
 // Video Call Logic (Agora)
 // ========================
 
-const AGORA_APP_ID = '938b4e3a12654e849dc519184e9a5596'; // <-- PASTE YOUR AGORA APP ID HERE
+const AGORA_APP_ID = '938b4e3a12654e849dc519184e9a5596'; // Your Agora App ID
 
 const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
 
@@ -20,26 +20,29 @@ let uid; // To store the local user's ID
  */
 async function joinAndDisplayLocalStream(channelName) {
   try {
+    // --- THIS IS THE KEY CHANGE ---
+    // Set up event listeners BEFORE joining the channel.
+    // This ensures we don't miss the event for users who are already in the channel.
+    client.on('user-published', handleUserPublished);
+    client.on('user-left', handleUserLeft);
+    // --- END CHANGE ---
+
     // Join the channel. The UID is returned upon joining.
     uid = await client.join(AGORA_APP_ID, channelName, null, null);
     console.log(`Successfully joined channel ${channelName} with uid ${uid}`);
 
     // Create microphone and camera tracks.
+    // Requesting permissions here, after the user has initiated an action.
     localTracks.audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
     localTracks.videoTrack = await AgoraRTC.createCameraVideoTrack();
 
     // Play the local video track in the 'local-player-container'.
     const localPlayerContainer = document.getElementById('local-player-container');
-    // localPlayerContainer.innerHTML = ''; // Clear any placeholders
     localTracks.videoTrack.play(localPlayerContainer);
 
     // Publish the local tracks to the channel.
     await client.publish(Object.values(localTracks));
     console.log("Local stream published successfully.");
-
-    // Listen for remote users.
-    client.on('user-published', handleUserPublished);
-    client.on('user-left', handleUserLeft);
 
   } catch (error) {
     console.error('Failed to join channel or create local tracks', error);
@@ -53,6 +56,7 @@ async function joinAndDisplayLocalStream(channelName) {
  */
 async function handleUserPublished(user, mediaType) {
   const userId = user.uid;
+  console.log(`Remote user published: ${userId}, mediaType: ${mediaType}`); // Added for debugging
   remoteUsers[userId] = user;
   await client.subscribe(user, mediaType);
   console.log(`Subscribed to remote user ${userId}`);
@@ -64,7 +68,14 @@ async function handleUserPublished(user, mediaType) {
     if (playerContainer === null) {
       playerContainer = document.createElement('div');
       playerContainer.id = `player-wrapper-${userId}`;
-      playerContainer.className = 'aspect-video bg-slate-700 rounded-lg overflow-hidden video-container';
+      playerContainer.className = 'aspect-video bg-slate-700 rounded-lg overflow-hidden video-container relative';
+      
+      // Add a label for the remote user
+      const nameLabel = document.createElement('div');
+      nameLabel.className = 'absolute top-2 left-2 text-xs bg-black/50 px-2 py-1 rounded';
+      nameLabel.textContent = `User ${userId}`;
+      playerContainer.appendChild(nameLabel);
+
       participantsContainer.appendChild(playerContainer);
     }
     
@@ -107,8 +118,6 @@ async function leaveChannel() {
   await client.leave();
   console.log("Left the channel successfully.");
 }
-
-// --- NEW: Functions to toggle media ---
 
 /**
  * Toggles the local camera on and off.
