@@ -6,17 +6,14 @@ const http = require('http');
 const { WebSocketServer } = require('ws');
 const admin = require('firebase-admin');
 
-// --- NEW: Firebase Admin SDK Initialization (Handles both local and deployed) ---
-// This code checks if the environment variable exists (on Render).
-// If it does, it parses it. If not, it falls back to the local file (for testing).
+// --- Firebase Admin SDK Initialization ---
 const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
   ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
   : require('./firebase-service-account-key.json');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  // Find your bucket name in Firebase Console > Storage
-  storageBucket: 'movienight-firebase.firebasestorage.app' // e.g., 'movienight-firebase.appspot.com'
+  storageBucket: 'movienight-firebase.appspot.com'
 });
 
 const bucket = admin.storage().bucket();
@@ -26,8 +23,20 @@ const bucket = admin.storage().bucket();
 const app = express();
 const port = 3000;
 
+// --- NEW: Final, Most Robust CORS Configuration ---
+// This configuration explicitly tells the server to trust your Netlify app
+// and correctly handles the browser's preflight security checks.
+const corsOptions = {
+  origin: "https://movienight2025.netlify.app",
+  methods: "GET,POST",
+  allowedHeaders: "Content-Type",
+  optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
+// --- END NEW ---
+
 // Middleware
-app.use(cors());
 app.use(express.json());
 
 const server = http.createServer(app);
@@ -79,7 +88,7 @@ async function run() {
     const db = client.db("movieNightDB");
     const roomsCollection = db.collection("rooms");
 
-    // --- NEW API ENDPOINT for generating upload URLs ---
+    // API Endpoint for generating upload URLs
     app.post('/api/generate-upload-url', async (req, res) => {
         const { fileName, fileType } = req.body;
         if (!fileName || !fileType) {
@@ -98,7 +107,6 @@ async function run() {
 
         try {
             const [signedUrl] = await file.getSignedUrl(options);
-            // The public URL is what we'll use for playback
             const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
             res.status(200).json({ signedUrl, publicUrl });
         } catch (error) {
@@ -108,9 +116,8 @@ async function run() {
     });
 
 
-    // Existing API Endpoints (these remain the same)
+    // Existing API Endpoints
     app.post('/api/rooms', async (req, res) => {
-      // IMPORTANT: The fileId is now the public Firebase Storage URL
       const { roomCode, fileId } = req.body;
       const newRoom = { roomCode, fileId, createdAt: new Date() };
       await roomsCollection.insertOne(newRoom);
