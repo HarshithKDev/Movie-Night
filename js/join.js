@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // --- NEW: Look up the room code from your backend ---
-            fetch(`https://bec3f35fd07b.ngrok-free.app/api/rooms/${enteredCode}`)
+            fetch(`https://movienight-backend-veka.onrender.com/api/rooms/${enteredCode}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Room not found');
