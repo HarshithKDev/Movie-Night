@@ -18,7 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- UI Setup ---
     roomCodeEl.textContent = roomCode;
-    videoPlayerEl.src = `https://drive.google.com/file/d/${fileId}/embed`;
+    // --- THIS IS THE FIX ---
+    // Switched back to the more reliable /preview URL for the iframe
+    videoPlayerEl.src = `https://docs.google.com/file/d/${fileId}/preview`;
 
     // --- Video Call Setup ---
     joinAndDisplayLocalStream(roomCode);
@@ -40,12 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Received message from server:', data);
 
         // IMPORTANT LIMITATION NOTE:
-        // The standard Google Drive embed (`/embed`) does NOT provide a JavaScript API
+        // The standard Google Drive embed does NOT provide a JavaScript API
         // to control playback (play, pause, seek, get current time).
-        // This means we can RECEIVE the events, but we cannot programmatically MAKE
-        // the other users' videos play or pause in sync.
         // The console logs below demonstrate that the real-time communication is working.
-        // A real-world app would require a different video player that allows for API control.
 
         switch (data.type) {
             case 'play':
@@ -69,7 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // This function demonstrates how you would send playback events to the server.
-    // Since we can't listen to the iframe's events, you would hook these up to custom UI buttons.
     function sendPlaybackEvent(type, time = null) {
         if (ws.readyState === WebSocket.OPEN) {
             const message = { type, roomCode };
