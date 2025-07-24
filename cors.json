@@ -1,8 +1,8 @@
 [
   {
-    "origin": ["https://movienight2025.netlify.app"],
-    "method": ["PUT"],
-    "responseHeader": ["Content-Type"],
+    "origin": ["https://movienight2025.netlify.app", "http://localhost:3000"],
+    "method": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    "responseHeader": ["Content-Type", "Content-Length", "Authorization"],
     "maxAgeSeconds": 3600
   }
 ]

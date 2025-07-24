@@ -22,7 +22,7 @@ try {
 
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    storageBucket: 'movienight-firebase.appspot.com'
+    storageBucket: 'movienight-firebase.firebasestorage.app'
   });
   console.log("✅ Firebase Admin SDK initialized successfully.");
 
