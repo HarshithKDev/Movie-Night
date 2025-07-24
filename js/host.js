@@ -40,8 +40,13 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {File} file The video file selected by the user.
      */
     async function handleFileUpload(file) {
-        if (!file.type.startsWith('video/')) {
-            alert('Please select a valid video file.');
+        // More robust check to include MKV files by checking the file extension,
+        // as some browsers don't assign a `video/*` MIME type to .mkv files.
+        const acceptedExtensions = ['.mp4', '.mov', '.webm', '.mkv'];
+        const fileExtension = `.${file.name.split('.').pop().toLowerCase()}`;
+        
+        if (!file.type.startsWith('video/') && !acceptedExtensions.includes(fileExtension)) {
+            alert('Please select a valid video file (e.g., MP4, MOV, WEBM, MKV).');
             return;
         }
 
@@ -54,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${backendUrl}/api/generate-upload-url`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fileName: file.name, fileType: file.type }),
+                body: JSON.stringify({ fileName: file.name, fileType: file.type || 'video/x-matroska' }), // Fallback for MKV
             });
 
             if (!response.ok) throw new Error('Failed to get upload URL from server.');
@@ -90,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
             xhr.open('PUT', url, true);
-            xhr.setRequestHeader('Content-Type', file.type);
+            xhr.setRequestHeader('Content-Type', file.type || 'video/x-matroska'); // Fallback for MKV
 
             xhr.upload.onprogress = (event) => {
                 if (event.lengthComputable) {
