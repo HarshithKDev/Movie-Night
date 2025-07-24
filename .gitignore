@@ -1,0 +1,7 @@
+.env
+package-lock.json
+package.json
+
+backend/.env
+backend/package-lock.json
+backend/package.json

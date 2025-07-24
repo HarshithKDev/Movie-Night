@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch Party</title>
+    <!-- Link to your compiled Tailwind CSS file -->
+    <link href="output.css" rel="stylesheet">
+    <style>
+        /* Ensure video elements fill their container */
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        /* Styling for the video controls overlay */
+        .video-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            opacity: 1;
+            transition: opacity 0.3s ease-in-out;
+            padding: 8px;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            z-index: 10; /* Ensure controls are on top */
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-white font-sans flex flex-col h-screen overflow-hidden">
+
+    <!-- Top Bar -->
+    <header class="flex items-center justify-between p-4 bg-slate-800 border-b border-slate-700">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-mono bg-slate-700 text-green-400 px-3 py-1 rounded">
+                    Room: <span id="room-code">LOADING...</span>
+                </span>
+                <button id="copy-button" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded text-sm">Copy</button>
+            </div>
+        </div>
+        <button id="exit-button" class="bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-6 rounded-lg transition-transform hover:scale-105">
+            Exit
+        </button>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex flex-1 overflow-auto">
+        
+        <!-- Video Player Section -->
+        <section class="flex-1 bg-black flex items-center justify-center border-l border-b border-slate-700">
+            <iframe id="video-player" class="w-full h-full" frameborder="0" allowfullscreen></iframe>
+        </section>
+
+        <!-- Participants Sidebar -->
+        <aside id="participants-container" class="w-full sm:w-1/4 lg:w-1/5 bg-slate-800 border-l border-b border-slate-700 p-4 flex flex-col gap-4 overflow-y-auto">
+            <h2 class="text-lg font-semibold text-center mb-2">Participants</h2>
+            
+            <!-- NEW: Wrapper for the local player and its controls -->
+            <div class="relative">
+                <!-- This container is now ONLY for the video stream -->
+                <div id="local-player-container" class="aspect-video bg-slate-700 rounded-lg overflow-hidden video-container">
+                    <!-- Agora will inject the video here -->
+                </div>
+                
+                <!-- The "You" label is now positioned over the wrapper -->
+                <div class="absolute top-2 left-2 text-xs bg-black/50 px-2 py-1 rounded z-10 pointer-events-none">You</div>
+
+                <!-- The controls are also positioned over the wrapper and will not be deleted -->
+                <div class="video-controls">
+                    <button id="mic-btn" class="p-2 bg-slate-600 rounded-full">
+                        <svg class="w-5 h-5" fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 14q-1.25 0-2.125-.875T9 11V5q0-1.25.875-2.125T12 2q1.25 0 2.125.875T15 5v6q0 1.25-.875 2.125T12 14Zm-1 7v-3.05q-2.825-.2-4.912-2.1-2.088-1.9-2.088-4.6h2q0 2.225 1.638 3.862T12 17q2.225 0 3.862-1.638T17.5 11.5h2q0 2.7-2.088 4.6-2.087 1.9-4.912 2.1V21h-2Z"/></svg>
+                    </button>
+                    <button id="camera-btn" class="p-2 bg-slate-600 rounded-full">
+                        <svg class="w-5 h-5" fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14 17.5 4-4-4-4ZM2 20q-.825 0-1.412-.587Q0 18.825 0 18V6q0-.825.588-1.413Q1.175 4 2 4h10l2.4 3H22q.825 0 1.413.587Q24 8.175 24 9v9q0 .825-.587 1.413Q22.825 20 22 20H2Zm0-2h20V9h-7.6l-2.4-3H2v12Zm10-6Z"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Remote users' videos will be added here -->
+
+        </aside>
+    </main>
+
+    <!-- Agora Web SDK -->
+    <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.20.2.js"></script>
+    
+    <!-- Your existing and new JavaScript files -->
+    <script src="js/watch.js"></script>
+    <script src="js/videocall.js"></script>
+</body>
+</html>
