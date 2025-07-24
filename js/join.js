@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // --- NEW: Look up the room code from your backend ---
-            fetch(`https://c8aecf22a5cf.ngrok-free.app/api/rooms/${enteredCode}`)
+            fetch(` https://1fa63c5e0cb7.ngrok-free.app/api/rooms/${enteredCode}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Room not found');
