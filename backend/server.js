@@ -4,6 +4,20 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 const cors = require('cors');
 const http = require('http');
 const { WebSocketServer } = require('ws');
+const admin = require('firebase-admin');
+
+// --- Firebase Admin SDK Initialization ---
+const serviceAccount = require('./firebase-service-account-key.json');
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  // Find your bucket name in Firebase Console > Storage
+  storageBucket: 'movienight-firebase.firebasestorage.app' // e.g., 'movienight-firebase.appspot.com'
+});
+
+const bucket = admin.storage().bucket();
+// --- End Firebase Initialization ---
+
 
 const app = express();
 const port = 3000;
@@ -12,69 +26,43 @@ const port = 3000;
 app.use(cors());
 app.use(express.json());
 
-// Create a standard HTTP server from the Express app
 const server = http.createServer(app);
-
-// Create a WebSocket server and attach it to the HTTP server
 const wss = new WebSocketServer({ server });
 
-// This object will store all connected clients, organized by room code
+// (WebSocket server logic remains the same)
 const rooms = {};
-
 wss.on('connection', (ws) => {
-  console.log('Client connected via WebSocket');
-
   ws.on('message', (message) => {
     try {
       const data = JSON.parse(message);
-
-      // When a user first connects, they will send a 'join' event
       if (data.type === 'join') {
         const { roomCode } = data;
-        ws.roomCode = roomCode; // Attach the room code to the WebSocket connection object
-
-        // If the room doesn't exist, create it
-        if (!rooms[roomCode]) {
-          rooms[roomCode] = new Set();
-        }
-        // Add the new client to the room
+        ws.roomCode = roomCode;
+        if (!rooms[roomCode]) rooms[roomCode] = new Set();
         rooms[roomCode].add(ws);
-        console.log(`Client joined room: ${roomCode}. Total clients in room: ${rooms[roomCode].size}`);
       }
-
-      // When a client sends a playback event (play, pause, seek)
       if (['play', 'pause', 'seek'].includes(data.type)) {
         const { roomCode } = ws;
         if (rooms[roomCode]) {
-          // Broadcast the message to all other clients in the same room
           rooms[roomCode].forEach(client => {
-            // We only send to other clients, not the one who sent the message
             if (client !== ws && client.readyState === client.OPEN) {
               client.send(JSON.stringify(data));
             }
           });
         }
       }
-    } catch (error) {
-      console.error('Failed to process WebSocket message:', error);
-    }
+    } catch (error) { console.error('WS message error:', error); }
   });
-
   ws.on('close', () => {
     const { roomCode } = ws;
     if (roomCode && rooms[roomCode]) {
-      // Remove the client from the room when they disconnect
       rooms[roomCode].delete(ws);
-      console.log(`Client left room: ${roomCode}. Total clients in room: ${rooms[roomCode].size}`);
-      if (rooms[roomCode].size === 0) {
-        delete rooms[roomCode]; // Clean up empty rooms
-      }
+      if (rooms[roomCode].size === 0) delete rooms[roomCode];
     }
-    console.log('Client disconnected');
   });
 });
 
-// MongoDB Client Setup
+
 const client = new MongoClient(process.env.MONGO_URI, {
   serverApi: { version: ServerApiVersion.v1, strict: true, deprecationErrors: true }
 });
@@ -83,12 +71,42 @@ async function run() {
   try {
     await client.connect();
     console.log("Successfully connected to MongoDB Atlas!");
-    
+
     const db = client.db("movieNightDB");
     const roomsCollection = db.collection("rooms");
 
-    // API Endpoints (these remain the same)
+    // --- NEW API ENDPOINT for generating upload URLs ---
+    app.post('/api/generate-upload-url', async (req, res) => {
+        const { fileName, fileType } = req.body;
+        if (!fileName || !fileType) {
+            return res.status(400).json({ message: 'fileName and fileType are required' });
+        }
+
+        const filePath = `videos/${Date.now()}-${fileName}`;
+        const file = bucket.file(filePath);
+
+        const options = {
+            version: 'v4',
+            action: 'write',
+            expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+            contentType: fileType,
+        };
+
+        try {
+            const [signedUrl] = await file.getSignedUrl(options);
+            // The public URL is what we'll use for playback
+            const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
+            res.status(200).json({ signedUrl, publicUrl });
+        } catch (error) {
+            console.error("Failed to generate signed URL", error);
+            res.status(500).json({ message: 'Could not generate upload URL' });
+        }
+    });
+
+
+    // Existing API Endpoints (these remain the same)
     app.post('/api/rooms', async (req, res) => {
+      // IMPORTANT: The fileId is now the public Firebase Storage URL
       const { roomCode, fileId } = req.body;
       const newRoom = { roomCode, fileId, createdAt: new Date() };
       await roomsCollection.insertOne(newRoom);
@@ -105,7 +123,6 @@ async function run() {
       }
     });
 
-    // Start the server
     server.listen(port, "0.0.0.0", () => {
       console.log(`Server listening on port ${port}`);
     });

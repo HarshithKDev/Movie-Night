@@ -6,6 +6,8 @@
     <title>Watch Party</title>
     <!-- Link to your compiled Tailwind CSS file -->
     <link href="output.css" rel="stylesheet">
+    <!-- NEW: Video.js CSS -->
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
     <style>
         /* Ensure video elements fill their container */
         .video-container video {
@@ -27,6 +29,11 @@
             justify-content: center;
             gap: 1rem;
             z-index: 10; /* Ensure controls are on top */
+        }
+        /* Make the Video.js player fill its container */
+        .video-js-wrapper {
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
@@ -52,8 +59,17 @@
         
         <!-- Video Player Section -->
         <section class="flex-1 bg-black flex items-center justify-center border-l border-b border-slate-700">
-            <!-- THIS IS THE FIX: Added the 'sandbox' attribute to the iframe -->
-            <iframe id="video-player" class="w-full h-full" frameborder="0" allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+            <!-- The iframe has been replaced with a div wrapper for the Video.js player -->
+            <div id="video-js-wrapper" class="w-full h-full">
+                <video
+                    id="movie-player"
+                    class="video-js vjs-big-play-centered w-full h-full"
+                    controls
+                    preload="auto"
+                    data-setup='{}'>
+                    <!-- The video source will be added by JavaScript -->
+                </video>
+            </div>
         </section>
 
         <!-- Participants Sidebar -->
@@ -86,6 +102,8 @@
 
     <!-- Agora Web SDK -->
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.20.2.js"></script>
+    <!-- NEW: Video.js JavaScript -->
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
     
     <!-- Your existing and new JavaScript files -->
     <script src="js/watch.js"></script>

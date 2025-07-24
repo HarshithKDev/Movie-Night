@@ -1,28 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Host Session - Select a File</title>
-  <link href="output.css" rel="stylesheet" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Host Session - Upload a File</title>
+    <!-- Link to your compiled Tailwind CSS file -->
+    <link href="output.css" rel="stylesheet">
 </head>
 <body class="bg-slate-900 text-white font-sans">
-  <div class="min-h-screen flex flex-col items-center justify-center p-4">
-    <div class="w-full max-w-2xl text-center">
-      <h1 class="text-4xl md:text-5xl font-bold mb-4">Choose Your Movie</h1>
-      <p class="text-slate-400 mb-8">Select a video file from your Google Drive to begin.</p>
 
-      <button id="authorize_button" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300" disabled>
-        Initializing...
-      </button>
+    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+        <div class="w-full max-w-2xl text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Host a New Session</h1>
+            <p class="text-slate-400 mb-8">Select a local video file to upload and share with your friends.</p>
+            
+            <!-- File Upload Area -->
+            <div id="upload-container" class="bg-slate-800 border-2 border-dashed border-slate-700 rounded-lg p-8 cursor-pointer hover:border-indigo-500 transition-colors">
+                <input type="file" id="file-input" class="hidden" accept="video/*">
+                <label for="file-input" class="flex flex-col items-center justify-center cursor-pointer">
+                    <svg class="w-12 h-12 text-slate-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                    </svg>
+                    <p class="text-lg font-semibold">Click to browse or drag & drop a file</p>
+                    <p class="text-sm text-slate-400">MP4, MOV, or WEBM recommended</p>
+                </label>
+            </div>
 
-      <div id="file-info" class="mt-8 p-6 bg-slate-800 rounded-lg text-left hidden">
-        <h3 class="font-bold text-lg mb-2 text-green-400">Selected File:</h3>
-        <p id="file-name" class="text-slate-300"></p>
-      </div>
+            <!-- Upload Progress Display -->
+            <div id="progress-container" class="mt-8 hidden w-full bg-slate-700 rounded-full h-4">
+                <div id="progress-bar" class="bg-indigo-600 h-4 rounded-full text-center text-xs text-white leading-4" style="width: 0%">0%</div>
+            </div>
+            <p id="upload-status" class="mt-2 text-slate-400"></p>
+        </div>
     </div>
-  </div>
 
-  <script src="js/host.js"></script>
+    <!-- Link to your external JavaScript file -->
+    <script src="js/host.js"></script>
 </body>
 </html>
