@@ -6,13 +6,9 @@ const cors = require('cors');
 const app = express();
 const port = 3000;
 
-// --- NEW: Explicit CORS Configuration ---
-// This tells our server to trust requests specifically from our Netlify app.
-const corsOptions = {
-  origin: 'https://movienight2025.netlify.app',
-  optionsSuccessStatus: 200 // For legacy browser support
-};
-app.use(cors(corsOptions));
+// --- NEW: More Open CORS Configuration for Debugging ---
+// This temporarily allows requests from any origin to confirm CORS is the issue.
+app.use(cors());
 // --- END NEW ---
 
 // Middleware
