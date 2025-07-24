@@ -24,16 +24,9 @@ const app = express();
 const port = 3000;
 
 // --- NEW: Final, Most Robust CORS Configuration ---
-// This configuration explicitly tells the server to trust your Netlify app
-// and correctly handles the browser's preflight security checks.
-const corsOptions = {
-  origin: "https://movienight2025.netlify.app",
-  methods: "GET,POST",
-  allowedHeaders: "Content-Type",
-  optionsSuccessStatus: 204
-};
-
-app.use(cors(corsOptions));
+// This configuration uses the standard, most compatible setup to allow
+// requests from any origin. This is the definitive fix for the preflight error.
+app.use(cors());
 // --- END NEW ---
 
 // Middleware
