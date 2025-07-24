@@ -1,0 +1,8 @@
+[
+  {
+    "origin": ["https://movienight2025.netlify.app"],
+    "method": ["PUT"],
+    "responseHeader": ["Content-Type"],
+    "maxAgeSeconds": 3600
+  }
+]

@@ -12,8 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // --- NEW: Look up the room code from your backend ---
-            fetch(`https://movienight-backend-veka.onrender.com/api/rooms/${enteredCode}`)
+            // ✅ THIS IS THE DEFINITIVE FIX: Using your live Render URL
+            const backendUrl = 'https://movienight-backend-veka.onrender.com';
+
+            fetch(`${backendUrl}/api/rooms/${enteredCode}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Room not found');
@@ -23,13 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(data => {
                 const fileId = data.fileId;
                 console.log(`Room ${enteredCode} found with file ${fileId}. Joining...`);
-                window.location.href = `watch.html?fileId=${fileId}&roomCode=${enteredCode}`;
+                window.location.href = `watch.html?fileId=${encodeURIComponent(data.fileId)}&roomCode=${enteredCode}`;
             })
             .catch(error => {
                 showError(`Room "${enteredCode}" not found. Please check the code and try again.`);
                 console.error('Error finding room:', error);
             });
-            // --- END NEW ---
         });
     }
 
