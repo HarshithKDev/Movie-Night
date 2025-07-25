@@ -4,14 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movie Night</title>
-    <!-- 
-      Link to your compiled Tailwind CSS file.
-      Make sure to run your Tailwind CLI build process.
-      Example command: npx tailwindcss -i ./src/input.css -o ./dist/output.css --watch
-    -->
     <link href="output.css" rel="stylesheet">
     <style>
-        /* Custom styles for the animated background icons */
         .icon-bg {
             position: absolute;
             top: 0;
@@ -21,59 +15,66 @@
             z-index: 0;
             overflow: hidden;
         }
-
         .moving-icon {
             position: absolute;
-            color: rgba(255, 255, 255, 0.05); /* Very faint icons */
+            color: rgba(255, 255, 255, 0.05);
             user-select: none;
             animation: floatUp linear infinite;
         }
-
         @keyframes floatUp {
-            0% {
-                transform: translateY(0);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-150vh);
-                opacity: 0;
-            }
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-150vh); opacity: 0; }
         }
     </style>
 </head>
 <body class="bg-slate-900 font-sans overflow-hidden">
 
-    <!-- Container for the animated background icons -->
     <div id="icon-background" class="icon-bg"></div>
 
-    <!-- Main content container -->
     <div class="relative min-h-screen flex flex-col items-center justify-center p-4 z-10">
         
-        <div class="text-center mb-12">
-            <h1 class="text-5xl md:text-7xl font-bold text-white tracking-tight">
-                Movie Night
-            </h1>
-            <p class="text-slate-400 mt-4 text-lg">
-                Host a watch party or join a friend's stream.
+        <!-- Logged Out View: Login/Sign Up Form -->
+        <div id="logged-out-view" class="w-full max-w-sm">
+            <div class="text-center mb-8">
+                <h1 class="text-5xl md:text-6xl font-bold text-white tracking-tight">
+                    Movie Night
+                </h1>
+            </div>
+            
+            <form id="auth-form" class="flex flex-col gap-4">
+                <input type="text" id="username-input" placeholder="Username" class="bg-slate-800 border border-slate-700 rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                <input type="email" id="email-input" placeholder="Email" required class="bg-slate-800 border border-slate-700 rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                <input type="password" id="password-input" placeholder="Password" required class="bg-slate-800 border border-slate-700 rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                <button type="submit" id="auth-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg">Sign Up</button>
+            </form>
+            
+            <p id="auth-error" class="text-red-500 text-center mt-4 h-4"></p>
+            
+            <p class="text-center mt-4 text-slate-400">
+                <span id="toggle-text">Already have an account?</span>
+                <button id="toggle-auth-mode" class="text-indigo-400 hover:underline">Log In</button>
             </p>
         </div>
 
-        <!-- Buttons container -->
-        <div class="flex flex-col sm:flex-row items-center gap-6">
-            <!-- Host Button -->
-            <a href="host.html" class="inline-block text-center w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xl tracking-wider py-4 px-12 rounded-xl shadow-lg shadow-indigo-600/30 transform hover:scale-105 transition-all duration-300 ease-in-out">
-                Host
-            </a>
-
-            <!-- Join Button (Changed to an <a> tag) -->
-            <a href="join.html" class="inline-block text-center w-full sm:w-auto bg-slate-700 hover:bg-slate-600 text-white font-bold text-xl tracking-wider py-4 px-12 rounded-xl shadow-lg shadow-slate-800/50 transform hover:scale-105 transition-all duration-300 ease-in-out">
-                Join
-            </a>
+        <!-- Logged In View: Welcome and Navigation -->
+        <div id="logged-in-view" class="hidden text-center">
+             <h1 class="text-4xl font-bold text-white">Welcome, <span id="user-name"></span>!</h1>
+             <p class="text-slate-400 mt-4">What would you like to do?</p>
+             <div class="flex flex-col sm:flex-row items-center gap-6 mt-8">
+                <a href="host.html" class="inline-block text-center w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xl py-4 px-12 rounded-xl">Host a Room</a>
+                <a href="join.html" class="inline-block text-center w-full sm:w-auto bg-slate-700 hover:bg-slate-600 text-white font-bold text-xl py-4 px-12 rounded-xl">Join a Room</a>
+             </div>
+             <button id="logout-btn" class="mt-8 text-slate-400 hover:text-white">Logout</button>
         </div>
+
     </div>
 
-    <!-- Assuming your script.js handles the icon animation -->
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    
     <script src="js/script.js"></script>
+    <script src="js/auth.js"></script>
 
 </body>
 </html>
