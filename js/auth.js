@@ -1,13 +1,12 @@
-// This configuration should be from your Firebase project settings.
+// This configuration is from your Firebase project settings.
 const firebaseConfig = {
   apiKey: "AIzaSyAc35kVMuZnxOZ85HIBGG-plHzOqvh1U5E",
   authDomain: "movienight-firebase.firebaseapp.com",
   projectId: "movienight-firebase",
   storageBucket: "movienight-firebase.firebasestorage.app",
   messagingSenderId: "6358321439",
-  appId: "1:6358321439:web:ec508f74d398eda996482a"
+  appId: "1:6358321439:web:ec508f74d398eda96482a"
 };
-
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
