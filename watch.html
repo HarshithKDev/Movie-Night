@@ -60,6 +60,7 @@
                     class="video-js vjs-big-play-centered vjs-fluid w-full h-full"
                     controls
                     preload="auto"
+                    autoplay <!-- This is the definitive fix -->
                     data-setup='{}'>
                 </video>
             </div>
@@ -80,7 +81,7 @@
                         <svg class="w-5 h-5" fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 14q-1.25 0-2.125-.875T9 11V5q0-1.25.875-2.125T12 2q1.25 0 2.125.875T15 5v6q0 1.25-.875 2.125T12 14Zm-1 7v-3.05q-2.825-.2-4.912-2.1-2.088-1.9-2.088-4.6h2q0 2.225 1.638 3.862T12 17q2.225 0 3.862-1.638T17.5 11.5h2q0 2.7-2.088 4.6-2.087 1.9-4.912 2.1V21h-2Z"/></svg>
                     </button>
                     <button id="camera-btn" class="p-2 bg-slate-600 rounded-full">
-                        <svg class="w-5 h-5" fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14 17.5 4-4-4-4ZM2 20q-.825 0-1.412-.587Q0 18.825 0 18V6q0-.825.588-1.413Q1.175 4 2 4h10l2.4 3H22q.825 0 1.413.587Q24 8.175 24 9v9q0 .825-.587 1.413Q22.825 20 22 20H2Zm0-2h20V9h-7.6l-2.4-3H2v12Zm10-6Z"/></svg>
+                        <svg class="w-5 h-5" fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14 17.5 4-4-4-4ZM2 0q-.825 0-1.412-.587Q0 18.825 0 18V6q0-.825.588-1.413Q1.175 4 2 4h10l2.4 3H22q.825 0 1.413.587Q24 8.175 24 9v9q0 .825-.587 1.413Q22.825 20 22 20H2Zm0-2h20V9h-7.6l-2.4-3H2v12Zm10-6Z"/></svg>
                     </button>
                 </div>
             </div>
