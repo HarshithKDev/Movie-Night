@@ -95,6 +95,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
     
+    // --- ✅ DEFINITIVE AUDIO FIX ---
+    // This listens for the very first 'play' event and programmatically unmutes the player.
+    player.one('play', () => {
+        console.log("First play event detected, unmuting player.");
+        player.muted(false);
+    });
+    // --- END AUDIO FIX ---
+
     player.on('play', () => {
         if (receivedEvent) return;
         sendPlaybackEvent('play');
