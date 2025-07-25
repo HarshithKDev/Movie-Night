@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressBar = document.getElementById('progress-bar');
     const uploadStatus = document.getElementById('upload-status');
     
-    // ✅ THIS IS THE DEFINITIVE FIX: Using your live Render URL
+    // Use your deployed Render URL here
     const backendUrl = 'https://movienight-backend-veka.onrender.com';
 
     // --- Event Listeners for File Input ---
@@ -38,22 +38,22 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {File} file The video file selected by the user.
      */
     async function handleFileUpload(file) {
-        const acceptedExtensions = ['.mp4', '.mov', '.webm', '.mkv'];
-        const fileExtension = `.${file.name.split('.').pop().toLowerCase()}`;
-        
-        if (!file.type.startsWith('video/') && !acceptedExtensions.includes(fileExtension)) {
-            alert('Please select a valid video file (e.g., MP4, MOV, WEBM, MKV).');
+        // THIS IS THE CHANGE: Stricter check for MP4 files only.
+        if (file.type !== 'video/mp4') {
+            alert('Please select a valid MP4 video file.');
             return;
         }
 
         progressContainer.classList.remove('hidden');
-        uploadStatus.textContent = 'Requesting upload link from server...';
+        uploadStatus.textContent = 'Preparing to upload...';
 
         try {
+            // 1. Ask our backend for a secure, one-time upload URL
+            uploadStatus.textContent = 'Requesting upload link from server...';
             const response = await fetch(`${backendUrl}/api/generate-upload-url`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fileName: file.name, fileType: file.type || 'video/x-matroska' }),
+                body: JSON.stringify({ fileName: file.name, fileType: file.type }),
             });
 
             if (!response.ok) throw new Error('Failed to get upload URL from server.');
@@ -61,12 +61,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const { signedUrl, publicUrl } = await response.json();
             console.log("Received signed URL for upload and public URL for playback.");
 
+            // 2. Upload the file directly to Firebase Storage using the signed URL
             uploadStatus.textContent = 'Uploading file... (This may take a while)';
             await uploadFile(signedUrl, file);
 
+            // 3. Create the room in our database with the permanent public URL
             uploadStatus.textContent = 'Finalizing room...';
             const roomCode = await createRoom(publicUrl);
 
+            // 4. Redirect to the watch party page
             uploadStatus.textContent = 'Success! Redirecting to room...';
             window.location.href = `watch.html?fileId=${encodeURIComponent(publicUrl)}&roomCode=${roomCode}`;
 
@@ -77,11 +80,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    /**
+     * Uploads the file to the provided signed URL using a PUT request.
+     * @param {string} url The signed URL from Firebase.
+     * @param {File} file The file to upload.
+     */
     function uploadFile(url, file) {
         return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
             xhr.open('PUT', url, true);
-            xhr.setRequestHeader('Content-Type', file.type || 'video/x-matroska');
+            xhr.setRequestHeader('Content-Type', file.type);
 
             xhr.upload.onprogress = (event) => {
                 if (event.lengthComputable) {
@@ -105,6 +113,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    /**
+     * Creates a new room on the backend.
+     * @param {string} publicUrl The permanent public URL of the uploaded video.
+     * @returns {Promise<string>} The generated room code.
+     */
     async function createRoom(publicUrl) {
         const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
         const response = await fetch(`${backendUrl}/api/rooms`, {

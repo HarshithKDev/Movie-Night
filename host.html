@@ -16,15 +16,15 @@
             
             <!-- File Upload Area -->
             <div id="upload-container" class="bg-slate-800 border-2 border-dashed border-slate-700 rounded-lg p-8 cursor-pointer hover:border-indigo-500 transition-colors">
-                <!-- THIS IS THE FIX: Added the specific MIME type for MKV -->
-                <input type="file" id="file-input" class="hidden" accept="video/*,video/x-matroska,.mkv">
+                <!-- THIS IS THE CHANGE: Now only accepts MP4 files -->
+                <input type="file" id="file-input" class="hidden" accept="video/mp4">
                 <label for="file-input" class="flex flex-col items-center justify-center cursor-pointer">
                     <svg class="w-12 h-12 text-slate-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                     </svg>
                     <p class="text-lg font-semibold">Click to browse or drag & drop a file</p>
                     <!-- Updated the recommended formats text -->
-                    <p class="text-sm text-slate-400">MKV, MP4, MOV, or WEBM recommended</p>
+                    <p class="text-sm text-slate-400">Only MP4 files are supported</p>
                 </label>
             </div>
 
