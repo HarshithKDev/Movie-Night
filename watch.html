@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Watch Party</title>
     <!-- Link to your compiled Tailwind CSS file -->
-    <link href="output.css" rel="stylesheet">
+    <link href="/dist/output.css" rel="stylesheet">
     <!-- Video.js CSS -->
     <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
     <style>
@@ -67,7 +67,7 @@
         </section>
 
         <!-- Participants Sidebar (Right Side) -->
-        <aside id="participants-container" class="w-full sm:w-1/4 lg:w-1/5 bg-slate-800 border-l border-b border-slate-700 p-4 flex flex-col gap-4 overflow-y-auto">
+        <aside id="participants-container" class="w-full sm:w-1/4 lg:w-1/5 bg-slate-800 border-l border-b border-slate-700 p-4 flex flex-col gap-4 overflow-y-auto flex-shrink-0">
             <h2 class="text-lg font-semibold text-center mb-2">Participants</h2>
             
             <!-- Wrapper for the local player and its controls -->
@@ -99,7 +99,7 @@
     <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
     
     <!-- Your Scripts -->
-    <script src="js/watch.js"></script>
-    <script src="js/videocall.js"></script>
+    <script src="watch.js"></script>
+    <script src="videocall.js"></script>
 </body>
 </html>
