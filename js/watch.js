@@ -47,41 +47,56 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     ws.onopen = () => {
         console.log('Connected to WebSocket server.');
+        // When the connection is open, send a message to join the specific room
         ws.send(JSON.stringify({ type: 'join', roomCode }));
     };
+
     ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
+        console.log('Received message from server:', data);
         receivedEvent = true;
+
         switch (data.type) {
-            case 'play': player.play(); break;
-            case 'pause': player.pause(); break;
-            case 'seek': player.currentTime(data.time); break;
+            // --- ✅ NEW: Handle the initial state sync from the server ---
+            case 'sync-state':
+                const { isPlaying, currentTime } = data.state;
+                player.currentTime(currentTime);
+                if (isPlaying) {
+                    player.play();
+                } else {
+                    player.pause();
+                }
+                break;
+            case 'play': 
+                player.play(); 
+                break;
+            case 'pause': 
+                player.pause(); 
+                break;
+            case 'seek': 
+                player.currentTime(data.time); 
+                break;
         }
-        setTimeout(() => { receivedEvent = false; }, 200);
+        // Use a longer timeout to prevent event echo on seek
+        setTimeout(() => { receivedEvent = false; }, 250);
     };
 
-    // --- ✅ NEW: Diagnostic Logging ---
-    // This event fires when the player has loaded enough data to know about the video's contents.
     player.on('loadedmetadata', () => {
-        console.log("Player metadata loaded. Checking for audio tracks...");
         const audioTracks = player.audioTracks();
         if (audioTracks.length > 0) {
-            console.log(`✅ SUCCESS: Found ${audioTracks.length} audio track(s). Audio should be available.`);
+            console.log(`✅ SUCCESS: Found ${audioTracks.length} audio track(s).`);
         } else {
-            console.error("❌ ERROR: No compatible audio tracks were found in this video file.");
+            console.error("❌ ERROR: No compatible audio tracks were found.");
         }
     });
 
-    // --- ✅ DEFINITIVE AUDIO FIX ---
-    // This event listener on the overlay is the key.
     unmuteOverlay.addEventListener('click', () => {
         console.log('Unmute overlay clicked. Forcing unmute and volume.');
-        // Forcefully unmute and set volume to max to override browser policies.
         player.muted(false);
         player.volume(1.0);
         player.play();
-        unmuteOverlay.style.display = 'none'; // Hide the overlay
-    }, { once: true }); // Ensure this only runs one time
+        unmuteOverlay.style.display = 'none';
+    }, { once: true });
 
     function sendPlaybackEvent(type, time = null) {
         if (ws.readyState === WebSocket.OPEN && !receivedEvent) {
