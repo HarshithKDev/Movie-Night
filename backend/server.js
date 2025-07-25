@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb'); // Import ObjectId
 const http = require('http');
 const { WebSocketServer } = require('ws');
 const admin = require('firebase-admin');
@@ -74,6 +74,7 @@ async function run() {
     
     const db = client.db("movieNightDB");
     const roomsCollection = db.collection("rooms");
+    const moviesCollection = db.collection("movies"); // New collection for user movies
 
     // API Endpoint for generating upload URLs
     app.post('/api/generate-upload-url', async (req, res) => {
@@ -89,19 +90,16 @@ async function run() {
         try {
             const [signedUrl] = await file.getSignedUrl(options);
             const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
-            res.status(200).json({ signedUrl, publicUrl });
+            res.status(200).json({ signedUrl, publicUrl, filePath }); // Return filePath
         } catch (error) {
             console.error("❌ Failed to generate signed URL", error);
             res.status(500).json({ message: 'Could not generate upload URL' });
         }
     });
 
-    // --- ✅ NEW API ENDPOINT for generating a streamable download URL ---
+    // API Endpoint for getting a streamable URL
     app.post('/api/get-stream-url', async (req, res) => {
         const { publicUrl } = req.body;
-        if (!publicUrl) {
-            return res.status(400).json({ message: 'publicUrl is required' });
-        }
         try {
             const urlParts = new URL(publicUrl);
             const filePath = urlParts.pathname.substring(1).split('/').slice(1).join('/');
@@ -119,9 +117,52 @@ async function run() {
         }
     });
 
-    // Existing API Endpoints
+    // --- ✅ NEW: Endpoint to get a user's movies ---
+    app.get('/api/movies/:userId', async (req, res) => {
+        const { userId } = req.params;
+        try {
+            const movies = await moviesCollection.find({ userId }).toArray();
+            res.status(200).json(movies);
+        } catch (error) {
+            res.status(500).json({ message: 'Failed to fetch movies' });
+        }
+    });
+
+    // --- ✅ NEW: Endpoint to delete a movie ---
+    app.delete('/api/movies', async (req, res) => {
+        const { movieId, filePath, userId } = req.body;
+        // Basic validation
+        if (!movieId || !filePath || !userId) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
+        try {
+            // Ensure the user owns the movie before deleting
+            const movie = await moviesCollection.findOne({ _id: new ObjectId(movieId), userId });
+            if (!movie) {
+                return res.status(404).json({ message: 'Movie not found or user not authorized' });
+            }
+
+            // Delete from Firebase Storage
+            await bucket.file(filePath).delete();
+            // Delete from MongoDB
+            await moviesCollection.deleteOne({ _id: new ObjectId(movieId) });
+
+            res.status(200).json({ message: 'Movie deleted successfully' });
+        } catch (error) {
+            console.error("❌ Failed to delete movie", error);
+            res.status(500).json({ message: 'Failed to delete movie' });
+        }
+    });
+
+    // --- UPDATED: Creating a room now also saves the movie to the user's library ---
     app.post('/api/rooms', async (req, res) => {
-      const { roomCode, fileId } = req.body;
+      const { roomCode, fileId, fileName, filePath, userId } = req.body;
+      
+      // Save to the user's movie library if a userId is provided
+      if (userId) {
+          await moviesCollection.insertOne({ userId, fileName, publicUrl: fileId, filePath, createdAt: new Date() });
+      }
+
       const newRoom = { roomCode, fileId, createdAt: new Date() };
       await roomsCollection.insertOne(newRoom);
       res.status(201).json(newRoom);
