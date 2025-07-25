@@ -1,7 +1,6 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const params = new URLSearchParams(window.location.search);
-    // The fileId is now a full URL, so it needs to be decoded
-    const fileId = decodeURIComponent(params.get('fileId'));
+    const fileId = decodeURIComponent(params.get('fileId')); // This is the publicUrl
     const roomCode = params.get('roomCode');
 
     const roomCodeEl = document.getElementById('room-code');
@@ -20,11 +19,36 @@ document.addEventListener('DOMContentLoaded', () => {
     roomCodeEl.textContent = roomCode;
 
     // --- Video.js Player Initialization ---
-    // Get the new <video> element with the correct ID
     const player = videojs('movie-player');
     
-    // Set the source for the Video.js player
-    player.src({ src: fileId });
+    // --- ✅ NEW: Fetch the secure, streamable URL from the backend ---
+    try {
+        const backendUrl = 'https://movienight-backend-veka.onrender.com';
+        const response = await fetch(`${backendUrl}/api/get-stream-url`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ publicUrl: fileId }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to get streamable URL from server.');
+        }
+
+        const data = await response.json();
+        const streamUrl = data.streamUrl;
+
+        // Set the source for the Video.js player with the new signed URL
+        player.src({ src: streamUrl });
+        console.log("✅ Player source set to signed stream URL.");
+
+    } catch (error) {
+        console.error("❌ Failed to load video:", error);
+        const playerWrapper = document.getElementById('video-js-wrapper');
+        if(playerWrapper) {
+            playerWrapper.innerHTML = `<div class="w-full h-full flex items-center justify-center text-red-500 p-4"><p class="text-center">Error: Could not load video. The file may be private or has been deleted.</p></div>`;
+        }
+    }
+    // --- END NEW ---
 
     // --- Video Call Setup ---
     joinAndDisplayLocalStream(roomCode);
@@ -33,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const wsUrl = 'wss://movienight-backend-veka.onrender.com'.replace(/^http/, 'ws');
     const ws = new WebSocket(wsUrl);
     
-    // A flag to prevent echoing events back to the server
     let receivedEvent = false;
 
     ws.onopen = () => {
@@ -44,10 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
         console.log('Received message:', data);
-
-        // Set the flag to true so we know this action came from the server
         receivedEvent = true;
-
         switch (data.type) {
             case 'play':
                 player.play();
@@ -56,20 +76,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 player.pause();
                 break;
             case 'seek':
-                // Set the player's time to the time sent by the server
                 player.currentTime(data.time);
                 break;
         }
-        
-        // Reset the flag shortly after, so user actions can be sent again
         setTimeout(() => { receivedEvent = false; }, 100);
     };
 
     ws.onclose = () => console.log('Disconnected from WebSocket server.');
     ws.onerror = (error) => console.error('WebSocket error:', error);
 
-    // --- Sending Sync Events to the Server ---
-    
     function sendPlaybackEvent(type, time = null) {
         if (ws.readyState === WebSocket.OPEN) {
             const message = { type, roomCode };
@@ -80,24 +95,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Listen for events on the player and send them to the server
     player.on('play', () => {
-        if (receivedEvent) return; // Don't send an event we just received
-        console.log('Sending play event');
+        if (receivedEvent) return;
         sendPlaybackEvent('play');
     });
 
     player.on('pause', () => {
-        if (receivedEvent) return; // Don't send an event we just received
-        console.log('Sending pause event');
+        if (receivedEvent) return;
         sendPlaybackEvent('pause');
     });
 
     player.on('seeked', () => {
-        if (receivedEvent) return; // Don't send an event we just received
-        const currentTime = player.currentTime();
-        console.log(`Sending seek event to ${currentTime}`);
-        sendPlaybackEvent('seek', currentTime);
+        if (receivedEvent) return;
+        sendPlaybackEvent('seek', player.currentTime());
     });
 
     // --- Button Event Listeners ---

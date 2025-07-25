@@ -4,60 +4,32 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 const http = require('http');
 const { WebSocketServer } = require('ws');
 const admin = require('firebase-admin');
+const cors = require('cors');
 
-// --- ✅ Definitive Firebase Admin SDK Initialization with Debugging ---
-try {
-  console.log("Attempting to initialize Firebase Admin SDK...");
+// --- Firebase Admin SDK Initialization ---
+const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
+  ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
+  : require('./firebase-service-account-key.json');
 
-  const serviceAccountString = process.env.FIREBASE_SERVICE_ACCOUNT;
-  if (!serviceAccountString) {
-    // This will be the error if the environment variable is missing on Render.
-    throw new Error("FIREBASE_SERVICE_ACCOUNT environment variable not found.");
-  }
-  console.log("✅ FIREBASE_SERVICE_ACCOUNT variable was found.");
-
-  // This is the most likely point of failure. If the JSON is malformed, it will crash here.
-  const serviceAccount = JSON.parse(serviceAccountString);
-  console.log("✅ Successfully parsed service account JSON.");
-
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    storageBucket: 'movienight-firebase.firebasestorage.app'
-  });
-  console.log("✅ Firebase Admin SDK initialized successfully.");
-
-} catch (error) {
-  // --- THIS IS THE CRITICAL ERROR MESSAGE ---
-  console.error("!!!!!!!!!!!!!!!!!!!!!!! FATAL STARTUP ERROR !!!!!!!!!!!!!!!!!!!!!!!");
-  console.error("!!! The backend server crashed during Firebase initialization. !!!");
-  console.error("!!! This is almost certainly due to an incorrect or malformed   !!!");
-  console.error("!!! FIREBASE_SERVICE_ACCOUNT environment variable on Render.     !!!");
-  console.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-  console.error("Actual Error Message:", error.message);
-  // We exit the process to ensure the crash is visible in the logs.
-  process.exit(1);
-}
-// --- End Firebase Initialization ---
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  storageBucket: 'movienight-firebase.firebasestorage.app'
+});
 
 const bucket = admin.storage().bucket();
+// --- End Firebase Initialization ---
+
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Middleware
+app.use(cors());
 app.use(express.json());
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-});
 
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
+// (WebSocket server logic remains the same)
 const rooms = {};
 wss.on('connection', (ws) => {
   ws.on('message', (message) => {
@@ -90,6 +62,7 @@ wss.on('connection', (ws) => {
   });
 });
 
+
 const client = new MongoClient(process.env.MONGO_URI, {
   serverApi: { version: ServerApiVersion.v1, strict: true, deprecationErrors: true }
 });
@@ -102,11 +75,9 @@ async function run() {
     const db = client.db("movieNightDB");
     const roomsCollection = db.collection("rooms");
 
+    // API Endpoint for generating upload URLs
     app.post('/api/generate-upload-url', async (req, res) => {
         const { fileName, fileType } = req.body;
-        if (!fileName || !fileType) {
-            return res.status(400).json({ message: 'fileName and fileType are required' });
-        }
         const filePath = `videos/${Date.now()}-${fileName}`;
         const file = bucket.file(filePath);
         const options = {
@@ -125,6 +96,30 @@ async function run() {
         }
     });
 
+    // --- ✅ NEW API ENDPOINT for generating a streamable download URL ---
+    app.post('/api/get-stream-url', async (req, res) => {
+        const { publicUrl } = req.body;
+        if (!publicUrl) {
+            return res.status(400).json({ message: 'publicUrl is required' });
+        }
+        try {
+            const urlParts = new URL(publicUrl);
+            const filePath = urlParts.pathname.substring(1).split('/').slice(1).join('/');
+            const file = bucket.file(filePath);
+            const options = {
+                version: 'v4',
+                action: 'read',
+                expires: Date.now() + 60 * 60 * 1000, // 1 hour
+            };
+            const [streamUrl] = await file.getSignedUrl(options);
+            res.status(200).json({ streamUrl });
+        } catch (error) {
+            console.error("❌ Failed to generate stream URL", error);
+            res.status(500).json({ message: 'Could not generate stream URL' });
+        }
+    });
+
+    // Existing API Endpoints
     app.post('/api/rooms', async (req, res) => {
       const { roomCode, fileId } = req.body;
       const newRoom = { roomCode, fileId, createdAt: new Date() };
