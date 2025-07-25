@@ -60,10 +60,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         setTimeout(() => { receivedEvent = false; }, 200);
     };
 
+    // --- ✅ NEW: Diagnostic Logging ---
+    // This event fires when the player has loaded enough data to know about the video's contents.
+    player.on('loadedmetadata', () => {
+        console.log("Player metadata loaded. Checking for audio tracks...");
+        const audioTracks = player.audioTracks();
+        if (audioTracks.length > 0) {
+            console.log(`✅ SUCCESS: Found ${audioTracks.length} audio track(s). Audio should be available.`);
+        } else {
+            console.error("❌ ERROR: No compatible audio tracks were found in this video file.");
+        }
+    });
+
     // --- ✅ DEFINITIVE AUDIO FIX ---
     // This event listener on the overlay is the key.
     unmuteOverlay.addEventListener('click', () => {
+        console.log('Unmute overlay clicked. Forcing unmute and volume.');
+        // Forcefully unmute and set volume to max to override browser policies.
         player.muted(false);
+        player.volume(1.0);
         player.play();
         unmuteOverlay.style.display = 'none'; // Hide the overlay
     }, { once: true }); // Ensure this only runs one time
