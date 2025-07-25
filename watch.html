@@ -6,7 +6,7 @@
     <title>Watch Party</title>
     <!-- Link to your compiled Tailwind CSS file -->
     <link href="output.css" rel="stylesheet">
-    <!-- NEW: Video.js CSS -->
+    <!-- Video.js CSS -->
     <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
     <style>
         /* Ensure video elements fill their container */
@@ -30,11 +30,6 @@
             gap: 1rem;
             z-index: 10; /* Ensure controls are on top */
         }
-        /* Make the Video.js player fill its container */
-        .video-js-wrapper {
-            width: 100%;
-            height: 100%;
-        }
     </style>
 </head>
 <body class="bg-slate-900 text-white font-sans flex flex-col h-screen overflow-hidden">
@@ -54,12 +49,11 @@
         </button>
     </header>
 
-    <!-- Main Content Area -->
+    <!-- Main Content Area with two-column layout -->
     <main class="flex flex-1 overflow-auto">
         
-        <!-- Video Player Section -->
+        <!-- Video Player Section (Main Area) -->
         <section class="flex-1 bg-black flex items-center justify-center border-l border-b border-slate-700">
-            <!-- The iframe has been replaced with a div wrapper for the Video.js player -->
             <div id="video-js-wrapper" class="w-full h-full">
                 <video
                     id="movie-player"
@@ -72,7 +66,7 @@
             </div>
         </section>
 
-        <!-- Participants Sidebar -->
+        <!-- Participants Sidebar (Right Side) -->
         <aside id="participants-container" class="w-full sm:w-1/4 lg:w-1/5 bg-slate-800 border-l border-b border-slate-700 p-4 flex flex-col gap-4 overflow-y-auto">
             <h2 class="text-lg font-semibold text-center mb-2">Participants</h2>
             
@@ -100,12 +94,11 @@
         </aside>
     </main>
 
-    <!-- Agora Web SDK -->
+    <!-- SDKs -->
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.20.2.js"></script>
-    <!-- NEW: Video.js JavaScript -->
     <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
     
-    <!-- Your existing and new JavaScript files -->
+    <!-- Your Scripts -->
     <script src="js/watch.js"></script>
     <script src="js/videocall.js"></script>
 </body>
