@@ -9,7 +9,7 @@
     <!-- Video.js CSS -->
     <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
     <style>
-        /* Ensure video elements fill their container */
+        /* Ensure Agora video elements fill their container */
         .video-container video {
             width: 100%;
             height: 100%;
@@ -28,20 +28,14 @@
             display: flex;
             justify-content: center;
             gap: 1rem;
-            z-index: 10; /* Ensure controls are on top */
-        }
-        /* --- THIS IS THE DEFINITIVE FIX --- */
-        /* This new rule forces the video player's container to behave correctly
-           within the flexbox layout, preventing it from overflowing. */
-        .video-player-section {
-            min-width: 0;
+            z-index: 10;
         }
     </style>
 </head>
-<body class="bg-slate-900 text-white font-sans flex flex-col h-screen overflow-hidden">
+<body class="bg-slate-900 text-white font-sans flex flex-col h-screen">
 
     <!-- Top Bar -->
-    <header class="flex items-center justify-between p-4 bg-slate-800 border-b border-slate-700">
+    <header class="flex-shrink-0 flex items-center justify-between p-4 bg-slate-800 border-b border-slate-700">
         <div>
             <div class="flex items-center gap-2">
                 <span class="text-sm font-mono bg-slate-700 text-green-400 px-3 py-1 rounded">
@@ -55,12 +49,11 @@
         </button>
     </header>
 
-    <!-- Main Content Area with two-column layout -->
-    <main class="flex flex-1 overflow-auto">
+    <!-- Main Content Area using CSS Grid -->
+    <main class="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_300px] overflow-hidden">
         
-        <!-- Video Player Section (Main Area) -->
-        <!-- Added a custom class for more specific styling -->
-        <section class="video-player-section flex-1 bg-black flex items-center justify-center border-l border-b border-slate-700">
+        <!-- Video Player Section (Main Grid Column) -->
+        <section class="bg-black flex items-center justify-center overflow-hidden">
             <div id="video-js-wrapper" class="w-full h-full">
                 <video
                     id="movie-player"
@@ -68,24 +61,20 @@
                     controls
                     preload="auto"
                     data-setup='{}'>
-                    <!-- The video source will be added by JavaScript -->
                 </video>
             </div>
         </section>
 
-        <!-- Participants Sidebar (Right Side) -->
-        <aside id="participants-container" class="w-full sm:w-1/4 lg:w-1/5 bg-slate-800 border-l border-b border-slate-700 p-4 flex flex-col gap-4 overflow-y-auto flex-shrink-0">
-            <h2 class="text-lg font-semibold text-center mb-2">Participants</h2>
+        <!-- Participants Sidebar (Second Grid Column) -->
+        <aside id="participants-container" class="bg-slate-800 border-l border-slate-700 p-4 flex flex-col gap-4 overflow-y-auto">
+            <h2 class="text-lg font-semibold text-center mb-2 flex-shrink-0">Participants</h2>
             
             <!-- Wrapper for the local player and its controls -->
-            <div class="relative">
-                <!-- This container is now ONLY for the video stream -->
+            <div class="relative flex-shrink-0">
                 <div id="local-player-container" class="aspect-video bg-slate-700 rounded-lg overflow-hidden video-container">
                     <!-- Agora will inject the video here -->
                 </div>
-                
                 <div class="absolute top-2 left-2 text-xs bg-black/50 px-2 py-1 rounded z-10 pointer-events-none">You</div>
-
                 <div class="video-controls">
                     <button id="mic-btn" class="p-2 bg-slate-600 rounded-full">
                         <svg class="w-5 h-5" fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 14q-1.25 0-2.125-.875T9 11V5q0-1.25.875-2.125T12 2q1.25 0 2.125.875T15 5v6q0 1.25-.875 2.125T12 14Zm-1 7v-3.05q-2.825-.2-4.912-2.1-2.088-1.9-2.088-4.6h2q0 2.225 1.638 3.862T12 17q2.225 0 3.862-1.638T17.5 11.5h2q0 2.7-2.088 4.6-2.087 1.9-4.912 2.1V21h-2Z"/></svg>

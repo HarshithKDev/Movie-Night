@@ -284,6 +284,9 @@
   .flex {
     display: flex;
   }
+  .grid {
+    display: grid;
+  }
   .hidden {
     display: none;
   }
@@ -352,6 +355,9 @@
   }
   .cursor-pointer {
     cursor: pointer;
+  }
+  .grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
   }
   .flex-col {
     flex-direction: column;
@@ -765,6 +771,11 @@
   .lg\:w-1\/5 {
     @media (width >= 64rem) {
       width: calc(1/5 * 100%);
+    }
+  }
+  .lg\:grid-cols-\[1fr_300px\] {
+    @media (width >= 64rem) {
+      grid-template-columns: 1fr 300px;
     }
   }
 }
