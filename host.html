@@ -3,69 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Host Session</title>
+    <title>Host Session - Movie Night</title>
     <link href="output.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .icon-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+            opacity: 0.4;
+        }
+        
+        .moving-icon {
+            position: absolute;
+            color: rgba(99, 102, 241, 0.08);
+            user-select: none;
+            animation: floatUp linear infinite;
+            text-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+        }
+        
+        @keyframes floatUp {
+            0% { 
+                transform: translateY(0) rotate(0deg); 
+                opacity: 0; 
+            }
+            10% { 
+                opacity: 1; 
+            }
+            90% { 
+                opacity: 1; 
+            }
+            100% { 
+                transform: translateY(-150vh) rotate(360deg); 
+                opacity: 0; 
+            }
+        }
+        
+        .glass-morphism {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .cinema-glow {
+            box-shadow: 0 0 50px rgba(99, 102, 241, 0.2);
+        }
+        
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+        
+        .upload-zone {
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.6) 100%);
+        }
+        
+        .upload-zone:hover {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-color: rgba(99, 102, 241, 0.5);
+            transform: scale(1.02);
+        }
+        
+        .upload-zone.drag-over {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+            border-color: #6366f1;
+            transform: scale(1.05);
+        }
+        
+        .progress-glow {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+        }
+        
+        .movie-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .movie-card:hover {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .action-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .modal-backdrop {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        
+        .film-strip {
+            background: linear-gradient(90deg, transparent 0%, rgba(99, 102, 241, 0.1) 50%, transparent 100%);
+            height: 2px;
+            animation: filmRoll 3s linear infinite;
+        }
+        
+        @keyframes filmRoll {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+    </style>
 </head>
-<body class="bg-slate-900 text-white font-sans">
+<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 font-sans relative min-h-screen">
+    
+    <!-- Animated Background -->
+    <div id="icon-background" class="icon-bg"></div>
+    
+    <!-- Navigation Header -->
+    <nav class="relative z-20 p-6">
+        <a href="index.html" class="inline-flex items-center text-slate-300 hover:text-white transition-colors group">
+            <svg class="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Back to Home
+        </a>
+    </nav>
 
-    <!-- ✅ THIS IS THE FIX: The main content is now wrapped in its own container -->
-    <div id="app-root">
-        <div class="min-h-screen flex flex-col items-center justify-center p-4">
-            <div class="w-full max-w-2xl text-center">
-                <h1 class="text-4xl md:text-5xl font-bold mb-4">Host a New Session</h1>
-                <p class="text-slate-400 mb-8">Select a local video file to upload or choose from your library.</p>
+    <!-- Main Content -->
+    <div id="app-root" class="relative z-10">
+        <div class="min-h-screen flex flex-col items-center justify-center p-4 pt-0">
+            <div class="w-full max-w-4xl">
                 
-                <!-- File Upload Area -->
-                <div id="upload-container" class="bg-slate-800 border-2 border-dashed border-slate-700 rounded-lg p-8 cursor-pointer hover:border-indigo-500 transition-colors">
-                    <input type="file" id="file-input" class="hidden" accept="video/mp4">
-                    <label for="file-input" class="flex flex-col items-center justify-center cursor-pointer">
-                        <svg class="w-12 h-12 text-slate-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                        </svg>
-                        <p class="text-lg font-semibold">Upload a New Movie</p>
-                        <p class="text-sm text-slate-400">Only MP4 files are supported</p>
-                    </label>
+                <!-- Header Section -->
+                <div class="text-center mb-12">
+                    <h1 class="text-5xl md:text-6xl font-black gradient-text mb-4">
+                        🎬 Host a Session
+                    </h1>
+                    <div class="film-strip mx-auto w-32 mb-6"></div>
+                    <p class="text-slate-300 text-xl font-light">
+                        Upload a new movie or choose from your collection
+                    </p>
                 </div>
+                
+                <!-- Upload Section -->
+                <div class="glass-morphism rounded-2xl p-8 mb-8 cinema-glow">
+                    <div id="upload-container" class="upload-zone border-2 border-dashed border-slate-600 rounded-xl p-12 cursor-pointer">
+                        <input type="file" id="file-input" class="hidden" accept="video/mp4">
+                        <label for="file-input" class="flex flex-col items-center justify-center cursor-pointer">
+                            <div class="text-6xl mb-6">🎥</div>
+                            <p class="text-2xl font-bold text-white mb-2">Upload a New Movie</p>
+                            <p class="text-slate-400 mb-4">Drag & drop or click to browse</p>
+                            <p class="text-sm text-slate-500 bg-slate-800/50 px-4 py-2 rounded-full">
+                                Only MP4 files are supported
+                            </p>
+                        </label>
+                    </div>
 
-                <!-- Upload Progress Display -->
-                <div id="progress-container" class="mt-8 hidden w-full bg-slate-700 rounded-full h-4">
-                    <div id="progress-bar" class="bg-indigo-600 h-4 rounded-full text-center text-xs text-white leading-4" style="width: 0%">0%</div>
+                    <!-- Upload Progress -->
+                    <div id="progress-container" class="mt-8 hidden">
+                        <div class="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+                            <div id="progress-bar" class="bg-gradient-to-r from-indigo-600 to-purple-600 h-3 rounded-full transition-all duration-300 progress-glow" style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-between items-center mt-3">
+                            <p id="upload-status" class="text-slate-300"></p>
+                            <span id="progress-text" class="text-sm text-slate-400">0%</span>
+                        </div>
+                    </div>
                 </div>
-                <p id="upload-status" class="mt-2 text-slate-400"></p>
 
                 <!-- Divider -->
-                <div class="my-8 flex items-center">
-                    <hr class="flex-grow border-slate-700">
-                    <span class="px-4 text-slate-500">OR</span>
-                    <hr class="flex-grow border-slate-700">
+                <div class="flex items-center mb-8">
+                    <div class="flex-grow h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div>
+                    <div class="px-6 text-slate-400 font-medium bg-slate-800/50 rounded-full py-2">
+                        OR CHOOSE FROM LIBRARY
+                    </div>
+                    <div class="flex-grow h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div>
                 </div>
 
-                <!-- Previously Uploaded Movies -->
-                <div>
-                    <h2 class="text-2xl font-bold mb-4">Choose from Your Library</h2>
-                    <div id="movie-library" class="space-y-3 text-left">
-                        <!-- Movies will be dynamically inserted here -->
-                        <p id="library-loading-message" class="text-slate-400 text-center">Loading your movies...</p>
+                <!-- Movie Library -->
+                <div class="glass-morphism rounded-2xl p-8 cinema-glow">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold text-white mb-2">🍿 Your Movie Library</h2>
+                        <p class="text-slate-400">Select a movie to start watching together</p>
+                    </div>
+                    
+                    <div id="movie-library" class="space-y-4">
+                        <div id="library-loading-message" class="text-center py-12">
+                            <div class="text-4xl mb-4">📼</div>
+                            <p class="text-slate-400">Loading your movies...</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- The modal is now a direct sibling of the main app content -->
+    <!-- Rename Modal -->
     <div id="rename-modal" class="fixed inset-0 hidden z-50">
-        <!-- Blurred Backdrop -->
-<div class="absolute inset-0 backdrop-blur-sm bg-black/30"></div>
+        <div class="modal-backdrop absolute inset-0"></div>
         
-        <!-- Centering Flex Container -->
         <div class="flex items-center justify-center w-full h-full p-4">
-            <!-- Modal Content Panel -->
-            <div class="bg-slate-800 rounded-lg p-6 w-full max-w-md shadow-xl relative z-10">
-                <h2 class="text-xl font-bold mb-4">Rename Movie</h2>
-                <input type="text" id="rename-input" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                <div class="flex justify-end gap-4 mt-6">
-                    <button id="cancel-rename-btn" class="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-4 rounded">Cancel</button>
-                    <button id="save-rename-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded">Save</button>
+            <div class="glass-morphism rounded-2xl p-8 w-full max-w-md shadow-2xl relative z-10 cinema-glow">
+                <div class="text-center mb-6">
+                    <div class="text-3xl mb-2">📝</div>
+                    <h2 class="text-2xl font-bold text-white">Rename Movie</h2>
+                </div>
+                
+                <input 
+                    type="text" 
+                    id="rename-input" 
+                    class="w-full bg-slate-800/50 border border-slate-600/50 rounded-xl p-4 text-white placeholder-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:outline-none mb-6"
+                    placeholder="Enter new movie name..."
+                >
+                
+                <div class="flex gap-4">
+                    <button 
+                        id="cancel-rename-btn" 
+                        class="flex-1 bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold py-3 rounded-xl transition-all hover-lift"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        id="save-rename-btn" 
+                        class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 rounded-xl transition-all hover-lift"
+                    >
+                        Save Changes
+                    </button>
                 </div>
             </div>
         </div>
