@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentUser = user;
             loadUserMovies(user.uid);
         } else {
+            // If user is not logged in, they can't see their library
             libraryLoadingMessage.textContent = 'Please log in to see your movie library.';
         }
     });
@@ -43,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * Fetches and displays the user's previously uploaded movies.
+     * @param {string} userId The UID of the logged-in user.
      */
     async function loadUserMovies(userId) {
         try {
@@ -51,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const movies = await response.json();
             libraryLoadingMessage.classList.add('hidden');
-            movieLibrary.innerHTML = '';
+            movieLibrary.innerHTML = ''; // Clear the loading message
 
             if (movies.length === 0) {
                 movieLibrary.innerHTML = '<p class="text-slate-400 text-center">You haven\'t uploaded any movies yet.</p>';
@@ -62,16 +64,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const movieEl = document.createElement('div');
                 movieEl.className = 'bg-slate-800 p-3 rounded-lg flex items-center justify-between';
                 movieEl.innerHTML = `
-                    <p class="movie-name truncate pr-4">${movie.fileName}</p>
+                    <p class="truncate pr-4">${movie.fileName}</p>
                     <div class="flex-shrink-0 flex gap-2">
                         <button class="host-btn bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 text-sm rounded">Host</button>
-                        <button class="rename-btn bg-slate-600 hover:bg-slate-500 text-white px-3 py-1 text-sm rounded">Rename</button>
                         <button class="delete-btn bg-red-600 hover:bg-red-500 text-white px-3 py-1 text-sm rounded">Delete</button>
                     </div>
                 `;
                 
+                // Add event listeners for the new buttons
                 movieEl.querySelector('.host-btn').onclick = () => createRoom(movie.publicUrl);
-                movieEl.querySelector('.rename-btn').onclick = () => renameMovie(movie._id, movie.fileName, movieEl);
                 movieEl.querySelector('.delete-btn').onclick = () => deleteMovie(movie._id, movie.filePath, movieEl);
                 
                 movieLibrary.appendChild(movieEl);
@@ -82,39 +83,12 @@ document.addEventListener('DOMContentLoaded', () => {
             libraryLoadingMessage.textContent = 'Could not load your movies.';
         }
     }
-    
-    /**
-     * ✅ NEW: Renames a movie in the database.
-     */
-    async function renameMovie(movieId, currentName, movieElement) {
-        if (!currentUser) return alert("You must be logged in to rename movies.");
-        
-        const newName = prompt("Enter the new name for the movie:", currentName);
-
-        if (newName && newName.trim() !== '' && newName !== currentName) {
-            try {
-                const response = await fetch(`${backendUrl}/api/movies/${movieId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ newName: newName.trim(), userId: currentUser.uid })
-                });
-
-                if (!response.ok) throw new Error('Failed to rename the movie on the server.');
-                
-                // Update the name in the UI on success
-                movieElement.querySelector('.movie-name').textContent = newName.trim();
-                alert("Movie renamed successfully.");
-
-            } catch (error) {
-                console.error("Failed to rename movie:", error);
-                alert("Error: Could not rename the movie.");
-            }
-        }
-    }
-
 
     /**
      * Deletes a movie from the database and storage.
+     * @param {string} movieId The MongoDB ObjectId of the movie.
+     * @param {string} filePath The path of the file in Firebase Storage.
+     * @param {HTMLElement} movieElement The HTML element to remove from the UI.
      */
     async function deleteMovie(movieId, filePath, movieElement) {
         if (!currentUser) return alert("You must be logged in to delete movies.");
@@ -129,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!response.ok) throw new Error('Failed to delete the movie on the server.');
             
-            movieElement.remove();
+            movieElement.remove(); // Remove from the UI on success
             alert("Movie deleted successfully.");
 
         } catch (error) {
@@ -174,6 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
      * Uploads the file to the provided signed URL.
      */
     function uploadFile(url, file) {
+        // ... (this function remains the same)
         return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
             xhr.open('PUT', url, true);
@@ -199,7 +174,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
         
         const body = { roomCode, fileId: publicUrl };
-        // Only add movie details to the body if it's a new upload
         if (fileName && filePath && userId) {
             body.fileName = fileName;
             body.filePath = filePath;
