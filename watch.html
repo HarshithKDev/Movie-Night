@@ -30,7 +30,7 @@
             gap: 1rem;
             z-index: 10;
         }
-        /* Ensures the video fits within the player area, adding black bars if necessary. */
+        /* ✅ THIS IS THE FIX: Ensures the video fits within its container, adding black bars if needed */
         .video-js .vjs-tech {
             object-fit: contain;
         }
@@ -53,8 +53,7 @@
     <main class="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_300px] overflow-hidden">
         
         <!-- Video Player Section (Main Grid Column) -->
-        <!-- ✅ THIS IS THE DEFINITIVE FIX: Added 'min-w-0' to allow the grid column to shrink -->
-        <section class="bg-slate-800 flex items-center justify-center overflow-hidden relative min-w-0">
+        <section class="bg-slate-800 flex items-center justify-center overflow-hidden relative">
             <div id="video-js-wrapper" class="w-full h-full">
                 <video id="movie-player" class="video-js vjs-big-play-centered vjs-fluid w-full h-full" controls preload="auto" muted data-setup='{}'></video>
             </div>
