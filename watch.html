@@ -30,6 +30,10 @@
             gap: 1rem;
             z-index: 10;
         }
+        /* ✅ THIS IS THE FIX: Ensures the video fits within its container, adding black bars if needed */
+        .video-js .vjs-tech {
+            object-fit: contain;
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-white font-sans flex flex-col h-screen">
@@ -49,7 +53,6 @@
     <main class="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_300px] overflow-hidden">
         
         <!-- Video Player Section (Main Grid Column) -->
-        <!-- ✅ FIX: Changed bg-black back to bg-slate-800 -->
         <section class="bg-slate-800 flex items-center justify-center overflow-hidden relative">
             <div id="video-js-wrapper" class="w-full h-full">
                 <video id="movie-player" class="video-js vjs-big-play-centered vjs-fluid w-full h-full" controls preload="auto" muted data-setup='{}'></video>
@@ -70,7 +73,6 @@
             <!-- Wrapper for the local player and its controls -->
             <div class="relative flex-shrink-0">
                 <div id="local-player-container" class="aspect-video bg-slate-700 rounded-lg overflow-hidden video-container"></div>
-                <!-- ✅ This element is ready to be populated with the user's name by auth.js -->
                 <div id="local-user-name" class="absolute top-2 left-2 text-xs bg-black/50 px-2 py-1 rounded z-10 pointer-events-none">You</div>
                 <div class="video-controls">
                     <button id="mic-btn" class="p-2 bg-slate-600 rounded-full"><svg class="w-5 h-5" fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 14q-1.25 0-2.125-.875T9 11V5q0-1.25.875-2.125T12 2q1.25 0 2.125.875T15 5v6q0 1.25-.875 2.125T12 14Zm-1 7v-3.05q-2.825-.2-4.912-2.1-2.088-1.9-2.088-4.6h2q0 2.225 1.638 3.862T12 17q2.225 0 3.862-1.638T17.5 11.5h2q0 2.7-2.088 4.6-2.087 1.9-4.912 2.1V21h-2Z"/></svg></button>
