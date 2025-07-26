@@ -8,7 +8,8 @@
 </head>
 <body class="bg-slate-900 text-white font-sans">
 
-    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+    <!-- ✅ THIS IS THE FIX: Added 'relative' and 'z-10' to establish a stacking context -->
+    <div class="min-h-screen flex flex-col items-center justify-center p-4 relative z-10">
         <div class="w-full max-w-2xl text-center">
             <h1 class="text-4xl md:text-5xl font-bold mb-4">Host a New Session</h1>
             <p class="text-slate-400 mb-8">Select a local video file to upload or choose from your library.</p>
@@ -49,7 +50,7 @@
         </div>
     </div>
 
-    <!-- ✅ THIS IS THE FIX: The modal's visibility and layout are now on separate elements -->
+    <!-- The modal's 'z-50' class will now correctly place it on top of the main content -->
     <div id="rename-modal" class="fixed inset-0 hidden z-50">
         <!-- Backdrop -->
         <div class="absolute inset-0 bg-black bg-opacity-50"></div>
