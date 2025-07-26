@@ -9,6 +9,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const movieLibrary = document.getElementById('movie-library');
     const libraryLoadingMessage = document.getElementById('library-loading-message');
     
+    // ✅ NEW: Get modal elements
+    const renameModal = document.getElementById('rename-modal');
+    const renameInput = document.getElementById('rename-input');
+    const saveRenameBtn = document.getElementById('save-rename-btn');
+    const cancelRenameBtn = document.getElementById('cancel-rename-btn');
+
     const backendUrl = 'https://movienight-backend-veka.onrender.com';
     let currentUser = null;
 
@@ -84,32 +90,50 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     /**
-     * ✅ NEW: Renames a movie in the database.
+     * ✅ NEW: Renames a movie in the database using a custom modal.
      */
-    async function renameMovie(movieId, currentName, movieElement) {
+    function renameMovie(movieId, currentName, movieElement) {
         if (!currentUser) return alert("You must be logged in to rename movies.");
         
-        const newName = prompt("Enter the new name for the movie:", currentName);
+        // Populate the modal and show it
+        renameInput.value = currentName;
+        renameModal.classList.remove('hidden');
 
-        if (newName && newName.trim() !== '' && newName !== currentName) {
-            try {
-                const response = await fetch(`${backendUrl}/api/movies/${movieId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ newName: newName.trim(), userId: currentUser.uid })
-                });
+        // This function will be called when the save button is clicked
+        const handleSave = async () => {
+            const newName = renameInput.value.trim();
+            if (newName && newName !== currentName) {
+                try {
+                    const response = await fetch(`${backendUrl}/api/movies/${movieId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ newName, userId: currentUser.uid })
+                    });
 
-                if (!response.ok) throw new Error('Failed to rename the movie on the server.');
-                
-                // Update the name in the UI on success
-                movieElement.querySelector('.movie-name').textContent = newName.trim();
-                alert("Movie renamed successfully.");
-
-            } catch (error) {
-                console.error("Failed to rename movie:", error);
-                alert("Error: Could not rename the movie.");
+                    if (!response.ok) throw new Error('Failed to rename the movie on the server.');
+                    
+                    // Update the name in the UI
+                    movieElement.querySelector('.movie-name').textContent = newName;
+                    
+                } catch (error) {
+                    console.error("Failed to rename movie:", error);
+                    alert("Error: Could not rename the movie.");
+                }
             }
-        }
+            // Hide the modal and clean up the event listeners
+            hideModal();
+        };
+
+        const hideModal = () => {
+            renameModal.classList.add('hidden');
+            // IMPORTANT: Remove the event listeners to prevent them from firing multiple times on subsequent renames
+            saveRenameBtn.removeEventListener('click', handleSave);
+            cancelRenameBtn.removeEventListener('click', hideModal);
+        };
+
+        // Add the event listeners for this specific rename operation
+        saveRenameBtn.addEventListener('click', handleSave);
+        cancelRenameBtn.addEventListener('click', hideModal);
     }
 
 
