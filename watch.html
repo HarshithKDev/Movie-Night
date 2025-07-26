@@ -1,21 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Watch Party</title>
-    <!-- Link to your compiled Tailwind CSS file -->
+    
+    <!-- Tailwind CSS -->
     <link href="output.css" rel="stylesheet" />
+
     <!-- Video.js CSS -->
     <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+
     <style>
-        /* Ensure Agora video elements fill their container */
         .video-container video {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-        /* Styling for the video controls overlay */
         .video-controls {
             position: absolute;
             bottom: 0;
@@ -30,9 +31,9 @@
             gap: 1rem;
             z-index: 10;
         }
-        /* Ensures the video fits within the player area, adding black bars if necessary. */
+        /* Ensures video fits inside the player with black bars if needed */
         .video-js .vjs-tech {
-            object-fit: contain;
+            object-fit: contain !important;
         }
     </style>
 </head>
@@ -40,58 +41,80 @@
 
     <!-- Top Bar -->
     <header class="flex-shrink-0 flex items-center justify-between p-4 bg-slate-800 border-b border-slate-700">
-        <div>
-            <div class="flex items-center gap-2">
-                <span class="text-sm font-mono bg-slate-700 text-green-400 px-3 py-1 rounded">Room: <span id="room-code">LOADING...</span></span>
-                <button id="copy-button" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded text-sm">Copy</button>
-            </div>
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-mono bg-slate-700 text-green-400 px-3 py-1 rounded">
+                Room: <span id="room-code">LOADING...</span>
+            </span>
+            <button id="copy-button" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded text-sm">
+                Copy
+            </button>
         </div>
-        <button id="exit-button" class="bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-6 rounded-lg">Exit</button>
+        <button id="exit-button" class="bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-6 rounded-lg">
+            Exit
+        </button>
     </header>
 
-    <!-- Main Content Area using CSS Grid -->
+    <!-- Main Grid -->
     <main class="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_300px] overflow-hidden">
         
-        <!-- Video Player Section (Main Grid Column) -->
-        <!-- ✅ THIS IS THE DEFINITIVE FIX: Added 'min-w-0' to allow the grid column to shrink -->
+        <!-- Movie Player Section -->
         <section class="bg-slate-800 flex items-center justify-center overflow-hidden relative min-w-0">
-            <div id="video-js-wrapper" class="w-full h-full">
-                <video id="movie-player" class="video-js vjs-big-play-centered vjs-fluid w-full h-full" controls preload="auto" muted data-setup='{}'></video>
+            <!-- ✅ Fixed-size video player container -->
+            <div id="video-js-wrapper" class="w-[960px] h-[540px] bg-black">
+                <video
+                    id="movie-player"
+                    class="video-js vjs-big-play-centered w-full h-full"
+                    controls
+                    preload="auto"
+                    muted
+                    data-setup="{}"
+                ></video>
             </div>
-            <!-- Overlay to capture the first user click for unmuting -->
+
+            <!-- Click to Unmute Overlay -->
             <div id="unmute-overlay" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center cursor-pointer z-20">
                 <div class="text-center">
-                    <svg class="w-16 h-16 mx-auto" fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3Zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02Z"/></svg>
+                    <svg class="w-16 h-16 mx-auto" fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M3 9v6h4l5 5V4L7 9H3Zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02Z"/>
+                    </svg>
                     <p class="text-2xl font-bold mt-4">Click to Unmute</p>
                 </div>
             </div>
         </section>
 
-        <!-- Participants Sidebar (Second Grid Column) -->
+        <!-- Participants Sidebar -->
         <aside id="participants-container" class="bg-slate-800 border-l border-slate-700 p-4 flex flex-col gap-4 overflow-y-auto">
             <h2 class="text-lg font-semibold text-center mb-2 flex-shrink-0">Participants</h2>
-            
-            <!-- Wrapper for the local player and its controls -->
+
+            <!-- Local Video Player -->
             <div class="relative flex-shrink-0">
                 <div id="local-player-container" class="aspect-video bg-slate-700 rounded-lg overflow-hidden video-container"></div>
                 <div id="local-user-name" class="absolute top-2 left-2 text-xs bg-black/50 px-2 py-1 rounded z-10 pointer-events-none">You</div>
                 <div class="video-controls">
-                    <button id="mic-btn" class="p-2 bg-slate-600 rounded-full"><svg class="w-5 h-5" fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 14q-1.25 0-2.125-.875T9 11V5q0-1.25.875-2.125T12 2q1.25 0 2.125.875T15 5v6q0 1.25-.875 2.125T12 14Zm-1 7v-3.05q-2.825-.2-4.912-2.1-2.088-1.9-2.088-4.6h2q0 2.225 1.638 3.862T12 17q2.225 0 3.862-1.638T17.5 11.5h2q0 2.7-2.088 4.6-2.087 1.9-4.912 2.1V21h-2Z"/></svg></button>
-                    <button id="camera-btn" class="p-2 bg-slate-600 rounded-full"><svg class="w-5 h-5" fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14 17.5 4-4-4-4ZM2 0q-.825 0-1.412-.587Q0 18.825 0 18V6q0-.825.588-1.413Q1.175 4 2 4h10l2.4 3H22q.825 0 1.413.587Q24 8.175 24 9v9q0 .825-.587 1.413Q22.825 20 22 20H2Zm0-2h20V9h-7.6l-2.4-3H2v12Zm10-6Z"/></svg></button>
+                    <button id="mic-btn" class="p-2 bg-slate-600 rounded-full">
+                        <svg class="w-5 h-5" fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M12 14q-1.25 0-2.125-.875T9 11V5q0-1.25.875-2.125T12 2q1.25 0 2.125.875T15 5v6q0 1.25-.875 2.125T12 14Zm-1 7v-3.05q-2.825-.2-4.912-2.1-2.088-1.9-2.088-4.6h2q0 2.225 1.638 3.862T12 17q2.225 0 3.862-1.638T17.5 11.5h2q0 2.7-2.088 4.6-2.087 1.9-4.912 2.1V21h-2Z"/>
+                        </svg>
+                    </button>
+                    <button id="camera-btn" class="p-2 bg-slate-600 rounded-full">
+                        <svg class="w-5 h-5" fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="m14 17.5 4-4-4-4ZM2 0q-.825 0-1.412-.587Q0 18.825 0 18V6q0-.825.588-1.413Q1.175 4 2 4h10l2.4 3H22q.825 0 1.413.587Q24 8.175 24 9v9q0 .825-.587 1.413Q22.825 20 22 20H2Zm0-2h20V9h-7.6l-2.4-3H2v12Zm10-6Z"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
 
-            <!-- Remote users' videos will be added here -->
+            <!-- Remote users will be dynamically inserted here -->
         </aside>
     </main>
 
-    <!-- SDKs -->
+    <!-- SDK Scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.20.2.js"></script>
     <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
-    
-    <!-- Your Scripts -->
+
+    <!-- Your custom JS -->
     <script src="js/auth.js"></script>
     <script src="js/watch.js"></script>
     <script src="js/videocall.js"></script>
