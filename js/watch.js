@@ -47,7 +47,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     ws.onopen = () => {
         console.log('Connected to WebSocket server.');
-        // When the connection is open, send a message to join the specific room
         ws.send(JSON.stringify({ type: 'join', roomCode }));
     };
 
@@ -57,7 +56,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         receivedEvent = true;
 
         switch (data.type) {
-            // --- ✅ NEW: Handle the initial state sync from the server ---
             case 'sync-state':
                 const { isPlaying, currentTime } = data.state;
                 player.currentTime(currentTime);
@@ -77,7 +75,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 player.currentTime(data.time); 
                 break;
         }
-        // Use a longer timeout to prevent event echo on seek
         setTimeout(() => { receivedEvent = false; }, 250);
     };
 
@@ -116,12 +113,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         ws.close();
         window.location.href = 'index.html';
     };
+    
+    // --- ✅ THIS IS THE FIX ---
+    // The button now copies only the roomCode to the clipboard.
     copyButtonEl.onclick = () => {
-        navigator.clipboard.writeText(window.location.href).then(() => {
+        navigator.clipboard.writeText(roomCode).then(() => {
             copyButtonEl.textContent = 'Copied!';
             setTimeout(() => { copyButtonEl.textContent = 'Copy'; }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy room code: ', err);
+            alert('Failed to copy room code.');
         });
     };
+    
     micBtn.addEventListener('click', toggleMic);
     cameraBtn.addEventListener('click', toggleCamera);
 });
