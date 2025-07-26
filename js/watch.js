@@ -1,3 +1,5 @@
+// This file requires auth.js to be loaded first to access firebase and auth objects.
+
 document.addEventListener('DOMContentLoaded', async () => {
     const params = new URLSearchParams(window.location.search);
     const fileId = decodeURIComponent(params.get('fileId'));
@@ -37,8 +39,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         if(playerWrapper) playerWrapper.innerHTML = `<div class="w-full h-full flex items-center justify-center text-red-500 p-4"><p>Error: Could not load video.</p></div>`;
     }
 
-    // --- Video Call Setup ---
-    joinAndDisplayLocalStream(roomCode);
+    // --- ✅ NEW: Get User Name and Start Video Call ---
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            // User is logged in, use their display name.
+            const userName = user.displayName || 'Guest';
+            joinAndDisplayLocalStream(roomCode, userName);
+        } else {
+            // User is not logged in, use a generic name.
+            // In a real app, you might redirect to the login page here.
+            joinAndDisplayLocalStream(roomCode, `Guest${Math.floor(Math.random() * 1000)}`);
+        }
+    });
+
 
     // --- WebSocket Connection for Video Sync ---
     const wsUrl = 'wss://movienight-backend-veka.onrender.com'.replace(/^http/, 'ws');
@@ -49,46 +62,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('Connected to WebSocket server.');
         ws.send(JSON.stringify({ type: 'join', roomCode }));
     };
-
     ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        console.log('Received message from server:', data);
         receivedEvent = true;
-
         switch (data.type) {
             case 'sync-state':
                 const { isPlaying, currentTime } = data.state;
                 player.currentTime(currentTime);
-                if (isPlaying) {
-                    player.play();
-                } else {
-                    player.pause();
-                }
+                if (isPlaying) player.play();
+                else player.pause();
                 break;
-            case 'play': 
-                player.play(); 
-                break;
-            case 'pause': 
-                player.pause(); 
-                break;
-            case 'seek': 
-                player.currentTime(data.time); 
-                break;
+            case 'play': player.play(); break;
+            case 'pause': player.pause(); break;
+            case 'seek': player.currentTime(data.time); break;
         }
         setTimeout(() => { receivedEvent = false; }, 250);
     };
 
     player.on('loadedmetadata', () => {
         const audioTracks = player.audioTracks();
-        if (audioTracks.length > 0) {
-            console.log(`✅ SUCCESS: Found ${audioTracks.length} audio track(s).`);
-        } else {
-            console.error("❌ ERROR: No compatible audio tracks were found.");
-        }
+        if (audioTracks.length > 0) console.log(`✅ SUCCESS: Found ${audioTracks.length} audio track(s).`);
+        else console.error("❌ ERROR: No compatible audio tracks were found.");
     });
 
     unmuteOverlay.addEventListener('click', () => {
-        console.log('Unmute overlay clicked. Forcing unmute and volume.');
         player.muted(false);
         player.volume(1.0);
         player.play();
@@ -113,19 +110,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         ws.close();
         window.location.href = 'index.html';
     };
-    
-    // --- ✅ THIS IS THE FIX ---
-    // The button now copies only the roomCode to the clipboard.
     copyButtonEl.onclick = () => {
         navigator.clipboard.writeText(roomCode).then(() => {
             copyButtonEl.textContent = 'Copied!';
             setTimeout(() => { copyButtonEl.textContent = 'Copy'; }, 2000);
-        }).catch(err => {
-            console.error('Failed to copy room code: ', err);
-            alert('Failed to copy room code.');
         });
     };
-    
     micBtn.addEventListener('click', toggleMic);
     cameraBtn.addEventListener('click', toggleCamera);
 });

@@ -17,27 +17,29 @@ let uid; // To store the local user's ID
 /**
  * Initializes the video call, joins the channel, and publishes the local stream.
  * @param {string} channelName - The room code to use as the channel name.
+ * @param {string} userName - The display name of the local user.
  */
-async function joinAndDisplayLocalStream(channelName) {
+async function joinAndDisplayLocalStream(channelName, userName) {
   try {
-    // --- THIS IS THE KEY CHANGE ---
+    // --- ✅ NEW: Pass the user's name as their UID when joining ---
+    // Agora allows string UIDs, so we can use the user's name directly.
+    // For production, you'd use the unique Firebase UID and pass the name separately.
+    uid = await client.join(AGORA_APP_ID, channelName, null, userName);
+    console.log(`Successfully joined channel ${channelName} as ${userName}`);
+
     // Set up event listeners BEFORE joining the channel.
-    // This ensures we don't miss the event for users who are already in the channel.
     client.on('user-published', handleUserPublished);
     client.on('user-left', handleUserLeft);
-    // --- END CHANGE ---
-
-    // Join the channel. The UID is returned upon joining.
-    uid = await client.join(AGORA_APP_ID, channelName, null, null);
-    console.log(`Successfully joined channel ${channelName} with uid ${uid}`);
 
     // Create microphone and camera tracks.
-    // Requesting permissions here, after the user has initiated an action.
     localTracks.audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
     localTracks.videoTrack = await AgoraRTC.createCameraVideoTrack();
 
     // Play the local video track in the 'local-player-container'.
     const localPlayerContainer = document.getElementById('local-player-container');
+    const localNameLabel = document.getElementById('local-user-name');
+    if (localNameLabel) localNameLabel.textContent = userName; // Set the local user's name
+    
     localTracks.videoTrack.play(localPlayerContainer);
 
     // Publish the local tracks to the channel.
@@ -55,8 +57,7 @@ async function joinAndDisplayLocalStream(channelName) {
  * @param {string} mediaType - 'audio' or 'video'.
  */
 async function handleUserPublished(user, mediaType) {
-  const userId = user.uid;
-  console.log(`Remote user published: ${userId}, mediaType: ${mediaType}`); // Added for debugging
+  const userId = user.uid; // This will now be the user's name
   remoteUsers[userId] = user;
   await client.subscribe(user, mediaType);
   console.log(`Subscribed to remote user ${userId}`);
@@ -68,18 +69,22 @@ async function handleUserPublished(user, mediaType) {
     if (playerContainer === null) {
       playerContainer = document.createElement('div');
       playerContainer.id = `player-wrapper-${userId}`;
-      playerContainer.className = 'aspect-video bg-slate-700 rounded-lg overflow-hidden video-container relative';
-      
-      // Add a label for the remote user
-      const nameLabel = document.createElement('div');
-      nameLabel.className = 'absolute top-2 left-2 text-xs bg-black/50 px-2 py-1 rounded';
-      nameLabel.textContent = `User ${userId}`;
-      playerContainer.appendChild(nameLabel);
+      playerContainer.className = 'relative flex-shrink-0'; // Use the same structure as the local player
 
+      // Create the inner structure for the remote player
+      playerContainer.innerHTML = `
+        <div class="aspect-video bg-slate-700 rounded-lg overflow-hidden video-container">
+            <!-- Remote video will be injected here by .play() -->
+        </div>
+        <div class="absolute top-2 left-2 text-xs bg-black/50 px-2 py-1 rounded z-10 pointer-events-none">${userId}</div>
+      `;
+      
       participantsContainer.appendChild(playerContainer);
     }
     
-    user.videoTrack.play(playerContainer);
+    // Play the video inside the newly created container
+    const videoContainer = playerContainer.querySelector('.video-container');
+    user.videoTrack.play(videoContainer);
   }
 
   if (mediaType === 'audio') {
@@ -89,7 +94,6 @@ async function handleUserPublished(user, mediaType) {
 
 /**
  * Handles a remote user leaving the channel.
- * @param {object} user - The remote user object from Agora.
  */
 function handleUserLeft(user) {
   const userId = user.uid;
@@ -114,7 +118,6 @@ async function leaveChannel() {
     }
   }
   
-  // Leave the channel.
   await client.leave();
   console.log("Left the channel successfully.");
 }
@@ -126,7 +129,6 @@ async function toggleCamera() {
     if (localTracks.videoTrack) {
         const isEnabled = localTracks.videoTrack.enabled;
         await localTracks.videoTrack.setEnabled(!isEnabled);
-        // Update UI (e.g., button color)
         document.getElementById('camera-btn').style.backgroundColor = isEnabled ? 'rgb(220 38 38)' : 'rgb(71 85 105)';
     }
 }
@@ -138,7 +140,6 @@ async function toggleMic() {
     if (localTracks.audioTrack) {
         const isEnabled = localTracks.audioTrack.enabled;
         await localTracks.audioTrack.setEnabled(!isEnabled);
-        // Update UI (e.g., button color)
         document.getElementById('mic-btn').style.backgroundColor = isEnabled ? 'rgb(220 38 38)' : 'rgb(71 85 105)';
     }
 }
