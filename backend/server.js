@@ -13,7 +13,7 @@ const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: 'movienight-firebase.appspot.com'
+  storageBucket: 'movienight-firebase.firebasestorage.app'
 });
 
 const bucket = admin.storage().bucket();
