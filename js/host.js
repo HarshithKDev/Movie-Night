@@ -161,13 +161,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="flex-shrink-0 flex gap-3">
                         <button class="host-btn action-btn bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-2 text-sm font-semibold rounded-lg">
-                            🎥 Host
+                            Host
                         </button>
                         <button class="rename-btn action-btn bg-slate-600/50 hover:bg-slate-500/50 text-white px-4 py-2 text-sm font-semibold rounded-lg">
-                            📝
+                            Rename
                         </button>
                         <button class="delete-btn action-btn bg-red-600/80 hover:bg-red-500/80 text-white px-4 py-2 text-sm font-semibold rounded-lg">
-                            🗑️
+                            Delete
                         </button>
                     </div>
                 `;
