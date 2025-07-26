@@ -11,9 +11,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const roomCode = params.get('roomCode');
 
     // DOM Elements
-    const roomCodeTextEl = document.getElementById('room-code-text'); // Changed ID
+    const roomCodeEl = document.getElementById('room-code');
     const exitButtonEl = document.getElementById('exit-button');
-    const copyRoomCodeBtn = document.getElementById('copy-room-code-btn'); // Changed ID
+    const copyButtonEl = document.getElementById('copy-button');
     const micBtn = document.getElementById('mic-btn');
     const cameraBtn = document.getElementById('camera-btn');
     const unmuteOverlay = document.getElementById('unmute-overlay');
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Set room code with animation
-    animateRoomCode(roomCodeTextEl, roomCode);
+    animateRoomCode(roomCodeEl, roomCode);
     
     // Initialize video player
     const player = videojs('movie-player', {
@@ -59,28 +59,67 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupEnhancedControls(player, unmuteOverlay, micBtn, cameraBtn);
 
     // Setup button interactions
-    setupButtonInteractions(exitButtonEl, copyRoomCodeBtn, roomCode);
+    setupButtonInteractions(exitButtonEl, copyButtonEl, roomCode);
 
     /**
      * Initialize floating background animation
      */
     function initializeBackgroundAnimation() {
-        // This function is for decorative purposes and can be kept as is.
+        const iconContainer = document.getElementById('icon-background');
+        if (!iconContainer) return;
+
+        const icons = [
+            '🎬', '🍿', '🎥', '🎞️', '🎟️', '🎭', '⭐', '📽️',
+            '🎪', '🎨', '🎯', '🎲', '🎸', '🎺', '🎵', '🎶',
+            '🌟', '✨', '💫', '🔥', '💎', '🏆', '🎊', '🎉'
+        ];
+
+        // Create initial batch of icons (reduced for video page)
+        for (let i = 0; i < 25; i++) {
+            createFloatingIcon(iconContainer, icons);
+        }
+
+        // Continuously spawn new icons
+        setInterval(() => {
+            createFloatingIcon(iconContainer, icons);
+            cleanupIcons(iconContainer);
+        }, 3000);
     }
 
     function createFloatingIcon(container, icons) {
-        // This function is for decorative purposes and can be kept as is.
+        const icon = document.createElement('span');
+        icon.classList.add('moving-icon');
+        icon.innerText = icons[Math.floor(Math.random() * icons.length)];
+        
+        const size = Math.random() * 2 + 1;
+        const left = Math.random() * 100;
+        const duration = Math.random() * 20 + 30;
+        const delay = Math.random() * -10;
+        
+        icon.style.fontSize = `${size}rem`;
+        icon.style.left = `${left}vw`;
+        icon.style.animationDuration = `${duration}s`;
+        icon.style.animationDelay = `${delay}s`;
+        icon.style.bottom = `-${size}rem`;
+        icon.dataset.created = Date.now();
+        
+        container.appendChild(icon);
     }
 
     function cleanupIcons(container) {
-        // This function is for decorative purposes and can be kept as is.
+        const icons = container.querySelectorAll('.moving-icon');
+        const now = Date.now();
+        icons.forEach(icon => {
+            if (now - parseInt(icon.dataset.created) > 40000) {
+                icon.remove();
+            }
+        });
     }
 
     /**
      * Animate room code display
      */
     function animateRoomCode(element, code) {
-        if (!element) return;
         element.textContent = '';
         let index = 0;
         
@@ -90,9 +129,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             if (index >= code.length) {
                 clearInterval(typeInterval);
-                if (element.parentElement) {
-                    element.parentElement.style.boxShadow = '0 0 20px rgba(99, 102, 241, 0.3)';
-                }
+                // Add a subtle glow effect when complete
+                element.parentElement.style.boxShadow = '0 0 20px rgba(34, 197, 94, 0.3)';
             }
         }, 100);
     }
@@ -116,8 +154,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const data = await response.json();
             
-            player.src({ src: data.streamUrl, type: 'video/mp4' });
+            // Set video source
+            player.src({ 
+                src: data.streamUrl,
+                type: 'video/mp4'
+            });
 
+            // Handle successful load
             player.ready(() => {
                 console.log('✅ Video player ready');
                 loadingOverlay.style.opacity = '0';
@@ -126,8 +169,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }, 500);
             });
 
+            // Enhanced metadata loading
             player.on('loadedmetadata', () => {
+                const duration = player.duration();
                 const audioTracks = player.audioTracks();
+                
+                console.log(`✅ Video loaded: ${Math.floor(duration / 60)}:${Math.floor(duration % 60).toString().padStart(2, '0')}`);
+                
                 if (audioTracks.length > 0) {
                     console.log(`✅ Audio tracks found: ${audioTracks.length}`);
                 } else {
@@ -136,6 +184,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
 
+            // Error handling
             player.on('error', (error) => {
                 console.error('❌ Video player error:', error);
                 handleVideoError(player);
@@ -151,7 +200,33 @@ document.addEventListener('DOMContentLoaded', async () => {
      * Handle video loading errors with user-friendly UI
      */
     function handleVideoError(player, errorMessage = 'Could not load video') {
-        // This function can be kept as is.
+        const playerWrapper = document.getElementById('video-js-wrapper');
+        if (playerWrapper) {
+            playerWrapper.innerHTML = `
+                <div class="w-full h-full flex items-center justify-center text-center p-8">
+                    <div>
+                        <div class="text-6xl mb-6">🎬💥</div>
+                        <h3 class="text-2xl font-bold text-red-400 mb-4">Video Load Error</h3>
+                        <p class="text-slate-300 mb-6">${errorMessage}</p>
+                        <div class="space-y-3">
+                            <button onclick="location.reload()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition-all">
+                                🔄 Try Again
+                            </button>
+                            <br>
+                            <a href="index.html" class="text-slate-400 hover:text-white transition-colors">
+                                ← Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Hide loading overlay
+        const loadingOverlay = document.getElementById('loading-overlay');
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'none';
+        }
     }
 
     /**
@@ -161,15 +236,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         auth.onAuthStateChanged(user => {
             if (user) {
                 const userName = user.displayName || user.email?.split('@')[0] || 'Guest';
+                console.log(`👤 User authenticated: ${userName}`);
+                
+                // Initialize video call with authenticated user
                 if (typeof joinAndDisplayLocalStream === 'function') {
                     joinAndDisplayLocalStream(roomCode, userName);
                 }
+                
+                // Update UI to show authenticated state
                 updateParticipantName(userName);
             } else {
+                // Handle guest user
                 const guestName = `Guest${Math.floor(Math.random() * 1000)}`;
+                console.log(`👤 Guest user: ${guestName}`);
+                
                 if (typeof joinAndDisplayLocalStream === 'function') {
                     joinAndDisplayLocalStream(roomCode, guestName);
                 }
+                
                 updateParticipantName(guestName);
             }
         });
@@ -179,46 +263,260 @@ document.addEventListener('DOMContentLoaded', async () => {
      * Update participant name in UI
      */
     function updateParticipantName(name) {
-        // This function can be kept as is.
+        const nameElement = document.getElementById('local-user-name');
+        if (nameElement) {
+            nameElement.innerHTML = `<span class="mr-1">👤</span><span>${name}</span>`;
+        }
     }
 
     /**
      * Setup WebSocket for video synchronization
      */
     function setupVideoSync(player, roomCode) {
-        // This function can be kept as is.
+        const wsUrl = 'wss://movienight-backend-veka.onrender.com';
+        const ws = new WebSocket(wsUrl);
+        let receivedEvent = false;
+        let isConnected = false;
+
+        ws.onopen = () => {
+            console.log('🔗 Connected to sync server');
+            isConnected = true;
+            ws.send(JSON.stringify({ type: 'join', roomCode }));
+            showNotification('Connected to sync server', 'success');
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            receivedEvent = true;
+            
+            console.log('📡 Sync event received:', data.type);
+            
+            switch (data.type) {
+                case 'sync-state':
+                    const { isPlaying, currentTime } = data.state;
+                    player.currentTime(currentTime);
+                    if (isPlaying && player.paused()) {
+                        player.play();
+                    } else if (!isPlaying && !player.paused()) {
+                        player.pause();
+                    }
+                    break;
+                    
+                case 'play':
+                    if (player.paused()) player.play();
+                    break;
+                    
+                case 'pause':
+                    if (!player.paused()) player.pause();
+                    break;
+                    
+                case 'seek':
+                    player.currentTime(data.time);
+                    break;
+            }
+            
+            setTimeout(() => { receivedEvent = false; }, 250);
+        };
+
+        ws.onclose = () => {
+            console.log('🔌 Disconnected from sync server');
+            isConnected = false;
+            showNotification('Disconnected from sync server', 'warning');
+        };
+
+        ws.onerror = (error) => {
+            console.error('❌ WebSocket error:', error);
+            showNotification('Sync connection error', 'error');
+        };
+
+        // Send playback events to other participants
+        function sendPlaybackEvent(type, time = null) {
+            if (ws.readyState === WebSocket.OPEN && !receivedEvent && isConnected) {
+                const message = { type, roomCode };
+                if (time !== null) message.time = time;
+                ws.send(JSON.stringify(message));
+                console.log('📤 Sync event sent:', type);
+            }
+        }
+
+        // Attach player event listeners
+        player.on('play', () => sendPlaybackEvent('play'));
+        player.on('pause', () => sendPlaybackEvent('pause'));
+        player.on('seeked', () => sendPlaybackEvent('seek', player.currentTime()));
+
+        // Store WebSocket reference for cleanup
+        window.movieWS = ws;
     }
 
     /**
      * Setup enhanced video controls
      */
     function setupEnhancedControls(player, unmuteOverlay, micBtn, cameraBtn) {
-        // This function can be kept as is.
+        // Enhanced unmute overlay
+        unmuteOverlay.addEventListener('click', () => {
+            player.muted(false);
+            player.volume(1.0);
+            
+            // Smooth fade out
+            unmuteOverlay.style.opacity = '0';
+            setTimeout(() => {
+                unmuteOverlay.style.display = 'none';
+                player.play();
+            }, 300);
+            
+            showNotification('🔊 Audio enabled! Enjoy the movie!', 'success');
+        }, { once: true });
+
+        // Enhanced mic control
+        let micMuted = false;
+        micBtn.addEventListener('click', () => {
+            micMuted = !micMuted;
+            
+            if (micMuted) {
+                micBtn.classList.add('muted');
+                micBtn.innerHTML = `
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M13.58 11.75a.75.75 0 01.75.75c0 2.33-1.47 4.32-3.54 5.1V19h.5a.75.75 0 010 1.5h-4.5a.75.75 0 010-1.5h.5v-1.4c-2.07-.78-3.54-2.77-3.54-5.1a.75.75 0 011.5 0c0 1.66 1.34 3 3 3s3-1.34 3-3a.75.75 0 01.75-.75z" clip-rule="evenodd"/>
+                        <path d="M8.25 2A2.25 2.25 0 006 4.25v3.5a2.25 2.25 0 004.5 0V4.25A2.25 2.25 0 008.25 2z"/>
+                        <path stroke="currentColor" stroke-width="2" d="M3 3l14 14"/>
+                    </svg>
+                `;
+                showNotification('🔇 Microphone muted', 'info');
+            } else {
+                micBtn.classList.remove('muted');
+                micBtn.innerHTML = `
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"/>
+                    </svg>
+                `;
+                showNotification('🎤 Microphone enabled', 'success');
+            }
+            
+            // Call videocall.js function if available
+            if (typeof toggleMic === 'function') {
+                toggleMic();
+            }
+        });
+
+        // Enhanced camera control
+        let cameraOff = false;
+        cameraBtn.addEventListener('click', () => {
+            cameraOff = !cameraOff;
+            
+            if (cameraOff) {
+                cameraBtn.classList.add('muted');
+                cameraBtn.innerHTML = `
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586l-.707-.707A1 1 0 0012.293 4H7.707a1 1 0 00-.707.293L6.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+                        <path stroke="currentColor" stroke-width="2" d="M3 3l14 14"/>
+                    </svg>
+                `;
+                showNotification('📹 Camera turned off', 'info');
+            } else {
+                cameraBtn.classList.remove('muted');
+                cameraBtn.innerHTML = `
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586l-.707-.707A1 1 0 0012.293 4H7.707a1 1 0 00-.707.293L6.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+                    </svg>
+                `;
+                showNotification('📷 Camera turned on', 'success');
+            }
+            
+            // Call videocall.js function if available
+            if (typeof toggleCamera === 'function') {
+                toggleCamera();
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Don't trigger if user is typing in an input
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            
+            switch (e.key.toLowerCase()) {
+                case ' ':
+                case 'k':
+                    e.preventDefault();
+                    if (player.paused()) {
+                        player.play();
+                    } else {
+                        player.pause();
+                    }
+                    break;
+                    
+                case 'm':
+                    e.preventDefault();
+                    micBtn.click();
+                    break;
+                    
+                case 'c':
+                    e.preventDefault();
+                    cameraBtn.click();
+                    break;
+                    
+                case 'f':
+                    e.preventDefault();
+                    if (player.isFullscreen()) {
+                        player.exitFullscreen();
+                    } else {
+                        player.requestFullscreen();
+                    }
+                    break;
+            }
+        });
     }
 
     /**
      * Setup button interactions
      */
-    function setupButtonInteractions(exitButtonEl, copyRoomCodeBtn, roomCode) {
+    function setupButtonInteractions(exitButtonEl, copyButtonEl, roomCode) {
         // Enhanced exit button
         exitButtonEl.onclick = async () => {
-            // This logic can be kept as is.
+            const confirmed = confirm('🚪 Are you sure you want to leave the movie room?');
+            if (!confirmed) return;
+            
+            // Show leaving state
+            exitButtonEl.innerHTML = '🔄 Leaving...';
+            exitButtonEl.disabled = true;
+            
+            try {
+                // Clean up video call
+                if (typeof leaveChannel === 'function') {
+                    await leaveChannel();
+                }
+                
+                // Close WebSocket
+                if (window.movieWS) {
+                    window.movieWS.close();
+                }
+                
+                showNotification('👋 Left the room successfully', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Error leaving room:', error);
+                showNotification('Error leaving room', 'error');
+                exitButtonEl.innerHTML = '🚪 Exit Room';
+                exitButtonEl.disabled = false;
+            }
         };
 
-        // --- ✅ THIS IS THE FIX: Updated copy button logic ---
-        copyRoomCodeBtn.onclick = async () => {
+        // Enhanced copy button
+        copyButtonEl.onclick = async () => {
             try {
                 await navigator.clipboard.writeText(roomCode);
                 
-                const roomCodeText = copyRoomCodeBtn.querySelector('#room-code-text');
-                const originalText = roomCodeText.textContent;
-                
-                roomCodeText.textContent = '✅ Copied!';
-                copyRoomCodeBtn.style.background = 'linear-gradient(135deg, rgba(34, 197, 94, 0.9) 0%, rgba(21, 128, 61, 0.9) 100%)';
+                // Visual feedback
+                const originalText = copyButtonEl.textContent;
+                copyButtonEl.textContent = '✅ Copied!';
+                copyButtonEl.style.background = 'rgba(34, 197, 94, 0.9)';
                 
                 setTimeout(() => {
-                    roomCodeText.textContent = originalText;
-                    copyRoomCodeBtn.style.background = '';
+                    copyButtonEl.textContent = originalText;
+                    copyButtonEl.style.background = '';
                 }, 2000);
                 
                 showNotification('📋 Room code copied to clipboard!', 'success');
@@ -234,28 +532,109 @@ document.addEventListener('DOMContentLoaded', async () => {
      * Enhanced notification system
      */
     function showNotification(message, type = 'info') {
-        // This function can be kept as is.
+        // Remove existing notifications
+        const existing = document.querySelector('.notification');
+        if (existing) existing.remove();
+
+        const notification = document.createElement('div');
+        notification.className = 'notification fixed top-6 right-6 z-50 px-6 py-4 rounded-xl shadow-lg max-w-sm transition-all duration-300 transform translate-x-full';
+        
+        const colors = {
+            success: 'bg-green-600/90 backdrop-blur-sm border border-green-500/30 text-white',
+            error: 'bg-red-600/90 backdrop-blur-sm border border-red-500/30 text-white',
+            warning: 'bg-yellow-600/90 backdrop-blur-sm border border-yellow-500/30 text-white',
+            info: 'bg-indigo-600/90 backdrop-blur-sm border border-indigo-500/30 text-white'
+        };
+        
+        notification.className += ` ${colors[type]}`;
+        
+        const icons = {
+            success: '✅',
+            error: '❌',
+            warning: '⚠️',
+            info: 'ℹ️'
+        };
+        
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <span class="text-xl mr-3">${icons[type]}</span>
+                <span class="font-medium">${message}</span>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Animate in
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
+        
+        // Auto remove after 4 seconds
+        setTimeout(() => {
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => notification.remove(), 300);
+        }, 4000);
     }
 
     /**
      * Update participants UI (called by videocall.js)
      */
     window.updateParticipantsUI = function() {
-        // This function can be kept as is.
+        const remoteParticipants = document.getElementById('remote-participants');
+        const waitingElement = document.getElementById('waiting-participants');
+        
+        if (remoteParticipants && remoteParticipants.children.length > 0) {
+            waitingElement.style.display = 'none';
+        } else {
+            waitingElement.style.display = 'flex';
+        }
     };
 
     /**
      * Add remote participant (called by videocall.js)
      */
     window.addRemoteParticipant = function(userId, userName) {
-        // This function can be kept as is.
+        const remoteContainer = document.getElementById('remote-participants');
+        if (!remoteContainer) return;
+
+        const participantEl = document.createElement('div');
+        participantEl.className = 'participant-card flex-shrink-0';
+        participantEl.id = `participant-${userId}`;
+        
+        participantEl.innerHTML = `
+            <div class="aspect-video relative">
+                <div id="remote-player-${userId}" class="w-full h-full bg-slate-800 rounded-lg overflow-hidden video-container"></div>
+                <div class="participant-name">
+                    <span class="mr-1">👤</span>
+                    <span>${userName}</span>
+                </div>
+            </div>
+        `;
+        
+        remoteContainer.appendChild(participantEl);
+        updateParticipantsUI();
+        
+        showNotification(`👋 ${userName} joined the room!`, 'success');
     };
 
     /**
      * Remove remote participant (called by videocall.js)
      */
     window.removeRemoteParticipant = function(userId, userName) {
-        // This function can be kept as is.
+        const participantEl = document.getElementById(`participant-${userId}`);
+        if (participantEl) {
+            participantEl.style.opacity = '0';
+            participantEl.style.transform = 'scale(0.9)';
+            
+            setTimeout(() => {
+                participantEl.remove();
+                updateParticipantsUI();
+            }, 300);
+            
+            if (userName) {
+                showNotification(`👋 ${userName} left the room`, 'info');
+            }
+        }
     };
 
     // Cleanup on page unload
