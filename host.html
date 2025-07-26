@@ -8,49 +8,51 @@
 </head>
 <body class="bg-slate-900 text-white font-sans">
 
-    <!-- ✅ THIS IS THE FIX: Added 'relative' and 'z-10' to establish a stacking context -->
-    <div class="min-h-screen flex flex-col items-center justify-center p-4 relative z-10">
-        <div class="w-full max-w-2xl text-center">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4">Host a New Session</h1>
-            <p class="text-slate-400 mb-8">Select a local video file to upload or choose from your library.</p>
-            
-            <!-- File Upload Area -->
-            <div id="upload-container" class="bg-slate-800 border-2 border-dashed border-slate-700 rounded-lg p-8 cursor-pointer hover:border-indigo-500 transition-colors">
-                <input type="file" id="file-input" class="hidden" accept="video/mp4">
-                <label for="file-input" class="flex flex-col items-center justify-center cursor-pointer">
-                    <svg class="w-12 h-12 text-slate-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                    </svg>
-                    <p class="text-lg font-semibold">Upload a New Movie</p>
-                    <p class="text-sm text-slate-400">Only MP4 files are supported</p>
-                </label>
-            </div>
+    <!-- ✅ THIS IS THE FIX: The main content is now wrapped in its own container -->
+    <div id="app-root">
+        <div class="min-h-screen flex flex-col items-center justify-center p-4">
+            <div class="w-full max-w-2xl text-center">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">Host a New Session</h1>
+                <p class="text-slate-400 mb-8">Select a local video file to upload or choose from your library.</p>
+                
+                <!-- File Upload Area -->
+                <div id="upload-container" class="bg-slate-800 border-2 border-dashed border-slate-700 rounded-lg p-8 cursor-pointer hover:border-indigo-500 transition-colors">
+                    <input type="file" id="file-input" class="hidden" accept="video/mp4">
+                    <label for="file-input" class="flex flex-col items-center justify-center cursor-pointer">
+                        <svg class="w-12 h-12 text-slate-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                        </svg>
+                        <p class="text-lg font-semibold">Upload a New Movie</p>
+                        <p class="text-sm text-slate-400">Only MP4 files are supported</p>
+                    </label>
+                </div>
 
-            <!-- Upload Progress Display -->
-            <div id="progress-container" class="mt-8 hidden w-full bg-slate-700 rounded-full h-4">
-                <div id="progress-bar" class="bg-indigo-600 h-4 rounded-full text-center text-xs text-white leading-4" style="width: 0%">0%</div>
-            </div>
-            <p id="upload-status" class="mt-2 text-slate-400"></p>
+                <!-- Upload Progress Display -->
+                <div id="progress-container" class="mt-8 hidden w-full bg-slate-700 rounded-full h-4">
+                    <div id="progress-bar" class="bg-indigo-600 h-4 rounded-full text-center text-xs text-white leading-4" style="width: 0%">0%</div>
+                </div>
+                <p id="upload-status" class="mt-2 text-slate-400"></p>
 
-            <!-- Divider -->
-            <div class="my-8 flex items-center">
-                <hr class="flex-grow border-slate-700">
-                <span class="px-4 text-slate-500">OR</span>
-                <hr class="flex-grow border-slate-700">
-            </div>
+                <!-- Divider -->
+                <div class="my-8 flex items-center">
+                    <hr class="flex-grow border-slate-700">
+                    <span class="px-4 text-slate-500">OR</span>
+                    <hr class="flex-grow border-slate-700">
+                </div>
 
-            <!-- Previously Uploaded Movies -->
-            <div>
-                <h2 class="text-2xl font-bold mb-4">Choose from Your Library</h2>
-                <div id="movie-library" class="space-y-3 text-left">
-                    <!-- Movies will be dynamically inserted here -->
-                    <p id="library-loading-message" class="text-slate-400 text-center">Loading your movies...</p>
+                <!-- Previously Uploaded Movies -->
+                <div>
+                    <h2 class="text-2xl font-bold mb-4">Choose from Your Library</h2>
+                    <div id="movie-library" class="space-y-3 text-left">
+                        <!-- Movies will be dynamically inserted here -->
+                        <p id="library-loading-message" class="text-slate-400 text-center">Loading your movies...</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- The modal's 'z-50' class will now correctly place it on top of the main content -->
+    <!-- The modal is now a direct sibling of the main app content -->
     <div id="rename-modal" class="fixed inset-0 hidden z-50">
         <!-- Backdrop -->
         <div class="absolute inset-0 bg-black bg-opacity-50"></div>
