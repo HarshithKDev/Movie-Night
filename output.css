@@ -837,6 +837,12 @@
   .pr-4 {
     padding-right: calc(var(--spacing) * 4);
   }
+  .pb-4 {
+    padding-bottom: calc(var(--spacing) * 4);
+  }
+  .pb-6 {
+    padding-bottom: calc(var(--spacing) * 6);
+  }
   .text-center {
     text-align: center;
   }
@@ -1256,6 +1262,11 @@
   .lg\:grid-cols-\[1fr_320px\] {
     @media (width >= 64rem) {
       grid-template-columns: 1fr 320px;
+    }
+  }
+  .lg\:grid-cols-\[1fr_360px\] {
+    @media (width >= 64rem) {
+      grid-template-columns: 1fr 360px;
     }
   }
 }
