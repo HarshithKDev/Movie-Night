@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Host Session</title>
-    <link href="output.css" rel="stylesheet">
+    <link href="/dist/output.css" rel="stylesheet">
 </head>
 <body class="bg-slate-900 text-white font-sans">
 
@@ -49,14 +49,21 @@
         </div>
     </div>
 
-    <!-- ✅ THIS IS THE FIX: Added the 'flex' class to center the modal -->
-    <div id="rename-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-slate-800 rounded-lg p-6 w-full max-w-md shadow-xl">
-            <h2 class="text-xl font-bold mb-4">Rename Movie</h2>
-            <input type="text" id="rename-input" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-            <div class="flex justify-end gap-4 mt-6">
-                <button id="cancel-rename-btn" class="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-4 rounded">Cancel</button>
-                <button id="save-rename-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded">Save</button>
+    <!-- ✅ THIS IS THE FIX: The modal's visibility and layout are now on separate elements -->
+    <div id="rename-modal" class="fixed inset-0 hidden z-50">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+        
+        <!-- Centering Flex Container -->
+        <div class="flex items-center justify-center w-full h-full p-4">
+            <!-- Modal Content Panel -->
+            <div class="bg-slate-800 rounded-lg p-6 w-full max-w-md shadow-xl relative z-10">
+                <h2 class="text-xl font-bold mb-4">Rename Movie</h2>
+                <input type="text" id="rename-input" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                <div class="flex justify-end gap-4 mt-6">
+                    <button id="cancel-rename-btn" class="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-4 rounded">Cancel</button>
+                    <button id="save-rename-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded">Save</button>
+                </div>
             </div>
         </div>
     </div>
@@ -65,7 +72,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     
-    <script src="js/auth.js"></script>
-    <script src="js/host.js"></script>
+    <script src="auth.js"></script>
+    <script src="host.js"></script>
 </body>
 </html>
