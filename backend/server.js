@@ -29,48 +29,25 @@ app.use(express.json());
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
-// --- ✅ NEW: Room State Management ---
-// This object will now store the clients AND the video state for each room.
+// (WebSocket server logic remains the same)
 const rooms = {};
-
 wss.on('connection', (ws) => {
-  console.log('Client connected via WebSocket');
-
   ws.on('message', (message) => {
     try {
       const data = JSON.parse(message);
-      const { roomCode } = data;
-
-      // When a user first connects, they will send a 'join' event
       if (data.type === 'join') {
+        const { roomCode } = data;
         ws.roomCode = roomCode;
-
-        // If the room doesn't exist, create it with a default state
-        if (!rooms[roomCode]) {
-          rooms[roomCode] = {
-            clients: new Set(),
-            state: { isPlaying: false, currentTime: 0, lastUpdated: Date.now() }
-          };
-        }
-        // Add the new client to the room
+        if (!rooms[roomCode]) rooms[roomCode] = { clients: new Set(), state: { isPlaying: false, currentTime: 0, lastUpdated: Date.now() } };
         rooms[roomCode].clients.add(ws);
-        console.log(`Client joined room: ${roomCode}. Total clients: ${rooms[roomCode].clients.size}`);
-
-        // --- ✅ CRITICAL FIX: Immediately send the current state to the new user ---
         ws.send(JSON.stringify({ type: 'sync-state', state: rooms[roomCode].state }));
       }
-
-      // When a client sends a playback event (play, pause, seek)
       if (['play', 'pause', 'seek'].includes(data.type)) {
+        const { roomCode } = ws;
         if (rooms[roomCode]) {
-          // Update the server's state for this room
           rooms[roomCode].state.isPlaying = data.type === 'play';
-          if (data.time !== undefined) {
-            rooms[roomCode].state.currentTime = data.time;
-          }
+          if (data.time !== undefined) rooms[roomCode].state.currentTime = data.time;
           rooms[roomCode].state.lastUpdated = Date.now();
-
-          // Broadcast the event to all other clients in the same room
           rooms[roomCode].clients.forEach(client => {
             if (client !== ws && client.readyState === client.OPEN) {
               client.send(JSON.stringify(data));
@@ -78,26 +55,18 @@ wss.on('connection', (ws) => {
           });
         }
       }
-    } catch (error) {
-      console.error('Failed to process WebSocket message:', error);
-    }
+    } catch (error) { console.error('WS message error:', error); }
   });
-
   ws.on('close', () => {
     const { roomCode } = ws;
     if (roomCode && rooms[roomCode]) {
       rooms[roomCode].clients.delete(ws);
-      console.log(`Client left room: ${roomCode}. Total clients: ${rooms[roomCode].clients.size}`);
-      if (rooms[roomCode].clients.size === 0) {
-        delete rooms[roomCode]; // Clean up empty rooms
-        console.log(`Room ${roomCode} is now empty and has been closed.`);
-      }
+      if (rooms[roomCode].clients.size === 0) delete rooms[roomCode];
     }
-    console.log('Client disconnected');
   });
 });
 
-// (The rest of the file remains the same)
+
 const client = new MongoClient(process.env.MONGO_URI, {
   serverApi: { version: ServerApiVersion.v1, strict: true, deprecationErrors: true }
 });
@@ -111,6 +80,31 @@ async function run() {
     const roomsCollection = db.collection("rooms");
     const moviesCollection = db.collection("movies");
 
+    // --- ✅ NEW: Endpoint to rename a movie ---
+    app.put('/api/movies/:movieId', async (req, res) => {
+        const { movieId } = req.params;
+        const { newName, userId } = req.body;
+        if (!newName || !userId) {
+            return res.status(400).json({ message: 'newName and userId are required' });
+        }
+        try {
+            const movie = await moviesCollection.findOne({ _id: new ObjectId(movieId), userId });
+            if (!movie) {
+                return res.status(404).json({ message: 'Movie not found or user not authorized' });
+            }
+
+            await moviesCollection.updateOne(
+                { _id: new ObjectId(movieId) },
+                { $set: { fileName: newName } }
+            );
+            res.status(200).json({ message: 'Movie renamed successfully' });
+        } catch (error) {
+            console.error("❌ Failed to rename movie", error);
+            res.status(500).json({ message: 'Failed to rename movie' });
+        }
+    });
+
+    // (Other endpoints remain the same)
     app.post('/api/generate-upload-url', async (req, res) => {
         const { fileName, fileType } = req.body;
         const filePath = `videos/${Date.now()}-${fileName}`;

@@ -709,6 +709,13 @@
       }
     }
   }
+  .hover\:bg-slate-500 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-slate-500);
+      }
+    }
+  }
   .hover\:bg-slate-600 {
     &:hover {
       @media (hover: hover) {
