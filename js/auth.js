@@ -89,12 +89,12 @@ if (logoutBtn) {
 function updateAuthUI() {
     if (isLoginMode) {
         if (usernameInput) usernameInput.classList.add('hidden');
-        if (authBtn) authBtn.innerHTML = '🎥 Log In';
+        if (authBtn) authBtn.innerHTML = 'Log In';
         if (toggleText) toggleText.textContent = "Don't have an account?";
         if (toggleAuthModeBtn) toggleAuthModeBtn.textContent = 'Sign Up';
     } else {
         if (usernameInput) usernameInput.classList.remove('hidden');
-        if (authBtn) authBtn.innerHTML = '🎥 Sign Up';
+        if (authBtn) authBtn.innerHTML = 'Sign Up';
         if (toggleText) toggleText.textContent = "Already have an account?";
         if (toggleAuthModeBtn) toggleAuthModeBtn.textContent = 'Log In';
     }
