@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             player.src({ src: data.streamUrl, type: 'video/mp4' });
 
             player.ready(() => {
-                console.log('✅ Video player ready');
+                console.log('Video player ready');
                 loadingOverlay.style.opacity = '0';
                 setTimeout(() => {
                     loadingOverlay.style.display = 'none';
@@ -160,9 +160,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             player.on('loadedmetadata', () => {
                 const audioTracks = player.audioTracks();
                 if (audioTracks.length > 0) {
-                    console.log(`✅ Audio tracks found: ${audioTracks.length}`);
+                    console.log(`Audio tracks found: ${audioTracks.length}`);
                 } else {
-                    console.warn('⚠️ No audio tracks detected');
+                    console.warn('No audio tracks detected');
                     showNotification('This video may not have audio', 'warning');
                 }
             });
@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         let isConnected = false;
 
         ws.onopen = () => {
-            console.log('🔗 Connected to sync server');
+            console.log('Connected to sync server');
             isConnected = true;
             ws.send(JSON.stringify({ type: 'join', roomCode }));
             showNotification('Connected to sync server', 'success');
@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = JSON.parse(event.data);
             receivedEvent = true;
             
-            console.log('📡 Sync event received:', data.type);
+            console.log('Sync event received:', data.type);
             
             switch (data.type) {
                 case 'sync-state':
@@ -290,7 +290,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         ws.onclose = () => {
-            console.log('🔌 Disconnected from sync server');
+            console.log('Disconnected from sync server');
             isConnected = false;
             showNotification('Disconnected from sync server', 'warning');
         };
@@ -305,7 +305,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const message = { type, roomCode };
                 if (time !== null) message.time = time;
                 ws.send(JSON.stringify(message));
-                console.log('📤 Sync event sent:', type);
+                console.log('Sync event sent:', type);
             }
         }
 
@@ -330,7 +330,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 player.play();
             }, 300);
             
-            showNotification('🔊 Audio enabled! Enjoy the movie!', 'success');
+            showNotification('Audio enabled! Enjoy the movie!', 'success');
         }, { once: true });
 
         let micMuted = false;
@@ -346,7 +346,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <path stroke="currentColor" stroke-width="2" d="M3 3l14 14"/>
                     </svg>
                 `;
-                showNotification('🔇 Microphone muted', 'info');
+                showNotification('Microphone muted', 'info');
             } else {
                 micBtn.classList.remove('muted');
                 micBtn.innerHTML = `
@@ -354,7 +354,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"/>
                     </svg>
                 `;
-                showNotification('🎤 Microphone enabled', 'success');
+                showNotification('Microphone enabled', 'success');
             }
             
             if (typeof toggleMic === 'function') {
@@ -374,7 +374,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <path stroke="currentColor" stroke-width="2" d="M3 3l14 14"/>
                     </svg>
                 `;
-                showNotification('📹 Camera turned off', 'info');
+                showNotification('Camera turned off', 'info');
             } else {
                 cameraBtn.classList.remove('muted');
                 cameraBtn.innerHTML = `
