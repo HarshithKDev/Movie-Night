@@ -11,7 +11,6 @@
             font-family: 'Inter', sans-serif;
         }
         
-        /* This is the same animation style used on your other pages for consistency */
         .icon-bg {
             position: absolute;
             top: 0;
@@ -20,15 +19,15 @@
             height: 100%;
             z-index: 0;
             overflow: hidden;
-            opacity: 0.6;
+            opacity: 0.3;
         }
         
         .moving-icon {
             position: absolute;
-            color: rgba(99, 102, 241, 0.1);
+            color: rgba(99, 102, 241, 0.05);
             user-select: none;
             animation: floatUp linear infinite;
-            text-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+            text-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
         }
         
         @keyframes floatUp {
@@ -88,11 +87,20 @@
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white font-sans min-h-screen overflow-hidden">
     
-    <!-- ✅ FIX: Replaced the old hardcoded icons with the dynamic container -->
     <div id="icon-background" class="icon-bg"></div>
 
+    <!-- ✅ THIS IS THE FIX: Added the 'Back to Home' navigation button -->
+    <nav class="relative z-20 p-6">
+        <a href="index.html" class="inline-flex items-center text-slate-300 hover:text-white transition-colors group">
+            <svg class="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Back to Home
+        </a>
+    </nav>
+
     <!-- Main Content -->
-    <div class="min-h-screen flex flex-col items-center justify-center p-4 relative z-10">
+    <div class="min-h-screen flex flex-col items-center justify-center p-4 pt-0 relative z-10">
         <div class="join-container w-full max-w-md text-center rounded-2xl p-8 relative">
             
             <!-- Header -->
@@ -168,7 +176,6 @@
     </div>
 
     <!-- Scripts -->
-    <!-- ✅ FIX: Added a link to script.js to handle the icon animation -->
     <script src="js/script.js"></script>
     <script src="js/join.js"></script>
 </body>
