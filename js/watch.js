@@ -558,7 +558,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="aspect-video relative">
                 <div id="remote-player-${userId}" class="w-full h-full bg-slate-800 rounded-lg overflow-hidden video-container"></div>
                 <div class="participant-name">
-                    <span class="mr-1">👤</span>
                     <span>${userName}</span>
                 </div>
             </div>
