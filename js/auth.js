@@ -9,13 +9,13 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-// Check if Firebase is already initialized to prevent errors on page navigation
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 const auth = firebase.auth();
 
 // --- DOM Elements ---
+const authLoadingView = document.getElementById('auth-loading-view'); // ✅ NEW
 const loggedOutView = document.getElementById('logged-out-view');
 const loggedInView = document.getElementById('logged-in-view');
 const userNameEl = document.getElementById('user-name');
@@ -32,7 +32,7 @@ const toggleAuthModeBtn = document.getElementById('toggle-auth-mode');
 const toggleText = document.getElementById('toggle-text');
 
 // --- State ---
-let isLoginMode = false; // Start in Sign Up mode
+let isLoginMode = false;
 
 // --- Event Listeners (with checks to prevent errors) ---
 if (toggleAuthModeBtn) {
@@ -49,24 +49,21 @@ if (authForm) {
         const password = passwordInput.value;
         const username = usernameInput.value;
 
-        authErrorEl.textContent = ''; // Clear previous errors
+        authErrorEl.textContent = '';
 
         if (isLoginMode) {
-            // Handle Login
             auth.signInWithEmailAndPassword(email, password)
                 .catch(error => {
                     console.error("Login failed:", error);
                     authErrorEl.textContent = error.message;
                 });
         } else {
-            // Handle Sign Up
             if (!username) {
                 authErrorEl.textContent = 'Please enter a username.';
                 return;
             }
             auth.createUserWithEmailAndPassword(email, password)
                 .then(userCredential => {
-                    // After creating the user, update their profile with the username
                     return userCredential.user.updateProfile({
                         displayName: username
                     });
@@ -90,24 +87,25 @@ if (logoutBtn) {
 
 // --- UI Update Function ---
 function updateAuthUI() {
-    // Check if elements exist before trying to modify them
     if (isLoginMode) {
         if (usernameInput) usernameInput.classList.add('hidden');
-        if (authBtn) authBtn.textContent = 'Log In';
+        if (authBtn) authBtn.innerHTML = '🎥 Log In';
         if (toggleText) toggleText.textContent = "Don't have an account?";
         if (toggleAuthModeBtn) toggleAuthModeBtn.textContent = 'Sign Up';
     } else {
         if (usernameInput) usernameInput.classList.remove('hidden');
-        if (authBtn) authBtn.textContent = 'Sign Up';
+        if (authBtn) authBtn.innerHTML = '🎥 Sign Up';
         if (toggleText) toggleText.textContent = "Already have an account?";
         if (toggleAuthModeBtn) toggleAuthModeBtn.textContent = 'Log In';
     }
-    if (authErrorEl) authErrorEl.textContent = ''; // Clear errors on mode switch
+    if (authErrorEl) authErrorEl.textContent = '';
 }
 
 // --- Auth State Observer ---
 auth.onAuthStateChanged(user => {
-    // Check if elements exist before trying to modify them
+    // ✅ FIX: Hide the loading spinner and show the correct view
+    if (authLoadingView) authLoadingView.classList.add('hidden');
+
     if (user) {
         // User is signed in.
         console.log("User is logged in:", user.displayName);
@@ -119,6 +117,6 @@ auth.onAuthStateChanged(user => {
         console.log("User is logged out.");
         if (loggedInView) loggedInView.classList.add('hidden');
         if (loggedOutView) loggedOutView.classList.remove('hidden');
-        updateAuthUI(); // Ensure form is in the correct state on logout
+        updateAuthUI();
     }
 });
