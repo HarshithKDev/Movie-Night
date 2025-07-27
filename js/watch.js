@@ -485,14 +485,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     /**
-     * Enhanced notification system
+     * ✅ THIS IS THE FIX: Enhanced notification system positioned at the bottom-center.
      */
     function showNotification(message, type = 'info') {
         const existing = document.querySelector('.notification');
         if (existing) existing.remove();
 
         const notification = document.createElement('div');
-        notification.className = 'notification fixed top-6 right-6 z-50 px-6 py-4 rounded-xl shadow-lg max-w-sm transition-all duration-300 transform translate-x-full';
+        notification.className = 'notification fixed bottom-6 left-1/2 z-50 px-6 py-4 rounded-xl shadow-lg max-w-sm transition-all duration-300 transform';
         
         const colors = {
             success: 'bg-green-600/90 backdrop-blur-sm border border-green-500/30 text-white',
@@ -519,12 +519,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         document.body.appendChild(notification);
         
+        // Initial state: off-screen below and centered
+        notification.style.transform = 'translateX(-50%) translateY(150%)';
+        notification.style.opacity = '0';
+
+        // Animate in
         setTimeout(() => {
-            notification.style.transform = 'translateX(0)';
+            notification.style.transform = 'translateX(-50%) translateY(0)';
+            notification.style.opacity = '1';
         }, 100);
         
+        // Auto remove after 4 seconds
         setTimeout(() => {
-            notification.style.transform = 'translateX(100%)';
+            notification.style.transform = 'translateX(-50%) translateY(150%)';
+            notification.style.opacity = '0';
             setTimeout(() => notification.remove(), 300);
         }, 4000);
     }
