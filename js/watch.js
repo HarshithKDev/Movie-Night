@@ -467,7 +467,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const roomCodeText = copyBtn.querySelector('#room-code-text');
                 const originalHTML = roomCodeText.innerHTML;
                 
-                roomCodeText.innerHTML = '✅ Copied!';
+                roomCodeText.innerHTML = 'Copied!';
                 copyBtn.style.background = 'linear-gradient(135deg, rgba(34, 197, 94, 0.9) 0%, rgba(21, 128, 61, 0.9) 100%)';
                 
                 setTimeout(() => {
