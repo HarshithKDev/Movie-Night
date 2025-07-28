@@ -13,7 +13,7 @@ const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: FIREBASE_STORAGE_BUCKET
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET
 });
 
 const bucket = admin.storage().bucket();
