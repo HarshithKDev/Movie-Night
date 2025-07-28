@@ -13,63 +13,50 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
+            background-color: #0f172a; /* Consistent bg color */
         }
         
         .cinema-header {
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
-            backdrop-filter: blur(15px);
-            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.15);
         }
         
-        .video-container {
-            background: #000;
-            overflow: hidden;
-            position: relative;
+        /* ✅ FIX: Enforce 16:9 aspect ratio and cover object-fit for a cinematic feel */
+        .video-js.vjs-16-9 {
+            padding-top: 56.25%;
         }
-        
-        .video-container video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-        
         .video-js .vjs-tech {
-            object-fit: contain;
+            object-fit: cover;
         }
         
-        .video-js {
-            overflow: hidden;
-        }
-        
-        /* ✅ FIX: Controls are now smaller, more transparent, and initially hidden */
+        /* ✅ FIX: Refined controls for a cleaner look */
         .video-controls {
             position: absolute;
             bottom: 8px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.6); /* Lighter background */
+            background: rgba(15, 23, 42, 0.7);
             backdrop-filter: blur(8px);
             border-radius: 50px;
-            padding: 6px 12px; /* Adjusted padding */
+            padding: 6px 10px;
             display: flex;
-            gap: 8px; /* Reduced gap */
+            gap: 8px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            opacity: 0; /* Initially hidden */
-            pointer-events: none; /* Not interactive when hidden */
+            opacity: 0;
+            pointer-events: none;
             transition: opacity 0.3s ease, transform 0.3s ease;
         }
         
-        /* ✅ FIX: Show controls on hover of the parent card */
         .participant-card:hover .video-controls {
             opacity: 1;
             pointer-events: auto;
             transform: translateX(-50%) translateY(-2px);
         }
         
-        /* ✅ FIX: Reduced button size */
         .control-btn {
-            width: 32px; /* Smaller size */
-            height: 32px; /* Smaller size */
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -77,23 +64,21 @@
             transition: all 0.2s ease;
             border: none;
             cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.1);
         }
         
         .control-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
             transform: scale(1.1);
         }
         
-        .control-btn.active {
-            background: rgba(99, 102, 241, 0.7); /* Lighter active state */
-        }
-        
         .control-btn.muted {
-            background: rgba(239, 68, 68, 0.7); /* Lighter muted state */
+            background: rgba(239, 68, 68, 0.8);
         }
         
         .participant-card {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
-            border: 1px solid rgba(99, 102, 241, 0.2);
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(99, 102, 241, 0.1);
             border-radius: 12px;
             overflow: hidden;
             position: relative;
@@ -101,225 +86,165 @@
         }
         
         .participant-card:hover {
-            border-color: rgba(99, 102, 241, 0.4);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border-color: rgba(99, 102, 241, 0.3);
+            background: rgba(30, 41, 59, 0.8);
         }
         
-        .participant-video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 12px;
-        }
-        
-        /* ✅ FIX: Smaller and lighter name display */
+        /* ✅ FIX: Refined name display */
         .participant-name {
             position: absolute;
-            top: 8px;
-            left: 8px;
-            background: rgba(0, 0, 0, 0.6); /* Lighter background */
-            backdrop-filter: blur(5px);
+            top: 6px;
+            left: 6px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
             color: white;
-            padding: 2px 10px; /* Reduced padding */
+            padding: 2px 10px;
             border-radius: 20px;
-            font-size: 11px; /* Smaller font */
+            font-size: 11px;
             font-weight: 500;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
-        .room-code-badge {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.9) 0%, rgba(79, 70, 229, 0.9) 100%);
-            border: 1px solid rgba(99, 102, 241, 0.3);
-        }
-        
-        .room-code-badge:hover {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 1) 0%, rgba(79, 70, 229, 1) 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
-        }
-
-        .exit-btn {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.9) 0%, rgba(185, 28, 28, 0.9) 100%);
-            border: 1px solid rgba(239, 68, 68, 0.3);
+        .room-code-badge, .exit-btn {
             transition: all 0.2s ease;
         }
-        
-        .exit-btn:hover {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 1) 0%, rgba(185, 28, 28, 1) 100%);
+        .room-code-badge:hover, .exit-btn:hover {
             transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
         }
-        
+
         .unmute-overlay {
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(20px);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(15px);
             transition: all 0.3s ease;
         }
         
-        .unmute-overlay:hover {
-            background: rgba(0, 0, 0, 0.95);
-        }
-        
-        .pulse-animation {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% {
+        .sidebar-scrollbar::-webkit-scrollbar { width: 6px; }
+        .sidebar-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-scrollbar::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.4); border-radius: 3px; }
+        .sidebar-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.6); }
+
+        /* ✅ FIX: Mobile responsiveness for sidebar */
+        @media (max-width: 1023px) {
+            .participants-sidebar {
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 300px;
+                height: 100%;
+                transform: translateX(100%);
+                transition: transform 0.3s ease-in-out;
+                z-index: 40;
+                border-left: 1px solid rgba(99, 102, 241, 0.15);
+                background: rgba(15, 23, 42, 0.9);
+                backdrop-filter: blur(20px);
+            }
+            .participants-sidebar.is-open {
+                transform: translateX(0);
+            }
+            .sidebar-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 39;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease-in-out;
+            }
+            .sidebar-overlay.is-open {
                 opacity: 1;
-            }
-            50% {
-                opacity: 0.7;
-            }
-        }
-        
-        .sidebar-scrollbar {
-            scrollbar-width: thin;
-            scrollbar-color: rgba(99, 102, 241, 0.5) transparent;
-        }
-        
-        .sidebar-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .sidebar-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        
-        .sidebar-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(99, 102, 241, 0.5);
-            border-radius: 3px;
-        }
-        
-        .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: rgba(99, 102, 241, 0.7);
-        }
-        
-        .participants-sidebar {
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
-            backdrop-filter: blur(20px);
-            border-left: 1px solid rgba(99, 102, 241, 0.15);
-        }
-        
-        @media (max-width: 1024px) {
-            .video-controls {
-                bottom: 60px;
-                padding: 6px 12px;
-                gap: 8px;
-            }
-            
-            .control-btn {
-                width: 36px;
-                height: 36px;
-            }
-            
-            .main-content {
-                grid-template-columns: 1fr !important;
-                grid-template-rows: 2fr 1fr !important;
+                pointer-events: auto;
             }
         }
     </style>
 </head>
-<body class="bg-slate-900 text-white font-sans h-screen overflow-hidden">
+<body class="bg-slate-900 text-white font-sans h-screen flex flex-col">
     
-    <header class="cinema-header flex-shrink-0 flex items-center justify-between p-4 relative z-20">
-        <div class="flex items-center gap-4">
-            <div class="text-2xl">🎬</div>
+    <header class="cinema-header flex-shrink-0 flex items-center justify-between p-3 md:p-4 relative z-20">
+        <div class="flex items-center gap-3 md:gap-4">
+            <a href="index.html" class="text-2xl">🎬</a>
             <div>
-                <h1 class="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                <h1 class="text-lg md:text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
                     Movie Night
                 </h1>
-                <p class="text-sm text-slate-400">Watch together, stay connected</p>
+                <p class="hidden md:block text-sm text-slate-400">Watch together, stay connected</p>
             </div>
         </div>
         
-        <div class="flex items-center gap-4">
-            <button id="copy-room-code-btn" class="room-code-badge text-white font-bold py-2 px-6 rounded-lg transition-all">
-                <span id="room-code-text" class="font-mono tracking-wider">LOADING...</span>
+        <div class="flex items-center gap-2 md:gap-4">
+            <button id="copy-room-code-btn" class="room-code-badge bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 md:px-6 rounded-lg">
+                <span id="room-code-text" class="font-mono text-sm tracking-wider">LOADING...</span>
             </button>
-            
-            <button id="exit-button" class="exit-btn text-white font-bold py-2 px-6 rounded-lg transition-all">
-            Exit
+            <button id="exit-button" class="exit-btn bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 md:px-6 rounded-lg">
+                Exit
+            </button>
+            <!-- ✅ FIX: Sidebar toggle button for mobile -->
+            <button id="sidebar-toggle" class="lg:hidden bg-slate-700 p-2 rounded-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
             </button>
         </div>
     </header>
 
-    <main class="main-content flex-1 grid grid-cols-1 lg:grid-cols-[1fr_360px] overflow-hidden">
+    <main class="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_320px] overflow-hidden">
         
-        <section class="bg-black flex items-center justify-center overflow-hidden relative">
-            <div id="video-js-wrapper" class="w-full h-full video-container relative">
-                <video 
-                    id="movie-player" 
-                    class="video-js vjs-big-play-centered vjs-fluid w-full h-full" 
-                    controls 
-                    preload="auto" 
-                    muted 
-                    data-setup='{}'
-                ></video>
-                
-                <div id="unmute-overlay" class="unmute-overlay absolute inset-0 flex items-center justify-center cursor-pointer z-30">
-                    <div class="text-center pulse-animation">
-                        <div class="text-6xl mb-6">🔊</div>
-                        <h3 class="text-3xl font-bold mb-4">Ready to Watch?</h3>
-                        <p class="text-slate-300 mb-6">Click anywhere to unmute and start the movie</p>
-                        <div class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 px-6 py-3 rounded-full transition-all">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
-                            </svg>
-                            <span class="font-semibold">Start Movie</span>
-                        </div>
+        <section class="bg-black flex items-center justify-center overflow-hidden relative p-2 md:p-4">
+            <!-- ✅ FIX: Added vjs-16-9 for consistent aspect ratio -->
+            <video 
+                id="movie-player" 
+                class="video-js vjs-16-9 vjs-big-play-centered w-full h-full" 
+                controls 
+                preload="auto" 
+                muted 
+                data-setup='{}'
+            ></video>
+            
+            <div id="unmute-overlay" class="unmute-overlay absolute inset-0 flex items-center justify-center cursor-pointer z-30">
+                <div class="text-center">
+                    <h3 class="text-3xl font-bold mb-4">Ready to Watch?</h3>
+                    <p class="text-slate-300 mb-6">Click to unmute and start the movie</p>
+                    <div class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 px-6 py-3 rounded-full transition-all">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"></path></svg>
+                        <span class="font-semibold">Start Movie</span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <aside class="participants-sidebar flex flex-col overflow-hidden">
-            <div class="flex-shrink-0 text-center p-6 pb-4">
-                <h2 class="text-2xl font-bold mb-2">Participants</h2>
-                <div class="h-px bg-gradient-to-r from-transparent via-indigo-500 to-transparent"></div>
+        <!-- ✅ FIX: Sidebar is now an aside element for better semantics -->
+        <aside id="participants-sidebar" class="participants-sidebar flex flex-col overflow-hidden">
+            <div class="flex-shrink-0 text-center p-4 border-b border-slate-700/50">
+                <h2 class="text-xl font-bold">Participants</h2>
             </div>
             
-            <div id="participants-container" class="flex-1 flex flex-col gap-4 overflow-y-auto sidebar-scrollbar px-6 pb-6">
-                <!-- ✅ FIX: The parent card now controls the hover state for the controls -->
-                <div class="participant-card flex-shrink-0">
+            <div id="participants-container" class="flex-1 flex flex-col gap-3 overflow-y-auto sidebar-scrollbar p-4">
+                <div class="participant-card">
                     <div class="aspect-video relative">
-                        <div id="local-player-container" class="w-full h-full bg-slate-800 rounded-lg overflow-hidden video-container"></div>
+                        <div id="local-player-container" class="w-full h-full bg-slate-800 rounded-lg overflow-hidden"></div>
                         <div id="local-user-name" class="participant-name">
-                            <span class="mr-1">👤</span>
                             <span>You</span>
                         </div>
                         
-                        <!-- ✅ FIX: Controls are now inside the hoverable card -->
                         <div class="video-controls">
-                            <button id="mic-btn" class="control-btn bg-slate-700 hover:bg-slate-600 text-white">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"/>
-                                </svg>
+                            <button id="mic-btn" class="control-btn">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4z"></path><path fill-rule="evenodd" d="M5.5 8a.5.5 0 00-1 0v.343a6.5 6.5 0 0011 0V8a.5.5 0 00-1 0v.343a5.5 5.5 0 01-9 0V8zM12 15a4 4 0 01-8 0H3a.5.5 0 000 1h1.132a6.002 6.002 0 0011.736 0H17a.5.5 0 000-1h-1z" clip-rule="evenodd"></path></svg>
                             </button>
-                            
-                            <button id="camera-btn" class="control-btn bg-slate-700 hover:bg-slate-600 text-white">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586l-.707-.707A1 1 0 0012.293 4H7.707a1 1 0 00-.707.293L6.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
-                                </svg>
+                            <button id="camera-btn" class="control-btn">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M2 4.75A2.75 2.75 0 014.75 2h10.5A2.75 2.75 0 0118 4.75v10.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25V4.75zM4.75 3.5a1.25 1.25 0 00-1.25 1.25v10.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25V4.75c0-.69-.56-1.25-1.25-1.25H4.75z"></path><path d="M10 12.5a3 3 0 100-6 3 3 0 000 6zM10 14a4.5 4.5 0 110-9 4.5 4.5 0 010 9z"></path></svg>
                             </button>
                         </div>
                     </div>
                 </div>
-
-                <div id="remote-participants" class="flex flex-col gap-4">
-                </div>
+                <div id="remote-participants" class="flex flex-col gap-3"></div>
             </div>
         </aside>
     </main>
 
+    <!-- ✅ FIX: Overlay for mobile sidebar -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
     <div id="loading-overlay" class="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50">
         <div class="text-center">
-            <div class="text-6xl mb-6 animate-bounce">🎬</div>
-            <h3 class="text-2xl font-bold mb-4">Loading Movie...</h3>
-            <div class="w-64 h-2 bg-slate-700 rounded-full overflow-hidden">
-                <div class="w-full h-full bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full animate-pulse"></div>
-            </div>
+            <div class="text-4xl mb-4 animate-spin">🎬</div>
+            <h3 class="text-2xl font-bold">Loading Movie...</h3>
         </div>
     </div>
 
