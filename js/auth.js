@@ -1,11 +1,12 @@
+require('dotenv').config();
 // This configuration should be from your Firebase project settings.
 const firebaseConfig = {
-  apiKey: "AIzaSyAc35kVMuZnxOZ85HIBGG-plHzOqvh1U5E",
-  authDomain: "movienight-firebase.firebaseapp.com",
-  projectId: "movienight-firebase",
-  storageBucket: "movienight-firebase.firebasestorage.app",
-  messagingSenderId: "6358321439",
-  appId: "1:6358321439:web:ec508f74d398eda996482a"
+  apiKey: process.env.PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.PUBLIC_FIREBASE_APP_ID
 };
 
 // Initialize Firebase
