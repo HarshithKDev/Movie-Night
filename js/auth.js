@@ -1,4 +1,4 @@
-require('dotenv').config();
+
 // This configuration should be from your Firebase project settings.
 const firebaseConfig = {
   apiKey: process.env.PUBLIC_FIREBASE_API_KEY,
