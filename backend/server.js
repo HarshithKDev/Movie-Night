@@ -1,22 +1,22 @@
 require('dotenv').config();
-import express, { json } from 'express';
-import { MongoClient, ServerApiVersion, ObjectId } from 'mongodb';
-import { createServer } from 'http';
-import { WebSocketServer } from 'ws';
-import { initializeApp, credential as _credential, storage } from 'firebase-admin';
-import cors from 'cors';
+const express = require('express');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const http = require('http');
+const { WebSocketServer } = require('ws');
+const admin = require('firebase-admin');
+const cors = require('cors');
 
 // --- Firebase Admin SDK Initialization ---
 const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
   ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
   : require('./firebase-service-account-key.json');
 
-initializeApp({
-  credential: _credential.cert(serviceAccount),
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET 
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  storageBucket: 'movienight-firebase.firebasestorage.app'
 });
 
-const bucket = storage().bucket();
+const bucket = admin.storage().bucket();
 // --- End Firebase Initialization ---
 
 const app = express();
@@ -24,9 +24,9 @@ const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
-app.use(json());
+app.use(express.json());
 
-const server = createServer(app);
+const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
 // (WebSocket server logic remains the same)
