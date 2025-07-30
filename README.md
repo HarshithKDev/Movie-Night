@@ -1,6 +1,3 @@
-#Movie Night
-
-[![Netlify Status](https://api.netlify.com/api/v1/badges/eab5b0a7dc60-ef5e-9134-bd2addc1f959/deploy-status)](https://app.netlify.com/sites/movienight2025/deploys)
 
 **Live Demo:** [https://movienight2025.netlify.app/](https://movienight2025.netlify.app/)
 
