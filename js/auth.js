@@ -104,7 +104,7 @@ function updateAuthUI() {
 
 // --- Auth State Observer ---
 auth.onAuthStateChanged(user => {
-    // ✅ FIX: Hide the loading spinner and show the correct view
+
     if (authLoadingView) authLoadingView.classList.add('hidden');
 
     if (user) {
