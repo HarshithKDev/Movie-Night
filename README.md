@@ -1,12 +1,9 @@
-# 🎬 Movie Night
-
-[![Netlify Status](https://api.netlify.com/api/v1/badges/eab5b0a7dc60-ef5e-9134-bd2addc1f959/deploy-status)](https://app.netlify.com/sites/movienight2025/deploys)
 
 **Live Demo:** [https://movienight2025.netlify.app/](https://movienight2025.netlify.app/)
 
 Movie Night is a web application that allows users to watch movies together in synchronized real-time, no matter where they are. Host a room, share the code, and enjoy a shared viewing experience with friends and family, complete with video chat.
 
-## ✨ Features
+## Features
 
 * **User Authentication:** Secure sign-up and login to manage a personal movie library.
 * **Host & Join Rooms:** Easily host a movie session by uploading a video, which generates a unique room code to share.
@@ -16,7 +13,7 @@ Movie Night is a web application that allows users to watch movies together in s
 * **Cloud Storage:** Movies are securely uploaded to and streamed from Firebase Cloud Storage for reliable playback.
 * **Responsive Design:** A beautiful and intuitive interface that works on all devices.
 
-## 🛠️ Technologies Used
+## Technologies Used
 
 * **Frontend:** HTML5, CSS3, Tailwind CSS, JavaScript
 * **Backend:** Node.js, Express.js, WebSocket
@@ -24,7 +21,7 @@ Movie Night is a web application that allows users to watch movies together in s
 * **Authentication & Storage:** Firebase (Authentication, Cloud Storage)
 * **Video & Audio Chat:** Agora RTC
 
-## 🚀 Getting Started
+## Getting Started
 
 To get a local copy up and running, follow these simple steps.
 
@@ -83,7 +80,7 @@ To get a local copy up and running, follow these simple steps.
 2.  **Open the frontend:**
     Open the `index.html` file in your browser. Using a live server extension (like the one in VS Code) is recommended for the best development experience.
 
-## 📁 Project Structure
+## Project Structure
 
 * `index.html`: The main landing page with user authentication (login/signup).
 * `host.html` & `js/host.js`: The page for authenticated users to upload new movies or select from their library to host a new session.
