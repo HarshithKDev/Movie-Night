@@ -29,6 +29,20 @@ app.use(express.json());
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
+
+
+
+// NEW: Health check route for the keep-alive service
+app.get('/', (req, res) => {
+  res.status(200).json({ message: 'Server is awake and running!' });
+});
+
+
+
+
+
+
+
 // (WebSocket server logic remains the same)
 const rooms = {};
 wss.on('connection', (ws) => {
@@ -167,5 +181,6 @@ async function run() {
     console.error("❌ Failed to connect to MongoDB", err);
   }
 }
+
 
 run();
