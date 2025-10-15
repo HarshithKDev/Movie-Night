@@ -101,6 +101,16 @@ app.get('/', (req, res) => {
   res.status(200).json({ message: 'Server is awake and running!' });
 });
 
+// --- NEW: Endpoint to provide Agora App ID ---
+app.get('/api/agora-appid', authenticateUser, (req, res) => {
+    const agoraAppId = process.env.AGORA_APP_ID;
+    if (agoraAppId) {
+        res.json({ agoraAppId });
+    } else {
+        res.status(500).json({ message: 'Agora App ID is not configured on the server.' });
+    }
+});
+
 // --- NEW: Endpoint to provide Firebase config to frontend ---
 app.get('/api/firebase-config', (req, res) => {
   const firebaseConfig = {

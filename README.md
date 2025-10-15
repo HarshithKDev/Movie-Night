@@ -69,29 +69,11 @@ To get a local copy up and running, follow these simple steps.
     PORT=3000
     MONGO_URI="your_mongodb_connection_string"
     FIREBASE_STORAGE_BUCKET="your_firebase_storage_bucket_url"
+    AGORA_APP_ID="YOUR_AGORA_APP_ID"
+    # Firebase Service Account Credentials (as a single line of JSON)
+    FIREBASE_SERVICE_ACCOUNT='{"type": "service_account", "project_id": "...", ...}'
     ```
-    **IMPORTANT:** For the Firebase Service Account, generate a private key file from your Firebase project settings (`Project settings` > `Service accounts` > `Generate new private key`). Save this file as `firebase-service-account-key.json` inside the `backend` directory. This file is listed in `.gitignore` and **should never be committed to version control**.
-
-4.  **Configure Frontend Keys**
-    It is highly recommended to use environment variables for frontend keys in a production build. For development, you can replace the placeholders in the following files:
-
-    * In `js/auth.js`, replace the placeholder `firebaseConfig` with your Firebase project's web app configuration.
-        ```javascript
-        // WARNING: For production, use environment variables, not hardcoded keys.
-        const firebaseConfig = {
-          apiKey: "YOUR_API_KEY",
-          authDomain: "YOUR_AUTH_DOMAIN",
-          projectId: "YOUR_PROJECT_ID",
-          storageBucket: "YOUR_STORAGE_BUCKET",
-          messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-          appId: "YOUR_APP_ID"
-        };
-        ```
-    * In `js/videocall.js`, replace the placeholder `AGORA_APP_ID`.
-        ```javascript
-        // WARNING: For production, use environment variables or a token server.
-        const AGORA_APP_ID = 'YOUR_AGORA_APP_ID';
-        ```
+    **IMPORTANT:** The `FIREBASE_SERVICE_ACCOUNT` variable should contain the entire content of your `firebase-service-account-key.json` file as a single line of JSON. This file is listed in `.gitignore` and **should never be committed to version control**.
 
 ### Usage
 

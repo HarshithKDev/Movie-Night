@@ -1,11 +1,41 @@
-const AGORA_APP_ID = '938b4e3a12654e849dc519184e9a5596';
+// REMOVED the hardcoded AGORA_APP_ID
 const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
 
 let localTracks = { videoTrack: null, audioTrack: null };
+let agoraAppId = null; // To store the fetched App ID
+
+// --- NEW: Function to fetch Agora App ID ---
+async function fetchAgoraAppId() {
+    try {
+        const backendUrl = 'http://localhost:3000';
+        const token = localStorage.getItem('firebaseIdToken');
+        const response = await fetch(`${backendUrl}/api/agora-appid`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        if (!response.ok) {
+            throw new Error('Could not fetch Agora App ID.');
+        }
+        const data = await response.json();
+        return data.agoraAppId;
+    } catch (error) {
+        console.error('Failed to fetch Agora App ID:', error);
+        alert('Failed to initialize video call service. Please try again later.');
+        return null;
+    }
+}
+
 
 async function joinAndDisplayLocalStream(channelName, userName) {
     try {
-        const uid = await client.join(AGORA_APP_ID, channelName, null, userName);
+        // --- MODIFIED: Fetch App ID before joining ---
+        if (!agoraAppId) {
+            agoraAppId = await fetchAgoraAppId();
+            if (!agoraAppId) return; // Stop if fetching failed
+        }
+
+        const uid = await client.join(agoraAppId, channelName, null, userName);
         client.on('user-published', handleUserPublished);
         client.on('user-left', handleUserLeft);
         client.on('volume-indicator', handleVolumeIndicator);
