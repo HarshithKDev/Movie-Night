@@ -1,20 +1,20 @@
 require('dotenv').config();
-const express = require('express');
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const http = require('http');
-const { WebSocketServer } = require('ws');
-const admin = require('firebase-admin');
-const cors = require('cors');
-const { body, param, validationResult } = require('express-validator');
-const url = require('url');
-const rateLimit = require('express-rate-limit');
-const { v4: uuidv4 } = require('uuid');
-const path = require('path');
+const express = a('express');
+const { MongoClient, ServerApiVersion, ObjectId } = a('mongodb');
+const http = a('http');
+const { WebSocketServer } = a('ws');
+const admin = a('firebase-admin');
+const cors = a('cors');
+const { body, param, validationResult } = a('express-validator');
+const url = a('url');
+const rateLimit = a('express-rate-limit');
+const { v4: uuidv4 } = a('uuid');
+const path = a('path');
 
 // --- Firebase Admin SDK Initialization ---
 const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
   ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
-  : require('./firebase-service-account-key.json');
+  : a('./firebase-service-account-key.json');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -30,7 +30,10 @@ const port = process.env.PORT || 3000;
 // --- Security Middleware ---
 
 // 1. CORS Configuration
-const allowedOrigins = ['https://movienightlive.netlify.app', 'http://localhost:3000', 'http://127.0.0.1:5500'];
+const allowedOrigins = ['https://movienightlive.netlify.app'];
+if (process.env.NODE_ENV === 'development') {
+    allowedOrigins.push('http://localhost:3000', 'http://127.0.0.1:5500');
+}
 const corsOptions = {
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
@@ -51,6 +54,14 @@ const apiLimiter = rateLimit({
     message: 'Too many requests from this IP, please try again after 15 minutes',
 });
 app.use('/api/', apiLimiter);
+
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10, // Limit each IP to 10 authentication requests per window
+    message: 'Too many authentication attempts from this IP, please try again after 15 minutes',
+});
+app.use('/api/auth', authLimiter);
+
 
 // Middleware
 app.use(express.json());
@@ -107,7 +118,7 @@ app.get('/api/agora-appid', authenticateUser, (req, res) => {
     if (agoraAppId) {
         res.json({ agoraAppId });
     } else {
-        res.status(500).json({ message: 'Agora App ID is not configured on the server.' });
+        res.status(500).json({ message: 'An internal server error occurred.' });
     }
 });
 
@@ -218,14 +229,13 @@ async function run() {
             }
             res.status(200).json({ message: 'Movie renamed successfully' });
         } catch (error) {
-            // SECURITY FIX: Log detailed error, send generic message
             console.error("❌ Failed to rename movie:", error);
             res.status(500).json({ message: 'An internal server error occurred.' });
         }
     });
 
     app.post('/api/generate-upload-url', authenticateUser, [
-        body('fileName').notEmpty().trim().escape(), // Sanitize fileName
+        body('fileName').notEmpty().trim().escape(),
         body('fileType').equals('video/mp4')
     ], handleValidationErrors, async (req, res) => {
         try {
@@ -238,7 +248,6 @@ async function run() {
             const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
             res.status(200).json({ signedUrl, publicUrl, filePath });
         } catch (error) {
-            // SECURITY FIX: Log detailed error, send generic message
             console.error("Error generating upload URL:", error);
             res.status(500).json({ message: 'An internal server error occurred.' });
         }
@@ -254,7 +263,6 @@ async function run() {
             const [streamUrl] = await file.getSignedUrl(options);
             res.status(200).json({ streamUrl });
         } catch (error) {
-            // SECURITY FIX: Log detailed error, send generic message
             console.error("Error generating stream URL:", error);
             res.status(500).json({ message: 'An internal server error occurred.' });
         }
@@ -268,8 +276,8 @@ async function run() {
         res.status(200).json(movies);
     });
 
-    app.delete('/api/movies/:movieId', authenticateUser, [ // Changed to use movieId from URL param
-        param('movieId').isMongoId(),
+    app.delete('/api/movies/:movieId', authenticateUser, [
+        param('movieId').isMongoId()
     ], handleValidationErrors, async (req, res) => {
         try {
             const { movieId } = req.params;
@@ -280,7 +288,6 @@ async function run() {
             await moviesCollection.deleteOne({ _id: new ObjectId(movieId) });
             res.status(200).json({ message: 'Movie deleted successfully' });
         } catch (error) {
-            // SECURITY FIX: Log detailed error, send generic message
             console.error('Error deleting movie:', error);
             res.status(500).json({ message: 'An internal server error occurred.' });
         }
@@ -289,7 +296,7 @@ async function run() {
     app.post('/api/rooms', authenticateUser, [
         body('roomCode').isLength({ min: 6, max: 6 }).isAlphanumeric().trim(),
         body('fileId').isURL(),
-        body('fileName').notEmpty().trim().escape(), // Sanitize fileName
+        body('fileName').notEmpty().trim().escape(),
         body('filePath').notEmpty().trim()
     ], handleValidationErrors, async (req, res) => {
         const { roomCode, fileId, fileName, filePath } = req.body;
