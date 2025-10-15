@@ -1,5 +1,8 @@
+# Movie Night
 
-**Live Demo:** [https://movienight2025.netlify.app/](https://movienight2025.netlify.app/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+**Live Demo:** [https://movienightlive.netlify.app/](https://movienightlive.netlify.app/)
 
 Movie Night is a web application that allows users to watch movies together in synchronized real-time, no matter where they are. Host a room, share the code, and enjoy a shared viewing experience with friends and family, complete with video chat.
 
@@ -15,11 +18,27 @@ Movie Night is a web application that allows users to watch movies together in s
 
 ## Technologies Used
 
-* **Frontend:** HTML5, CSS3, Tailwind CSS, JavaScript
-* **Backend:** Node.js, Express.js, WebSocket
-* **Database:** MongoDB
-* **Authentication & Storage:** Firebase (Authentication, Cloud Storage)
-* **Video & Audio Chat:** Agora RTC
+### Frontend:
+
+* HTML5
+* CSS3
+* [Tailwind CSS](https://tailwindcss.com/)
+* JavaScript
+
+### Backend:
+
+* [Node.js](https://nodejs.org/)
+* [Express.js](https://expressjs.com/)
+* [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
+
+### Database:
+
+* [MongoDB](https://www.mongodb.com/)
+
+### Services:
+
+* **Authentication & Storage:** [Firebase (Authentication, Cloud Storage)](https://firebase.google.com/)
+* **Video & Audio Chat:** [Agora RTC](https://www.agora.io/en/)
 
 ## Getting Started
 
@@ -90,5 +109,3 @@ To get a local copy up and running, follow these simple steps.
 * `js/auth.js`: Handles all Firebase authentication logic.
 * `js/videocall.js`: Manages the Agora video and audio chat functionality.
 * `output.css`: The compiled Tailwind CSS file.
-
-
