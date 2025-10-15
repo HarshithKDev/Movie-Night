@@ -1,4 +1,3 @@
-
 // This configuration should be from your Firebase project settings.
 const firebaseConfig = {
   apiKey: "AIzaSyAc35kVMuZnxOZ85HIBGG-plHzOqvh1U5E",
@@ -16,7 +15,7 @@ if (!firebase.apps.length) {
 const auth = firebase.auth();
 
 // --- DOM Elements ---
-const authLoadingView = document.getElementById('auth-loading-view'); // ✅ NEW
+const authLoadingView = document.getElementById('auth-loading-view');
 const loggedOutView = document.getElementById('logged-out-view');
 const loggedInView = document.getElementById('logged-in-view');
 const userNameEl = document.getElementById('user-name');
@@ -35,7 +34,7 @@ const toggleText = document.getElementById('toggle-text');
 // --- State ---
 let isLoginMode = false;
 
-// --- Event Listeners (with checks to prevent errors) ---
+// --- Event Listeners ---
 if (toggleAuthModeBtn) {
     toggleAuthModeBtn.addEventListener('click', () => {
         isLoginMode = !isLoginMode;
@@ -55,7 +54,6 @@ if (authForm) {
         if (isLoginMode) {
             auth.signInWithEmailAndPassword(email, password)
                 .catch(error => {
-                    console.error("Login failed:", error);
                     authErrorEl.textContent = error.message;
                 });
         } else {
@@ -69,11 +67,7 @@ if (authForm) {
                         displayName: username
                     });
                 })
-                .then(() => {
-                    console.log("User signed up and profile updated.");
-                })
                 .catch(error => {
-                    console.error("Sign up failed:", error);
                     authErrorEl.textContent = error.message;
                 });
         }
@@ -89,13 +83,13 @@ if (logoutBtn) {
 // --- UI Update Function ---
 function updateAuthUI() {
     if (isLoginMode) {
-        if (usernameInput) usernameInput.classList.add('hidden');
-        if (authBtn) authBtn.innerHTML = 'Log In';
+        if (usernameInput) usernameInput.parentElement.classList.add('hidden');
+        if (authBtn) authBtn.textContent = 'Log In';
         if (toggleText) toggleText.textContent = "Don't have an account?";
         if (toggleAuthModeBtn) toggleAuthModeBtn.textContent = 'Sign Up';
     } else {
-        if (usernameInput) usernameInput.classList.remove('hidden');
-        if (authBtn) authBtn.innerHTML = 'Sign Up';
+        if (usernameInput) usernameInput.parentElement.classList.remove('hidden');
+        if (authBtn) authBtn.textContent = 'Sign Up';
         if (toggleText) toggleText.textContent = "Already have an account?";
         if (toggleAuthModeBtn) toggleAuthModeBtn.textContent = 'Log In';
     }
@@ -104,20 +98,15 @@ function updateAuthUI() {
 
 // --- Auth State Observer ---
 auth.onAuthStateChanged(user => {
-
     if (authLoadingView) authLoadingView.classList.add('hidden');
 
     if (user) {
-        // User is signed in.
-        console.log("User is logged in:", user.displayName);
         if (userNameEl) userNameEl.textContent = user.displayName || user.email;
         if (loggedInView) loggedInView.classList.remove('hidden');
         if (loggedOutView) loggedOutView.classList.add('hidden');
     } else {
-        // User is signed out.
-        console.log("User is logged out.");
         if (loggedInView) loggedInView.classList.add('hidden');
         if (loggedOutView) loggedOutView.classList.remove('hidden');
-        updateAuthUI();
+        if (isLoginMode === false) updateAuthUI(); // Ensure correct view on logout
     }
 });

@@ -3,207 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movie Night - Watch Together</title>
+    <title>Movie Night</title>
     <link href="output.css" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        /* Base styles for the new professional theme */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #111827; /* Dark Blue-Gray Background */
-            color: #E5E7EB; /* Light Gray Text */
-        }
-
-        /* A subtle background pattern for depth */
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: radial-gradient(circle at top left, rgba(79, 70, 229, 0.15), transparent 30%),
-                              radial-gradient(circle at bottom right, rgba(79, 70, 229, 0.15), transparent 30%);
-            opacity: 0.5;
-            z-index: 0;
-        }
-        
-        /* Main container styling */
-        .main-container {
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Card styles for forms and logged-in view */
-        .theme-card {
-            background: rgba(31, 41, 55, 0.5); /* Semi-transparent dark gray */
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 1rem; /* 16px */
-        }
-        
-        /* Input field styling */
-        .theme-input {
-            background-color: #374151; /* Gray-700 */
-            border: 1px solid #4B5563; /* Gray-600 */
-            border-radius: 0.5rem; /* 8px */
-            color: #F9FAFB; /* Gray-50 */
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        .theme-input:focus {
-            outline: none;
-            border-color: #4F46E5; /* Indigo-600 */
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.4);
-        }
-
-        /* Primary button styling */
-        .btn-primary {
-            background-color: #4F46E5; /* Indigo-600 */
-            color: white;
-            border-radius: 0.5rem; /* 8px */
-            font-weight: 600;
-            transition: background-color 0.2s ease, transform 0.2s ease;
-        }
-        .btn-primary:hover {
-            background-color: #4338CA; /* Indigo-700 */
-            transform: translateY(-2px);
-        }
-
-        /* Secondary (link) button styling */
-        .btn-link {
-            color: #818CF8; /* Indigo-400 */
-            font-weight: 600;
-            transition: color 0.2s ease;
-        }
-        .btn-link:hover {
-            color: #A5B4FC; /* Indigo-300 */
-        }
-
-        /* Action card styling for host/join buttons */
-        .action-card {
-            background-color: rgba(55, 65, 81, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 0.75rem; /* 12px */
-            transition: background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
-        }
-        .action-card:hover {
-            background-color: rgba(55, 65, 81, 0.7);
-            border-color: rgba(79, 70, 229, 0.5);
-            transform: translateY(-4px);
-        }
-        .action-card.primary {
-            background-color: #4F46E5; /* Indigo-600 */
-        }
-        .action-card.primary:hover {
-            background-color: #4338CA; /* Indigo-700 */
-            border-color: #4F46E5;
-        }
-    </style>
 </head>
 <body>
-    
-    <div class="main-container min-h-screen flex flex-col items-center justify-center p-4">
-        
-        <div id="auth-loading-view" class="text-center">
-            <div class="w-12 h-12 border-4 border-t-indigo-500 border-gray-700 rounded-full animate-spin"></div>
-            <h3 class="text-xl font-semibold mt-4 text-gray-300">Loading...</h3>
+
+    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+
+        <div id="auth-loading-view" class="flex flex-col items-center gap-4">
+            <span class="animate-spin h-8 w-8 border-4 border-t-primary rounded-full"></span>
+            <p>Loading...</p>
         </div>
 
-        <div id="logged-out-view" class="w-full max-w-md hidden">
+        <div id="logged-out-view" class="w-full max-w-sm hidden">
             <div class="text-center mb-8">
-                <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight">
-                    Movie Night
-                </h1>
-                <p class="text-gray-400 mt-2 text-lg">
-                    Watch movies together, perfectly in sync.
-                </p>
+                <h1 class="text-4xl font-bold text-on-background">Movie Night</h1>
+                <p class="text-on-surface/70 mt-1">Watch movies together, perfectly in sync.</p>
             </div>
-            
-            <div class="theme-card p-8">
-                <form id="auth-form" class="space-y-4">
-                    <input 
-                        type="text" 
-                        id="username-input" 
-                        placeholder="Username" 
-                        class="theme-input w-full p-3"
-                    >
-                    <input 
-                        type="email" 
-                        id="email-input" 
-                        placeholder="Email Address" 
-                        required 
-                        class="theme-input w-full p-3"
-                    >
-                    <input 
-                        type="password" 
-                        id="password-input" 
-                        placeholder="Password" 
-                        required 
-                        class="theme-input w-full p-3"
-                    >
-                    <button 
-                        type="submit" 
-                        id="auth-btn" 
-                        class="btn-primary w-full py-3 mt-2">
-                        Sign Up
-                    </button>
-                </form>
-                
-                <p id="auth-error" class="text-red-400 text-center mt-4 h-5 text-sm"></p>
-                
-                <div class="text-center mt-4">
-                    <span id="toggle-text" class="text-gray-400 text-sm">Already have an account?</span>
-                    <button id="toggle-auth-mode" class="btn-link ml-1 text-sm">
-                    Log In
-                    </button>
+
+            <div class="bg-surface rounded-lg shadow-xl">
+                <div class="p-8">
+                    <form id="auth-form" class="space-y-6">
+                        <div class="relative">
+                            <input type="text" id="username-input" class="peer w-full bg-transparent border-b-2 border-on-surface/30 focus:border-primary transition-colors outline-none pt-4" placeholder=" " />
+                            <label class="absolute left-0 top-4 text-on-surface/50 peer-focus:top-0 peer-focus:text-xs peer-focus:text-primary transition-all" for="username-input">Username</label>
+                        </div>
+                        <div class="relative">
+                            <input type="email" id="email-input" required class="peer w-full bg-transparent border-b-2 border-on-surface/30 focus:border-primary transition-colors outline-none pt-4" placeholder=" " />
+                            <label class="absolute left-0 top-4 text-on-surface/50 peer-focus:top-0 peer-focus:text-xs peer-focus:text-primary transition-all" for="email-input">Email</label>
+                        </div>
+                        <div class="relative">
+                            <input type="password" id="password-input" required class="peer w-full bg-transparent border-b-2 border-on-surface/30 focus:border-primary transition-colors outline-none pt-4" placeholder=" " />
+                            <label class="absolute left-0 top-4 text-on-surface/50 peer-focus:top-0 peer-focus:text-xs peer-focus:text-primary transition-all" for="password-input">Password</label>
+                        </div>
+                        <div class="pt-4">
+                            <button type="submit" id="auth-btn" class="w-full bg-primary text-on-primary font-bold py-3 rounded-md hover:bg-opacity-90 transition-colors uppercase tracking-wider">Sign Up</button>
+                        </div>
+                    </form>
+                    <p id="auth-error" class="text-error text-center mt-4 h-5 text-sm"></p>
+                    <div class="text-center text-sm mt-4">
+                        <span id="toggle-text" class="text-on-surface/60">Already have an account?</span>
+                        <button id="toggle-auth-mode" class="font-semibold text-primary/80 hover:text-primary p-1">Log In</button>
+                    </div>
                 </div>
             </div>
         </div>
-        
-        <div id="logged-in-view" class="hidden w-full max-w-2xl text-center">
-            <div class="theme-card p-8 md:p-12">
-                <div class="mb-8">
-                    <h1 class="text-4xl font-bold text-white mb-2">
-                        Welcome, <span id="user-name" class="text-indigo-400"></span>!
-                    </h1>
-                    <p class="text-gray-300 text-xl">
-                        Ready for your next movie adventure?
-                    </p>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <a href="host.html" class="action-card primary p-6 group">
-                        <div class="w-10 h-10 mx-auto mb-3 text-white">
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-full h-full">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        </div>
-                        <h3 class="text-lg font-semibold text-white">Host a Room</h3>
-                        <p class="text-sm text-gray-400 mt-1">Start watching together</p>
-                    </a>
-                    
-                    <a href="join.html" class="action-card p-6 group">
-                        <div class="w-10 h-10 mx-auto mb-3 text-gray-400 group-hover:text-indigo-400 transition-colors">
-                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-full h-full">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-                           </svg>
-                        </div>
-                        <h3 class="text-lg font-semibold text-white">Join a Room</h3>
-                        <p class="text-sm text-gray-400 mt-1">Enter with a room code</p>
-                    </a>
-                </div>
-                
-                <button id="logout-btn" class="text-gray-400 hover:text-white font-medium transition-colors duration-200 text-sm">
-                    Sign Out
-                </button>
+
+        <div id="logged-in-view" class="hidden w-full max-w-lg">
+             <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-on-background">Welcome, <span id="user-name" class="text-primary"></span>!</h1>
+                <p class="text-on-surface/70">What would you like to do?</p>
+            </div>
+            <div class="space-y-4">
+                 <a href="host.html" class="flex items-center gap-4 p-4 bg-surface hover:bg-white/5 transition-colors rounded-lg shadow-md w-full">
+                    <div class="bg-primary/10 p-3 rounded-full">
+                       <i data-lucide="plus-circle" class="text-primary"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-semibold text-lg text-on-background">Host a New Session</h2>
+                        <p class="text-sm text-on-surface/60">Upload a video and invite others to watch.</p>
+                    </div>
+                </a>
+                 <a href="join.html" class="flex items-center gap-4 p-4 bg-surface hover:bg-white/5 transition-colors rounded-lg shadow-md w-full">
+                     <div class="bg-secondary/10 p-3 rounded-full">
+                       <i data-lucide="log-in" class="text-secondary"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-semibold text-lg text-on-background">Join a Session</h2>
+                        <p class="text-sm text-on-surface/60">Enter a room code to join an existing session.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="text-center mt-8">
+                <button id="logout-btn" class="text-on-surface/60 hover:text-on-surface font-semibold text-sm py-2 px-4 transition-colors">Sign Out</button>
             </div>
         </div>
     </div>
-    
+
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="js/auth.js"></script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>lucide.createIcons();</script>
 </body>
 </html>

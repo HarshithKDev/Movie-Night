@@ -3,138 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Join Movie Night - Watch Together</title>
+    <title>Join Session - Movie Night</title>
     <link href="output.css" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        /* Base styles from the new professional theme */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #111827; /* Dark Blue-Gray Background */
-            color: #E5E7EB; /* Light Gray Text */
-        }
-
-        /* A subtle background pattern for depth */
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: radial-gradient(circle at top left, rgba(79, 70, 229, 0.15), transparent 30%),
-                              radial-gradient(circle at bottom right, rgba(79, 70, 229, 0.15), transparent 30%);
-            opacity: 0.5;
-            z-index: 0;
-        }
-        
-        /* Main container styling */
-        .main-container {
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Card styles for forms */
-        .theme-card {
-            background: rgba(31, 41, 55, 0.5); /* Semi-transparent dark gray */
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 1rem; /* 16px */
-        }
-        
-        /* Input field styling */
-        .theme-input {
-            background-color: #374151; /* Gray-700 */
-            border: 1px solid #4B5563; /* Gray-600 */
-            border-radius: 0.5rem; /* 8px */
-            color: #F9FAFB; /* Gray-50 */
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        .theme-input:focus {
-            outline: none;
-            border-color: #4F46E5; /* Indigo-600 */
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.4);
-        }
-
-        /* Primary button styling */
-        .btn-primary {
-            background-color: #4F46E5; /* Indigo-600 */
-            color: white;
-            border-radius: 0.5rem; /* 8px */
-            font-weight: 600;
-            transition: background-color 0.2s ease, transform 0.2s ease;
-        }
-        .btn-primary:hover {
-            background-color: #4338CA; /* Indigo-700 */
-            transform: translateY(-2px);
-        }
-
-        /* Navigation link styling */
-        .nav-link {
-            color: #9CA3AF; /* Gray-400 */
-            transition: color 0.2s ease;
-        }
-        .nav-link:hover {
-            color: #F9FAFB; /* Gray-50 */
-        }
-    </style>
 </head>
 <body>
-    
-    <div class="main-container min-h-screen flex flex-col items-center p-4">
-        <nav class="w-full max-w-5xl mx-auto py-4">
-            <a href="index.html" class="nav-link inline-flex items-center group">
-                <svg class="w-5 h-5 mr-2 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                </svg>
-                Back to Home
-            </a>
-        </nav>
-
-        <div class="flex-grow flex items-center justify-center w-full">
-            <div class="theme-card w-full max-w-md text-center p-8">
-                
-                <div class="mb-8">
-                    <h1 class="text-3xl md:text-4xl font-bold text-white">
-                        Join a Movie Room
-                    </h1>
-                    <p class="text-gray-400 mt-2">Enter the 6-character code from your host.</p>
+    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+        <div class="w-full max-w-sm">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-on-background">Join Session</h1>
+                <p class="text-on-surface/70 mt-1">Enter the 6-character room code.</p>
+            </div>
+            <div class="bg-surface rounded-lg shadow-xl">
+                <div class="p-8">
+                    <form id="join-form" class="w-full space-y-6">
+                        <div>
+                            <input
+                                type="text"
+                                id="room-code-input"
+                                placeholder="ABCDEF"
+                                class="w-full bg-transparent text-center text-3xl tracking-[0.2em] font-mono uppercase border-b-2 border-on-surface/30 focus:border-primary transition-colors outline-none pb-2"
+                                maxlength="6"
+                                required
+                                autocomplete="off"
+                            />
+                        </div>
+                        <div class="pt-4">
+                             <button type="submit" class="w-full bg-primary text-on-primary font-bold py-3 rounded-md hover:bg-opacity-90 transition-colors uppercase tracking-wider">Join Room</button>
+                        </div>
+                    </form>
+                    <p id="error-text" class="text-error text-center mt-4 h-5 text-sm"></p>
                 </div>
-
-                <form id="join-form" class="flex flex-col gap-4">
-                    <input
-                        type="text"
-                        id="room-code-input"
-                        placeholder="ABCDEF"
-                        class="theme-input w-full text-white text-center text-2xl tracking-[0.3em] font-mono uppercase rounded-lg p-4 focus:outline-none"
-                        maxlength="6"
-                        required
-                        autocomplete="off"
-                    >
-                    
-                    <button type="submit" class="btn-primary w-full py-3 mt-2 text-lg">
-                        Join Room
-                    </button>
-                </form>
-
-                <div id="error-message" class="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 hidden">
-                    <p id="error-text" class="text-sm"></p>
-                </div>
-
+            </div>
+             <div class="text-center mt-6">
+                <a href="index.html" class="inline-flex items-center gap-1 text-on-surface/60 hover:text-on-surface transition-colors">
+                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                    Back to Home
+                </a>
             </div>
         </div>
     </div>
 
-    <div id="loading-overlay" class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm hidden items-center justify-center z-50">
-        <div class="text-center">
-            <div class="w-12 h-12 border-4 border-t-indigo-500 border-gray-700 rounded-full animate-spin"></div>
-            <h3 id="loading-title" class="text-xl font-semibold mt-4 text-gray-300">Joining Room...</h3>
-            <p id="loading-desc" class="text-gray-400 mt-1">Please wait while we connect you.</p>
-        </div>
+    <div id="loading-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="flex flex-col items-center gap-4 text-on-background"><span class="animate-spin h-8 w-8 border-4 border-t-primary rounded-full"></span><h3>Joining Room...</h3></div>
     </div>
 
     <script src="js/join.js"></script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>lucide.createIcons();</script>
 </body>
 </html>

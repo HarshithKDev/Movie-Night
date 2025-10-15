@@ -3,213 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movie Night - Watch Together</title>
+    <title>Movie Night</title>
     <link href="output.css" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet">
     <style>
-        /* Base styles from the new professional theme */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #111827; /* Dark Blue-Gray Background */
-            color: #E5E7EB; /* Light Gray Text */
-            overflow: hidden; /* Prevent scrolling */
-        }
-
-        /* --- Header Styling --- */
-        .header {
-            background: rgba(17, 24, 39, 0.8); /* Gray-900 with transparency */
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* --- Video Player Styling --- */
-        .video-js {
-            width: 100%;
-            height: 100%;
-        }
-        .vjs-big-play-button {
-            background-color: rgba(79, 70, 229, 0.8) !important;
-            border-color: rgba(79, 70, 229, 1) !important;
-            width: 2em !important;
-            height: 2em !important;
-            border-radius: 50% !important;
-            margin-top: -1em !important;
-            margin-left: -1em !important;
-        }
-
-        /* --- Sidebar Styling --- */
-        .sidebar {
-            background-color: #1F2937; /* Gray-800 */
-            border-left: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        /* Participant Card Styling */
-        .participant-card {
-            background-color: #374151; /* Gray-700 */
-            border-radius: 0.75rem; /* 12px */
-            overflow: hidden;
-            position: relative;
-        }
-        .participant-name {
-            position: absolute;
-            bottom: 6px;
-            left: 8px;
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 1rem; /* 16px */
-            font-size: 0.75rem; /* 12px */
-            font-weight: 500;
-        }
-
-        /* Video Controls (Mic/Camera) */
-        .video-controls {
-            position: absolute;
-            top: 6px;
-            right: 6px;
-            display: flex;
-            gap: 6px;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-        .participant-card:hover .video-controls {
-            opacity: 1;
-        }
-        .control-btn {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: rgba(0, 0, 0, 0.5);
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-        .control-btn:hover {
-            background-color: rgba(0, 0, 0, 0.8);
-        }
-        .control-btn.muted {
-            background-color: #DC2626; /* Red-600 */
-        }
-        
-        /* Custom Scrollbar for Sidebar */
-        .sidebar-scrollbar::-webkit-scrollbar { width: 6px; }
-        .sidebar-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .sidebar-scrollbar::-webkit-scrollbar-thumb { background: #4B5563; border-radius: 3px; }
-        .sidebar-scrollbar::-webkit-scrollbar-thumb:hover { background: #6B7280; }
-
-        /* Mobile Responsive Sidebar */
-        @media (max-width: 1023px) {
-            .sidebar {
-                position: fixed;
-                top: 0;
-                right: 0;
-                width: 300px;
-                height: 100%;
-                transform: translateX(100%);
-                transition: transform 0.3s ease-in-out;
-                z-index: 40;
-            }
-            .sidebar.is-open {
-                transform: translateX(0);
-            }
-            .sidebar-overlay {
-                position: fixed;
-                inset: 0;
-                background: rgba(0,0,0,0.6);
-                z-index: 39;
-                opacity: 0;
-                pointer-events: none;
-                transition: opacity 0.3s ease-in-out;
-            }
-            .sidebar-overlay.is-open {
-                opacity: 1;
-                pointer-events: auto;
-            }
-        }
+        .video-js { width: 100%; height: 100%; background-color: #000; }
+        .vjs-big-play-button { background-color: rgba(98, 0, 238, 0.8) !important; border: none !important; }
     </style>
 </head>
 <body class="h-screen flex flex-col">
-    
-    <header class="header flex-shrink-0 flex items-center justify-between p-3 md:p-4 z-20">
-        <div class="flex items-center gap-3 md:gap-4">
-            <a href="index.html" class="text-2xl">🎬</a>
-            <div>
-                <h1 class="text-lg md:text-xl font-bold text-white">Movie Night</h1>
-                <p class="hidden md:block text-sm text-gray-400">Watch together, stay connected</p>
-            </div>
+
+    <header class="flex-shrink-0 h-16 flex items-center justify-between px-4 bg-surface border-b border-white/10 z-20">
+        <div class="flex items-center gap-2">
+            <a href="index.html" class="font-bold text-xl text-on-background normal-case">Movie Night</a>
         </div>
-        
-        <div class="flex items-center gap-2 md:gap-4">
-            <button id="copy-room-code-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                <span id="room-code-text" class="font-mono text-sm tracking-wider">LOADING...</span>
+        <div class="hidden lg:flex items-center gap-2 font-mono text-sm text-on-surface/70">
+            Room Code: 
+            <span id="room-code-text" class="bg-background px-3 py-1 rounded-md text-on-surface">...</span>
+        </div>
+        <div class="flex items-center gap-2">
+             <button id="copy-room-code-btn" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors">
+                <i data-lucide="clipboard-copy" class="w-5 h-5"></i>
             </button>
-            <button id="exit-button" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
-                Exit
+            <button id="exit-button" class="w-10 h-10 flex items-center justify-center rounded-full text-error hover:bg-error/10 transition-colors">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
             </button>
-            <button id="sidebar-toggle" class="lg:hidden bg-gray-700 p-2 rounded-lg">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-            </button>
+            <label for="sidebar-toggle" class="lg:hidden w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors">
+                <i data-lucide="panel-left-close" class="w-5 h-5"></i>
+            </label>
         </div>
     </header>
 
-    <main class="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_320px] overflow-hidden">
+    <div class="flex flex-1 overflow-hidden">
+        <input id="sidebar-toggle" type="checkbox" class="hidden" />
+        <main class="flex-1 flex flex-col bg-black">
+            <section class="flex-1 flex items-center justify-center relative">
+                 <video id="movie-player" class="video-js vjs-big-play-centered" controls preload="auto" muted data-setup='{}'></video>
+                 <div id="unmute-overlay" class="absolute inset-0 flex items-center justify-center cursor-pointer z-30 bg-black/80 backdrop-blur-sm">
+                    <button class="bg-primary text-on-primary font-bold py-3 px-6 rounded-md hover:bg-opacity-90 transition-colors uppercase tracking-wider">Click to Unmute</button>
+                </div>
+            </section>
+        </main>
         
-        <section class="bg-black flex items-center justify-center overflow-hidden relative">
-            <video id="movie-player" class="video-js vjs-big-play-centered" controls preload="auto" muted data-setup='{}'></video>
-            
-            <div id="unmute-overlay" class="absolute inset-0 flex items-center justify-center cursor-pointer z-30 bg-black/80 backdrop-blur-sm">
-                <div class="text-center">
-                    <h3 class="text-3xl font-bold mb-2">Click to Unmute</h3>
-                    <p class="text-gray-300">Audio is muted by default</p>
+        <aside id="sidebar" class="w-80 flex-shrink-0 flex flex-col bg-surface border-l border-white/10 p-4 transition-transform duration-300 ease-in-out -translate-x-0 lg:translate-x-0">
+            <h2 class="text-lg font-semibold text-center mb-4 text-on-background">Participants</h2>
+            <div id="participants-container" class="space-y-2 overflow-y-auto">
+                <div class="flex items-center gap-3 p-2 rounded-lg bg-background">
+                    <div id="local-player-container" class="w-16 h-12 bg-surface rounded-md overflow-hidden flex-shrink-0"></div>
+                    <p id="local-user-name" class="font-medium flex-1 truncate">You</p>
+                    <button id="mic-btn" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10"><i data-lucide="mic" class="w-4 h-4"></i></button>
+                    <button id="camera-btn" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10"><i data-lucide="video" class="w-4 h-4"></i></button>
                 </div>
             </div>
-        </section>
-
-        <aside id="participants-sidebar" class="sidebar flex flex-col">
-            <div class="flex-shrink-0 text-center p-4 border-b border-gray-700">
-                <h2 class="text-xl font-bold">Participants</h2>
-            </div>
-            
-            <div id="participants-container" class="flex-1 flex flex-col gap-3 overflow-y-auto sidebar-scrollbar p-4">
-                <div class="participant-card">
-                    <div class="aspect-video relative">
-                        <div id="local-player-container" class="w-full h-full bg-gray-800 rounded-lg overflow-hidden"></div>
-                        <div id="local-user-name" class="participant-name">You</div>
-                        <div class="video-controls">
-                            <button id="mic-btn" class="control-btn">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4z"></path><path fill-rule="evenodd" d="M5.5 8a.5.5 0 00-1 0v.343a6.5 6.5 0 0011 0V8a.5.5 0 00-1 0v.343a5.5 5.5 0 01-9 0V8zM12 15a4 4 0 01-8 0H3a.5.5 0 000 1h1.132a6.002 6.002 0 0011.736 0H17a.5.5 0 000-1h-1z" clip-rule="evenodd"></path></svg>
-                            </button>
-                            <button id="camera-btn" class="control-btn">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M2 4.75A2.75 2.75 0 014.75 2h10.5A2.75 2.75 0 0118 4.75v10.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25V4.75zM4.75 3.5a1.25 1.25 0 00-1.25 1.25v10.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25V4.75c0-.69-.56-1.25-1.25-1.25H4.75z"></path><path d="M10 12.5a3 3 0 100-6 3 3 0 000 6zM10 14a4.5 4.5 0 110-9 4.5 4.5 0 010 9z"></path></svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                </div>
         </aside>
-    </main>
-
-    <div id="sidebar-overlay" class="sidebar-overlay"></div>
-
-    <div id="loading-overlay" class="fixed inset-0 bg-gray-900/90 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class="text-center">
-            <div class="w-12 h-12 border-4 border-t-indigo-500 border-gray-700 rounded-full animate-spin"></div>
-            <h3 class="text-xl font-semibold mt-4 text-gray-300">Loading Movie...</h3>
-        </div>
     </div>
+
+    <div id="loading-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50"><div class="flex flex-col items-center gap-4 text-on-background"><span class="animate-spin h-8 w-8 border-4 border-t-primary rounded-full"></span></div></div>
+    <div id="toast-container" class="fixed bottom-8 right-8 space-y-3 z-50"></div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.20.2.js"></script>
     <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
-    
     <script src="js/auth.js"></script>
     <script src="js/watch.js"></script>
     <script src="js/videocall.js"></script>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>lucide.createIcons();</script>
 </body>
 </html>

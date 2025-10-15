@@ -5,191 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Host Session - Movie Night</title>
     <link href="output.css" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        /* Base styles from the new professional theme */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #111827; /* Dark Blue-Gray Background */
-            color: #E5E7EB; /* Light Gray Text */
-        }
-
-        /* A subtle background pattern for depth */
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: radial-gradient(circle at top left, rgba(79, 70, 229, 0.15), transparent 30%),
-                              radial-gradient(circle at bottom right, rgba(79, 70, 229, 0.15), transparent 30%);
-            opacity: 0.5;
-            z-index: 0;
-        }
-        
-        /* Main container styling */
-        .main-container {
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Card styles */
-        .theme-card {
-            background: rgba(31, 41, 55, 0.5); /* Semi-transparent dark gray */
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 1rem; /* 16px */
-        }
-        
-        /* Navigation link styling */
-        .nav-link {
-            color: #9CA3AF; /* Gray-400 */
-            transition: color 0.2s ease;
-        }
-        .nav-link:hover {
-            color: #F9FAFB; /* Gray-50 */
-        }
-
-        /* Primary button styling */
-        .btn-primary {
-            background-color: #4F46E5; /* Indigo-600 */
-            color: white;
-            border-radius: 0.5rem; /* 8px */
-            font-weight: 600;
-            transition: background-color 0.2s ease, transform 0.2s ease;
-        }
-        .btn-primary:hover {
-            background-color: #4338CA; /* Indigo-700 */
-            transform: translateY(-2px);
-        }
-
-        /* Secondary button styling */
-        .btn-secondary {
-            background-color: #374151; /* Gray-700 */
-            color: #E5E7EB; /* Gray-200 */
-            border-radius: 0.5rem; /* 8px */
-            font-weight: 600;
-            transition: background-color 0.2s ease;
-        }
-        .btn-secondary:hover {
-            background-color: #4B5563; /* Gray-600 */
-        }
-        
-        /* Destructive button styling */
-        .btn-danger {
-             background-color: #DC2626; /* Red-600 */
-            color: white;
-            border-radius: 0.5rem; /* 8px */
-            font-weight: 600;
-            transition: background-color 0.2s ease;
-        }
-        .btn-danger:hover {
-            background-color: #B91C1C; /* Red-700 */
-        }
-
-        /* Upload zone styling */
-        .upload-zone {
-            border: 2px dashed #4B5563; /* Gray-600 */
-            border-radius: 0.75rem; /* 12px */
-            transition: border-color 0.2s ease, background-color 0.2s ease;
-        }
-        .upload-zone:hover {
-            border-color: #4F46E5; /* Indigo-600 */
-            background-color: rgba(79, 70, 229, 0.1);
-        }
-        .upload-zone.drag-over {
-            border-color: #6366F1; /* Indigo-500 */
-            background-color: rgba(79, 70, 229, 0.2);
-        }
-
-    </style>
 </head>
 <body>
-    <div class="main-container min-h-screen p-4 md:p-6">
-        <nav class="w-full max-w-5xl mx-auto mb-6">
-            <a href="index.html" class="nav-link inline-flex items-center group">
-                <svg class="w-5 h-5 mr-2 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                </svg>
-                Back to Home
+    <div class="max-w-4xl mx-auto p-4 md:p-6">
+        <header class="flex items-center mb-8">
+            <a href="index.html" class="flex items-center gap-2 text-on-surface/70 hover:text-on-surface transition-colors">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                Home
             </a>
-        </nav>
+        </header>
 
-        <div class="w-full max-w-5xl mx-auto">
-            <div class="text-center mb-8">
-                <h1 class="text-4xl md:text-5xl font-extrabold text-white">Host a Session</h1>
-                <p class="text-gray-400 mt-2 text-lg">Upload a new movie or choose from your library.</p>
+        <main>
+            <div class="text-center mb-10">
+                <h1 class="text-4xl font-bold text-on-background">Host a Session</h1>
+                <p class="text-on-surface/70 mt-2">Upload a movie or choose one from your library.</p>
             </div>
-            
-            <div class="theme-card p-6 md:p-8 mb-8">
-                <div id="upload-container" class="upload-zone cursor-pointer">
-                    <input type="file" id="file-input" class="hidden" accept="video/mp4">
-                    <label for="file-input" class="flex flex-col items-center justify-center p-8 text-center cursor-pointer">
-                        <svg class="w-16 h-16 text-gray-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
-                        </svg>
-                        <p class="text-xl font-semibold text-white">Upload a New Movie</p>
-                        <p class="text-gray-400 mt-1">Drag & drop or click to browse</p>
-                        <p class="text-sm text-gray-500 mt-4 bg-gray-800 px-3 py-1 rounded-full">MP4 files only</p>
+
+            <div class="bg-surface rounded-lg shadow-lg mb-12">
+                 <div class="p-6">
+                    <label for="file-input" class="w-full p-6 border-2 border-dashed border-on-surface/20 rounded-lg hover:border-primary transition-colors cursor-pointer text-center">
+                        <input type="file" id="file-input" class="hidden" accept="video/mp4">
+                        <i data-lucide="upload-cloud" class="w-10 h-10 mx-auto text-on-surface/50"></i>
+                        <p class="font-semibold mt-3 text-on-background">Click to upload or drag & drop</p>
+                        <p class="text-sm text-on-surface/60">MP4 video files only</p>
                     </label>
-                </div>
-
-                <div id="progress-container" class="mt-6 hidden">
-                    <div class="w-full bg-gray-700 rounded-full h-2.5">
-                        <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    <div id="progress-container" class="mt-4 w-full hidden">
+                        <div class="w-full bg-on-surface/20 rounded-full h-2">
+                            <div id="progress-bar" class="bg-primary h-2 rounded-full transition-all" style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-between items-center mt-1 text-xs text-on-surface/70">
+                            <span id="upload-status">Uploading...</span>
+                            <span id="progress-text">0%</span>
+                        </div>
                     </div>
-                    <div class="flex justify-between items-center mt-2">
-                        <p id="upload-status" class="text-gray-300 text-sm"></p>
-                        <span id="progress-text" class="text-sm text-gray-400">0%</span>
-                    </div>
-                </div>
+                 </div>
             </div>
 
-            <div class="text-center mb-6">
-                <p class="text-gray-500 font-semibold tracking-widest">YOUR LIBRARY</p>
+            <h2 class="text-xl font-bold mb-4 text-on-background">Your Library</h2>
+            <div id="movie-library" class="rounded-lg bg-surface shadow-lg">
+                <div class="flex justify-center items-center p-12">
+                     <span class="animate-spin h-6 w-6 border-4 border-t-primary rounded-full"></span>
+                </div>
             </div>
-
-            <div id="movie-library" class="space-y-3">
-                <div id="library-loading-message" class="text-center py-12">
-                     <div class="w-10 h-10 border-4 border-t-indigo-500 border-gray-700 rounded-full animate-spin mx-auto"></div>
-                    <p class="text-gray-400 mt-4">Loading your movies...</p>
-                </div>
-                </div>
-        </div>
+        </main>
     </div>
 
-    <div id="rename-modal" class="fixed inset-0 hidden z-50 bg-gray-900/80 backdrop-blur-sm">
-        <div class="flex items-center justify-center w-full h-full p-4">
-            <div class="theme-card p-6 w-full max-w-md">
-                <h2 class="text-xl font-bold text-white mb-4">Rename Movie</h2>
-                <input type="text" id="rename-input" class="theme-input w-full p-3 mb-4" placeholder="Enter new movie name...">
-                <div class="flex gap-3">
-                    <button id="cancel-rename-btn" class="btn-secondary w-full py-2">Cancel</button>
-                    <button id="save-rename-btn" class="btn-primary w-full py-2">Save Changes</button>
-                </div>
+    <div id="rename-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+      <div class="bg-surface rounded-lg shadow-xl w-full max-w-sm">
+        <div class="p-6">
+            <h3 class="font-bold text-lg text-on-background">Rename Movie</h3>
+            <div class="relative mt-6">
+                <input type="text" id="rename-input" class="peer w-full bg-transparent border-b-2 border-on-surface/30 focus:border-primary transition-colors outline-none pt-4" placeholder=" ">
+                 <label class="absolute left-0 top-4 text-on-surface/50 peer-focus:top-0 peer-focus:text-xs peer-focus:text-primary transition-all" for="rename-input">New movie name</label>
             </div>
         </div>
+        <div class="bg-white/5 px-6 py-3 flex justify-end gap-3 rounded-b-lg">
+            <button id="cancel-rename-btn" class="px-4 py-2 text-on-surface/80 hover:bg-white/10 rounded-md text-sm font-semibold">Cancel</button>
+            <button id="save-rename-btn" class="px-4 py-2 text-primary hover:bg-primary/10 rounded-md text-sm font-semibold">Save</button>
+        </div>
+      </div>
     </div>
 
-    <div id="delete-modal" class="fixed inset-0 hidden z-50 bg-gray-900/80 backdrop-blur-sm">
-         <div class="flex items-center justify-center w-full h-full p-4">
-            <div class="theme-card p-6 w-full max-w-md text-center">
-                <h2 class="text-xl font-bold text-white mb-2">Delete Movie</h2>
-                <p class="text-gray-400 mb-6">Are you sure? This action cannot be undone.</p>
-                <div class="flex gap-3">
-                    <button id="cancel-delete-btn" class="btn-secondary w-full py-2">Cancel</button>
-                    <button id="confirm-delete-btn" class="btn-danger w-full py-2">Confirm Delete</button>
-                </div>
-            </div>
+    <div id="delete-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+      <div class="bg-surface rounded-lg shadow-xl w-full max-w-sm">
+        <div class="p-6">
+            <h3 class="font-bold text-lg text-on-background">Delete Movie</h3>
+            <p class="py-4 text-on-surface/70">Are you sure? This action cannot be undone.</p>
         </div>
+        <div class="bg-white/5 px-6 py-3 flex justify-end gap-3 rounded-b-lg">
+            <button id="cancel-delete-btn" class="px-4 py-2 text-on-surface/80 hover:bg-white/10 rounded-md text-sm font-semibold">Cancel</button>
+            <button id="confirm-delete-btn" class="px-4 py-2 text-error hover:bg-error/10 rounded-md text-sm font-semibold">Confirm Delete</button>
+        </div>
+      </div>
     </div>
+
+    <div id="toast-container" class="fixed bottom-8 right-8 space-y-3 z-50"></div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/host.js"></script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>lucide.createIcons();</script>
 </body>
 </html>
