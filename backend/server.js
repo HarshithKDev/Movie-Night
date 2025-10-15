@@ -225,7 +225,7 @@ async function run() {
     });
 
     app.post('/api/generate-upload-url', authenticateUser, [
-        body('fileName').notEmpty().trim(),
+        body('fileName').notEmpty().trim().escape(), // Sanitize fileName
         body('fileType').equals('video/mp4')
     ], handleValidationErrors, async (req, res) => {
         try {
@@ -268,16 +268,15 @@ async function run() {
         res.status(200).json(movies);
     });
 
-    app.delete('/api/movies', authenticateUser, [
-        body('movieId').isMongoId(),
-        body('filePath').notEmpty()
+    app.delete('/api/movies/:movieId', authenticateUser, [ // Changed to use movieId from URL param
+        param('movieId').isMongoId(),
     ], handleValidationErrors, async (req, res) => {
         try {
-            const { movieId, filePath } = req.body;
+            const { movieId } = req.params;
             const movie = await moviesCollection.findOne({ _id: new ObjectId(movieId), userId: req.user.uid });
             if (!movie) return res.status(404).json({ message: 'Movie not found or user not authorized' });
             
-            await bucket.file(filePath).delete();
+            await bucket.file(movie.filePath).delete();
             await moviesCollection.deleteOne({ _id: new ObjectId(movieId) });
             res.status(200).json({ message: 'Movie deleted successfully' });
         } catch (error) {
@@ -290,7 +289,7 @@ async function run() {
     app.post('/api/rooms', authenticateUser, [
         body('roomCode').isLength({ min: 6, max: 6 }).isAlphanumeric().trim(),
         body('fileId').isURL(),
-        body('fileName').notEmpty().trim(),
+        body('fileName').notEmpty().trim().escape(), // Sanitize fileName
         body('filePath').notEmpty().trim()
     ], handleValidationErrors, async (req, res) => {
         const { roomCode, fileId, fileName, filePath } = req.body;
