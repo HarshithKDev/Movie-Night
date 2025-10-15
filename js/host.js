@@ -84,16 +84,12 @@ document.addEventListener('DOMContentLoaded', () => {
             movies.forEach(movie => {
                 const movieEl = document.createElement('div');
                 movieEl.className = 'flex items-center p-4 hover:bg-white/5';
-
-                // Create and append elements safely to prevent XSS
                 const icon = document.createElement('i');
                 icon.setAttribute('data-lucide', 'film');
                 icon.className = 'w-5 h-5 mr-4 text-on-surface/60';
-
                 const nameSpan = document.createElement('span');
                 nameSpan.className = 'flex-1 truncate';
-                nameSpan.textContent = movie.fileName; // Use textContent for safety
-
+                nameSpan.textContent = movie.fileName;
                 const controlsDiv = document.createElement('div');
                 controlsDiv.className = 'flex gap-2';
                 controlsDiv.innerHTML = `
@@ -101,22 +97,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="rename-btn px-3 py-1.5 text-sm font-semibold hover:bg-white/10 rounded-md">Rename</button>
                     <button class="delete-btn px-3 py-1.5 text-sm font-semibold text-error hover:bg-error/10 rounded-md">Delete</button>
                 `;
-                
                 movieEl.appendChild(icon);
                 movieEl.appendChild(nameSpan);
                 movieEl.appendChild(controlsDiv);
-
-                // Pass all movie details to the createRoom function
                 controlsDiv.querySelector('.host-btn').onclick = () => createRoom(movie.publicUrl, movie.fileName, movie.filePath);
                 controlsDiv.querySelector('.rename-btn').onclick = () => openRenameModal(movie._id, movie.fileName, nameSpan);
                 controlsDiv.querySelector('.delete-btn').onclick = () => openDeleteModal(movie._id, movie.filePath, movieEl);
-                
                 movieLibrary.appendChild(movieEl);
             });
-            lucide.createIcons(); // Re-render icons
+            lucide.createIcons();
         } catch (error) {
             console.error("Failed to load movies:", error);
-            showNotification('Could not load your movies.', 'error');
+            // SECURITY FIX: Use a generic error message for the user.
+            showNotification('Could not load your library. Please try again.', 'error');
             movieLibrary.innerHTML = `<div class="p-8 text-center text-error">Failed to load library. Please try again later.</div>`;
         }
     }
@@ -137,11 +130,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         body: JSON.stringify({ newName })
                     });
                     if (!response.ok) throw new Error('Failed to rename on server.');
-                    
-                    nameSpanElement.textContent = newName; // Safely update the text
+                    nameSpanElement.textContent = newName;
                     showNotification("Movie renamed successfully!", "success");
                 } catch (error) {
-                    showNotification("Could not rename the movie.", "error");
+                    // SECURITY FIX: Use a generic error message for the user.
+                    showNotification("An error occurred. Please try again.", "error");
                 }
             }
             closeModal(renameModal);
@@ -161,17 +154,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify({ movieId, filePath })
                 });
                 if (!response.ok) throw new Error('Failed to delete on server.');
-
                 movieElement.remove();
-                
-                // If the library is now empty, show the empty message
                 if (movieLibrary.children.length === 0) {
                     movieLibrary.innerHTML = `<div class="text-center p-8 text-on-surface/60"><p>Your movie library is empty. Upload a movie to get started!</p></div>`;
                 }
-
                 showNotification("Movie deleted successfully.", "success");
             } catch (error) {
-                showNotification("Could not delete the movie.", "error");
+                // SECURITY FIX: Use a generic error message for the user.
+                showNotification("An error occurred. Please try again.", "error");
             }
             closeModal(deleteModal);
         };
@@ -201,20 +191,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: getAuthHeader(),
                 body: JSON.stringify({ fileName: file.name, fileType: file.type }),
             });
-
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.errors ? errorData.errors[0].msg : 'Could not generate upload URL');
+                // SECURITY FIX: Use a generic error message
+                throw new Error('Could not prepare the upload.');
             }
-
             const { signedUrl, publicUrl, filePath } = await response.json();
-            
             await uploadFile(signedUrl, file);
             await createRoom(publicUrl, file.name, filePath);
-
         } catch (error) {
             uploadStatus.textContent = `Error: ${error.message}`;
-            showNotification(`Upload failed: ${error.message}`, "error");
+            // SECURITY FIX: Use a generic error message
+            showNotification("Upload failed. Please try again.", "error");
         }
     }
 
@@ -247,14 +234,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: getAuthHeader(),
                 body: JSON.stringify({ roomCode, fileId: publicUrl, fileName, filePath }),
             });
-            
             uploadStatus.textContent = 'Success! Redirecting...';
             setTimeout(() => {
                 window.location.href = `watch.html?fileId=${encodeURIComponent(publicUrl)}&roomCode=${roomCode}`;
             }, 1500);
-            
         } catch (error) {
-            showNotification('Failed to create room.', 'error');
+            // SECURITY FIX: Use a generic error message
+            showNotification('Failed to create room. Please try again.', 'error');
             uploadStatus.textContent = 'Failed to create room.';
         }
     }
@@ -267,20 +253,17 @@ document.addEventListener('DOMContentLoaded', () => {
             error: 'bg-error text-on-primary',
             info: 'bg-surface text-on-surface',
         };
-
         const toast = document.createElement('div');
         toast.className = `px-4 py-3 rounded-md shadow-lg text-sm font-semibold animate-fade-in-up ${colors[type]}`;
         toast.textContent = message;
-        
         toastContainer.appendChild(toast);
-        
         setTimeout(() => {
             toast.classList.add('animate-fade-out-down');
             toast.addEventListener('animationend', () => toast.remove());
         }, 3000);
     }
 
-    // Add animation keyframes if they don't exist
+    // Add animation keyframes
     if (!document.getElementById('toast-animations')) {
         const style = document.createElement('style');
         style.id = 'toast-animations';

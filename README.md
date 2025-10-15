@@ -67,27 +67,31 @@ To get a local copy up and running, follow these simple steps.
     Create a `.env` file in the `backend` directory and add your credentials:
     ```env
     PORT=3000
-    MONGO_URI=your_mongodb_connection_string
-    FIREBASE_SERVICE_ACCOUNT=your_firebase_service_account_json_as_a_single_line
-    FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket_url
+    MONGO_URI="your_mongodb_connection_string"
+    FIREBASE_STORAGE_BUCKET="your_firebase_storage_bucket_url"
     ```
-4.  **Configure Frontend Firebase Keys**
-    In `js/auth.js`, replace the placeholder `firebaseConfig` with your actual Firebase project's web app configuration.
-    ```javascript
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
-    ```
-5.  **Configure Frontend Agora App ID**
-    In `js/videocall.js`, replace the placeholder `AGORA_APP_ID` with your Agora App ID.
-    ```javascript
-    const AGORA_APP_ID = 'YOUR_AGORA_APP_ID';
-    ```
+    **IMPORTANT:** For the Firebase Service Account, generate a private key file from your Firebase project settings (`Project settings` > `Service accounts` > `Generate new private key`). Save this file as `firebase-service-account-key.json` inside the `backend` directory. This file is listed in `.gitignore` and **should never be committed to version control**.
+
+4.  **Configure Frontend Keys**
+    It is highly recommended to use environment variables for frontend keys in a production build. For development, you can replace the placeholders in the following files:
+
+    * In `js/auth.js`, replace the placeholder `firebaseConfig` with your Firebase project's web app configuration.
+        ```javascript
+        // WARNING: For production, use environment variables, not hardcoded keys.
+        const firebaseConfig = {
+          apiKey: "YOUR_API_KEY",
+          authDomain: "YOUR_AUTH_DOMAIN",
+          projectId: "YOUR_PROJECT_ID",
+          storageBucket: "YOUR_STORAGE_BUCKET",
+          messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+          appId: "YOUR_APP_ID"
+        };
+        ```
+    * In `js/videocall.js`, replace the placeholder `AGORA_APP_ID`.
+        ```javascript
+        // WARNING: For production, use environment variables or a token server.
+        const AGORA_APP_ID = 'YOUR_AGORA_APP_ID';
+        ```
 
 ### Usage
 
@@ -97,15 +101,4 @@ To get a local copy up and running, follow these simple steps.
     npm start
     ```
 2.  **Open the frontend:**
-    Open the `index.html` file in your browser. Using a live server extension (like the one in VS Code) is recommended for the best development experience.
-
-## Project Structure
-
-* `index.html`: The main landing page with user authentication (login/signup).
-* `host.html` & `js/host.js`: The page for authenticated users to upload new movies or select from their library to host a new session.
-* `join.html` & `js/join.js`: The page where users can enter a room code to join a session.
-* `watch.html` & `js/watch.js`: The main watch party room, featuring the synchronized video player and the participant video chat sidebar.
-* `backend/server.js`: The core Node.js server using Express for API routes, MongoDB for data persistence, and WebSockets for real-time synchronization.
-* `js/auth.js`: Handles all Firebase authentication logic.
-* `js/videocall.js`: Manages the Agora video and audio chat functionality.
-* `output.css`: The compiled Tailwind CSS file.
+    Open the `index.html` file in your browser. Using a live server extension (like the one in VS Code) is recommended.
