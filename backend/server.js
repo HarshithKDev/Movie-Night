@@ -176,7 +176,6 @@ async function run() {
     const roomsCollection = db.collection("rooms");
     const moviesCollection = db.collection("movies");
 
-    // --- ✅ NEW: Endpoint to rename a movie ---
     app.put('/api/movies/:movieId', 
         authenticateUser, 
         [
@@ -207,24 +206,31 @@ async function run() {
         }
     );
 
-    // (Other endpoints remain the same)
     app.post('/api/generate-upload-url', 
         authenticateUser,
         [
-            body('fileName').notEmpty().trim().escape(),
+            body('fileName').notEmpty().trim(),
             body('fileType').equals('video/mp4').withMessage('Only MP4 files are allowed')
         ],
         handleValidationErrors,
         async (req, res) => {
             const { fileName, fileType } = req.body;
-            const filePath = `videos/${Date.now()}-${fileName}`;
+
+            // **FIX:** Sanitize the filename to create a safe path
+            const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+            const filePath = `videos/${Date.now()}-${sanitizedFileName}`;
+            
             const file = bucket.file(filePath);
             const options = { version: 'v4', action: 'write', expires: Date.now() + 15 * 60 * 1000, contentType: fileType };
+            
             try {
                 const [signedUrl] = await file.getSignedUrl(options);
                 const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
                 res.status(200).json({ signedUrl, publicUrl, filePath });
-            } catch (error) { res.status(500).json({ message: 'Could not generate upload URL' }); }
+            } catch (error) { 
+                console.error("Error generating upload URL:", error);
+                res.status(500).json({ message: 'Could not generate upload URL' }); 
+            }
         }
     );
 
@@ -243,7 +249,10 @@ async function run() {
                 const options = { version: 'v4', action: 'read', expires: Date.now() + 60 * 60 * 1000 };
                 const [streamUrl] = await file.getSignedUrl(options);
                 res.status(200).json({ streamUrl });
-            } catch (error) { res.status(500).json({ message: 'Could not generate stream URL' }); }
+            } catch (error) { 
+                console.error("Error generating stream URL:", error);
+                res.status(500).json({ message: 'Could not generate stream URL' }); 
+            }
         }
     );
 
@@ -293,7 +302,7 @@ async function run() {
         [
             body('roomCode').isLength({ min: 6, max: 6 }).isAlphanumeric().trim(),
             body('fileId').isURL(),
-            body('fileName').notEmpty().trim().escape(),
+            body('fileName').notEmpty().trim(),
             body('filePath').notEmpty().trim()
         ],
         handleValidationErrors,
@@ -301,7 +310,12 @@ async function run() {
             const { roomCode, fileId, fileName, filePath } = req.body;
             const userId = req.user.uid;
             
-            await moviesCollection.insertOne({ userId, fileName, publicUrl: fileId, filePath, createdAt: new Date() });
+            // **FIX:** Prevent duplicate movie entries
+            const existingMovie = await moviesCollection.findOne({ filePath: filePath, userId: userId });
+            if (!existingMovie) {
+                await moviesCollection.insertOne({ userId, fileName, publicUrl: fileId, filePath, createdAt: new Date() });
+            }
+
             const newRoom = { roomCode, fileId, createdAt: new Date() };
             await roomsCollection.insertOne(newRoom);
             res.status(201).json(newRoom);
