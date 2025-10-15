@@ -7,17 +7,16 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Material Design Dark Theme Palette
-        'background': '#121212', // Page background
-        'surface': '#1E1E1E',   // Card and component backgrounds
-        'primary': '#6200EE',   // Primary actions, buttons
-        'secondary': '#03DAC6', // Secondary accents
-        'on-background': '#FFFFFF',
-        'on-surface': '#E0E0E0',
-        'on-primary': '#FFFFFF',
-        'error': '#CF6679',
+        'background': '#0a0a0a',
+        'surface': '#1a1a1a',
+        'primary': '#7e22ce',
+        'secondary': '#10b981',
+        'on-background': '#f5f5f5',
+        'on-surface': '#d4d4d4',
+        'on-primary': '#ffffff',
+        'error': '#f43f5e',
       }
     },
   },
-  plugins: [], // DaisyUI plugin removed
+  plugins: [],
 }

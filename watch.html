@@ -6,60 +6,58 @@
     <title>Movie Night</title>
     <link href="output.css" rel="stylesheet">
     <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet">
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <style>
         .video-js { width: 100%; height: 100%; background-color: #000; }
-        .vjs-big-play-button { background-color: rgba(98, 0, 238, 0.8) !important; border: none !important; }
+        .vjs-big-play-button { background-color: rgba(126, 34, 206, 0.8) !important; border: none !important; }
+        .aspect-video { aspect-ratio: 16 / 9; }
     </style>
 </head>
-<body class="h-screen flex flex-col">
+<body class="h-screen flex flex-col bg-background text-on-background">
 
     <header class="flex-shrink-0 h-16 flex items-center justify-between px-4 bg-surface border-b border-white/10 z-20">
         <div class="flex items-center gap-2">
             <a href="index.html" class="font-bold text-xl text-on-background normal-case">Movie Night</a>
         </div>
-        <div class="hidden lg:flex items-center gap-2 font-mono text-sm text-on-surface/70">
-            Room Code: 
-            <span id="room-code-text" class="bg-background px-3 py-1 rounded-md text-on-surface">...</span>
-        </div>
-        <div class="flex items-center gap-2">
-             <button id="copy-room-code-btn" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors">
-                <i data-lucide="clipboard-copy" class="w-5 h-5"></i>
-            </button>
+        <div class="flex items-center gap-4">
+            <div class="hidden sm:flex items-center gap-2 text-sm text-on-surface/70 bg-background rounded-full">
+                <span class="pl-4">Room:</span>
+                <span id="room-code-text" class="px-2 py-1 text-on-surface font-sans tracking-wider">...</span>
+                <button id="copy-room-code-btn" class="w-8 h-8 flex items-center justify-center rounded-full transition-transform duration-200 hover:scale-110 active:scale-100 mr-1">
+                    <i data-lucide="clipboard-copy" class="w-4 h-4"></i>
+                </button>
+            </div>
             <button id="exit-button" class="w-10 h-10 flex items-center justify-center rounded-full text-error hover:bg-error/10 transition-colors">
                 <i data-lucide="log-out" class="w-5 h-5"></i>
             </button>
-            <label for="sidebar-toggle" class="lg:hidden w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors">
-                <i data-lucide="panel-left-close" class="w-5 h-5"></i>
-            </label>
         </div>
     </header>
 
     <div class="flex flex-1 overflow-hidden">
-        <input id="sidebar-toggle" type="checkbox" class="hidden" />
         <main class="flex-1 flex flex-col bg-black">
             <section class="flex-1 flex items-center justify-center relative">
-                 <video id="movie-player" class="video-js vjs-big-play-centered" controls preload="auto" muted data-setup='{}'></video>
-                 <div id="unmute-overlay" class="absolute inset-0 flex items-center justify-center cursor-pointer z-30 bg-black/80 backdrop-blur-sm">
-                    <button class="bg-primary text-on-primary font-bold py-3 px-6 rounded-md hover:bg-opacity-90 transition-colors uppercase tracking-wider">Click to Unmute</button>
-                </div>
+                 <video id="movie-player" class="video-js vjs-big-play-centered" controls preload="auto" data-setup='{}'></video>
             </section>
         </main>
-        
-        <aside id="sidebar" class="w-80 flex-shrink-0 flex flex-col bg-surface border-l border-white/10 p-4 transition-transform duration-300 ease-in-out -translate-x-0 lg:translate-x-0">
+
+        <aside id="sidebar" class="hidden lg:flex w-80 flex-shrink-0 flex-col bg-surface border-l border-white/10 p-4">
             <h2 class="text-lg font-semibold text-center mb-4 text-on-background">Participants</h2>
-            <div id="participants-container" class="space-y-2 overflow-y-auto">
-                <div class="flex items-center gap-3 p-2 rounded-lg bg-background">
-                    <div id="local-player-container" class="w-16 h-12 bg-surface rounded-md overflow-hidden flex-shrink-0"></div>
-                    <p id="local-user-name" class="font-medium flex-1 truncate">You</p>
-                    <button id="mic-btn" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10"><i data-lucide="mic" class="w-4 h-4"></i></button>
-                    <button id="camera-btn" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10"><i data-lucide="video" class="w-4 h-4"></i></button>
+            <div id="participants-container" class="flex flex-col gap-4 overflow-y-auto">
+                <div class="flex flex-col gap-2">
+                    <div id="local-player-container" class="w-full aspect-video bg-background rounded-md overflow-hidden relative"></div>
+                    <div class="flex items-center justify-between">
+                        <p id="local-user-name" class="font-medium text-sm truncate">You</p>
+                        <div class="flex items-center gap-2">
+                            <button id="mic-btn" class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-white/10"><i data-lucide="mic" class="w-4 h-4"></i></button>
+                            <button id="camera-btn" class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-white/10"><i data-lucide="video" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </aside>
     </div>
 
     <div id="loading-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50"><div class="flex flex-col items-center gap-4 text-on-background"><span class="animate-spin h-8 w-8 border-4 border-t-primary rounded-full"></span></div></div>
-    <div id="toast-container" class="fixed bottom-8 right-8 space-y-3 z-50"></div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
@@ -68,7 +66,7 @@
     <script src="js/auth.js"></script>
     <script src="js/watch.js"></script>
     <script src="js/videocall.js"></script>
-    
+
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>lucide.createIcons();</script>
 </body>

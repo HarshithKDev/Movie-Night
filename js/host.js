@@ -32,8 +32,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- File Upload Listeners ---
     fileInput.addEventListener('change', (e) => handleFileUpload(e.target.files[0]));
-    uploadContainer.addEventListener('dragover', (e) => { e.preventDefault(); });
-    uploadContainer.addEventListener('drop', (e) => { e.preventDefault(); handleFileUpload(e.dataTransfer.files[0]); });
+    uploadContainer.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadContainer.classList.add('bg-primary/10');
+    });
+    uploadContainer.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        uploadContainer.classList.remove('bg-primary/10');
+    });
+    uploadContainer.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadContainer.classList.remove('bg-primary/10');
+        handleFileUpload(e.dataTransfer.files[0]);
+    });
+
 
     // --- Core Functions ---
     async function loadUserMovies(userId) {
@@ -45,17 +57,17 @@ document.addEventListener('DOMContentLoaded', () => {
             movieLibrary.innerHTML = ''; 
 
             if (movies.length === 0) {
-                movieLibrary.innerHTML = `<div class="text-center p-8 text-on-surface/60"><p>Your movie library is empty.</p></div>`;
+                movieLibrary.innerHTML = `<div class="text-center p-8 text-on-surface/60"><p>Your movie library is empty. Upload a movie to get started!</p></div>`;
                 return;
             }
 
             movies.forEach(movie => {
                 const movieEl = document.createElement('div');
-                movieEl.className = 'flex items-center p-4 group hover:bg-white/5';
+                movieEl.className = 'flex items-center p-4 hover:bg-white/5';
                 movieEl.innerHTML = `
                     <i data-lucide="film" class="w-5 h-5 mr-4 text-on-surface/60"></i>
                     <span class="flex-1 truncate">${movie.fileName}</span>
-                    <div class="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                    <div class="flex gap-2">
                         <button class="host-btn px-3 py-1.5 text-sm font-semibold bg-primary text-on-primary rounded-md hover:bg-opacity-90">Host</button>
                         <button class="rename-btn px-3 py-1.5 text-sm font-semibold hover:bg-white/10 rounded-md">Rename</button>
                         <button class="delete-btn px-3 py-1.5 text-sm font-semibold text-error hover:bg-error/10 rounded-md">Delete</button>

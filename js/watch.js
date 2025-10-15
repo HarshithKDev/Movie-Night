@@ -9,10 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const exitButtonEl = document.getElementById('exit-button');
     const micBtn = document.getElementById('mic-btn');
     const cameraBtn = document.getElementById('camera-btn');
-    const unmuteOverlay = document.getElementById('unmute-overlay');
     const loadingOverlay = document.getElementById('loading-overlay');
-    const sidebarToggle = document.getElementById('sidebar-toggle');
-    const sidebar = document.getElementById('sidebar');
 
     // --- Initialization ---
     if (!fileId || !roomCode) {
@@ -30,7 +27,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupVideoSync(player, roomCode);
     setupPlayerControls(player);
     setupButtonListeners();
-    setupSidebar();
 
     // --- Core Functions ---
     async function loadVideo(player, fileId) {
@@ -48,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 loadingOverlay.classList.add('hidden');
             });
         } catch (error) {
-            showNotification(`Error: ${error.message}`, 'error');
+            console.error(`Error loading video: ${error.message}`);
             loadingOverlay.classList.add('hidden');
         }
     }
@@ -66,7 +62,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     function setupVideoSync(player, roomCode) {
         const ws = new WebSocket('wss://movienight-backend-veka.onrender.com');
         let receivedEvent = false;
-        ws.onopen = () => { ws.send(JSON.stringify({ type: 'join', roomCode })); showNotification('Sync connection established', 'success'); };
+        
+        ws.onopen = () => { 
+            ws.send(JSON.stringify({ type: 'join', roomCode })); 
+        };
+        
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
             receivedEvent = true;
@@ -78,8 +78,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             setTimeout(() => receivedEvent = false, 250);
         };
-        ws.onclose = () => showNotification('Sync connection lost.', 'error');
-        ws.onerror = () => showNotification('Sync connection error.', 'error');
 
         const sendEvent = (type, time) => { if (ws.readyState === WebSocket.OPEN && !receivedEvent) { ws.send(JSON.stringify({ type, roomCode, time })); } };
         player.on('play', () => sendEvent('play'));
@@ -89,7 +87,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function setupPlayerControls(player) {
-        unmuteOverlay.addEventListener('click', () => { player.muted(false); unmuteOverlay.classList.add('hidden'); }, { once: true });
         micBtn.addEventListener('click', () => { if (typeof toggleMic === 'function') toggleMic(); });
         cameraBtn.addEventListener('click', () => { if (typeof toggleCamera === 'function') toggleCamera(); });
     }
@@ -103,18 +100,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         copyRoomCodeBtn.addEventListener('click', () => {
             navigator.clipboard.writeText(roomCode);
-            showNotification('Room code copied!', 'success');
-        });
-    }
+            
+            const originalIcon = copyRoomCodeBtn.innerHTML;
+            copyRoomCodeBtn.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-secondary"></i>`;
+            lucide.createIcons();
 
-    function setupSidebar() {
-        sidebarToggle.addEventListener('change', () => {
-            sidebar.classList.toggle('translate-x-full');
+            setTimeout(() => {
+                copyRoomCodeBtn.innerHTML = originalIcon;
+                lucide.createIcons();
+            }, 2000);
         });
-    }
-
-    // --- Reusable Notification Toast ---
-    function showNotification(message, type = 'info') {
-        // This can be the same function from host.js
     }
 });

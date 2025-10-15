@@ -29,7 +29,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    roomCodeInput.addEventListener('input', hideError);
+    roomCodeInput.addEventListener('input', () => {
+        hideError();
+        roomCodeInput.value = roomCodeInput.value.toUpperCase();
+    });
 
     function showError(message) {
         errorText.textContent = message;

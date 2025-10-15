@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movie Night</title>
     <link href="output.css" rel="stylesheet">
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 </head>
-<body>
+<body class="bg-background text-on-background">
 
     <div class="min-h-screen flex flex-col items-center justify-center p-4">
 
@@ -26,15 +27,18 @@
                     <form id="auth-form" class="space-y-6">
                         <div class="relative">
                             <input type="text" id="username-input" class="peer w-full bg-transparent border-b-2 border-on-surface/30 focus:border-primary transition-colors outline-none pt-4" placeholder=" " />
-                            <label class="absolute left-0 top-4 text-on-surface/50 peer-focus:top-0 peer-focus:text-xs peer-focus:text-primary transition-all" for="username-input">Username</label>
+                            <label class="absolute left-0 top-4 text-on-surface/50 transition-all peer-focus:top-0 peer-focus:text-xs peer-focus:text-primary peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs" for="username-input">Username</label>
                         </div>
                         <div class="relative">
                             <input type="email" id="email-input" required class="peer w-full bg-transparent border-b-2 border-on-surface/30 focus:border-primary transition-colors outline-none pt-4" placeholder=" " />
-                            <label class="absolute left-0 top-4 text-on-surface/50 peer-focus:top-0 peer-focus:text-xs peer-focus:text-primary transition-all" for="email-input">Email</label>
+                            <label class="absolute left-0 top-4 text-on-surface/50 transition-all peer-focus:top-0 peer-focus:text-xs peer-focus:text-primary peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs" for="email-input">Email</label>
                         </div>
                         <div class="relative">
                             <input type="password" id="password-input" required class="peer w-full bg-transparent border-b-2 border-on-surface/30 focus:border-primary transition-colors outline-none pt-4" placeholder=" " />
-                            <label class="absolute left-0 top-4 text-on-surface/50 peer-focus:top-0 peer-focus:text-xs peer-focus:text-primary transition-all" for="password-input">Password</label>
+                            <label class="absolute left-0 top-4 text-on-surface/50 transition-all peer-focus:top-0 peer-focus:text-xs peer-focus:text-primary peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs" for="password-input">Password</label>
+                            <button type="button" id="password-toggle-btn" class="absolute right-0 top-4 text-on-surface/50 hover:text-on-surface">
+                                <i data-lucide="eye-off" class="w-5 h-5"></i>
+                            </button>
                         </div>
                         <div class="pt-4">
                             <button type="submit" id="auth-btn" class="w-full bg-primary text-on-primary font-bold py-3 rounded-md hover:bg-opacity-90 transition-colors uppercase tracking-wider">Sign Up</button>

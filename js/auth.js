@@ -25,6 +25,7 @@ const authForm = document.getElementById('auth-form');
 const usernameInput = document.getElementById('username-input');
 const emailInput = document.getElementById('email-input');
 const passwordInput = document.getElementById('password-input');
+const passwordToggleBtn = document.getElementById('password-toggle-btn');
 const authBtn = document.getElementById('auth-btn');
 const authErrorEl = document.getElementById('auth-error');
 
@@ -42,6 +43,15 @@ if (toggleAuthModeBtn) {
     });
 }
 
+if (passwordToggleBtn) {
+    passwordToggleBtn.addEventListener('click', () => {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        passwordToggleBtn.innerHTML = type === 'password' ? '<i data-lucide="eye-off" class="w-5 h-5"></i>' : '<i data-lucide="eye" class="w-5 h-5"></i>';
+        lucide.createIcons();
+    });
+}
+
 if (authForm) {
     authForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -54,7 +64,7 @@ if (authForm) {
         if (isLoginMode) {
             auth.signInWithEmailAndPassword(email, password)
                 .catch(error => {
-                    authErrorEl.textContent = error.message;
+                    authErrorEl.textContent = getFriendlyErrorMessage(error.code);
                 });
         } else {
             if (!username) {
@@ -68,7 +78,7 @@ if (authForm) {
                     });
                 })
                 .catch(error => {
-                    authErrorEl.textContent = error.message;
+                    authErrorEl.textContent = getFriendlyErrorMessage(error.code);
                 });
         }
     });
@@ -98,6 +108,7 @@ function updateAuthUI() {
 
 // --- Auth State Observer ---
 auth.onAuthStateChanged(user => {
+    // THIS IS THE FIX: Changed .remove('hidden') to .add('hidden')
     if (authLoadingView) authLoadingView.classList.add('hidden');
 
     if (user) {
@@ -110,3 +121,19 @@ auth.onAuthStateChanged(user => {
         if (isLoginMode === false) updateAuthUI(); // Ensure correct view on logout
     }
 });
+
+function getFriendlyErrorMessage(errorCode) {
+    switch (errorCode) {
+        case 'auth/invalid-email':
+            return 'Please enter a valid email address.';
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+            return 'Invalid email or password.';
+        case 'auth/email-already-in-use':
+            return 'An account with this email already exists.';
+        case 'auth/weak-password':
+            return 'Password should be at least 6 characters.';
+        default:
+            return 'An unexpected error occurred. Please try again.';
+    }
+}

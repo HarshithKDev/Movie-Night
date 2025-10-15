@@ -5,35 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Host Session - Movie Night</title>
     <link href="output.css" rel="stylesheet">
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 </head>
-<body>
-    <div class="max-w-4xl mx-auto p-4 md:p-6">
-        <header class="flex items-center mb-8">
-            <a href="index.html" class="flex items-center gap-2 text-on-surface/70 hover:text-on-surface transition-colors">
-                <i data-lucide="chevron-left" class="w-5 h-5"></i>
-                Home
-            </a>
-        </header>
+<body class="bg-background text-on-background">
 
+    <header class="h-16 flex items-center px-4 md:px-6 bg-surface border-b border-white/10">
+        <a href="index.html" class="flex items-center gap-2 text-on-surface/80 hover:text-on-surface transition-colors font-semibold">
+            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+            Back to Home
+        </a>
+    </header>
+
+    <div class="max-w-4xl mx-auto p-4 md:p-6">
         <main>
             <div class="text-center mb-10">
                 <h1 class="text-4xl font-bold text-on-background">Host a Session</h1>
                 <p class="text-on-surface/70 mt-2">Upload a movie or choose one from your library.</p>
             </div>
 
-            <div class="bg-surface rounded-lg shadow-lg mb-12">
+            <div id="upload-container" class="bg-surface rounded-lg shadow-lg mb-12 transition-all duration-300">
                  <div class="p-6">
-                    <label for="file-input" class="w-full p-6 border-2 border-dashed border-on-surface/20 rounded-lg hover:border-primary transition-colors cursor-pointer text-center">
+                    <label for="file-input" class="flex flex-col items-center justify-center w-full p-8 border-2 border-dashed border-on-surface/20 rounded-lg hover:border-primary hover:bg-primary/5 transition-all cursor-pointer text-center">
                         <input type="file" id="file-input" class="hidden" accept="video/mp4">
-                        <i data-lucide="upload-cloud" class="w-10 h-10 mx-auto text-on-surface/50"></i>
-                        <p class="font-semibold mt-3 text-on-background">Click to upload or drag & drop</p>
-                        <p class="text-sm text-on-surface/60">MP4 video files only</p>
+                        <div class="bg-primary/10 p-4 rounded-full">
+                            <i data-lucide="upload-cloud" class="w-12 h-12 text-primary"></i>
+                        </div>
+                        <p class="font-semibold mt-4 text-on-background">
+                            <span class="font-semibold text-primary">Click to upload</span> or drag & drop
+                        </p>
+                        <p class="text-sm text-on-surface/60 mt-1">MP4 video files only</p>
                     </label>
-                    <div id="progress-container" class="mt-4 w-full hidden">
+                    <div id="progress-container" class="mt-6 w-full hidden">
                         <div class="w-full bg-on-surface/20 rounded-full h-2">
                             <div id="progress-bar" class="bg-primary h-2 rounded-full transition-all" style="width: 0%"></div>
                         </div>
-                        <div class="flex justify-between items-center mt-1 text-xs text-on-surface/70">
+                        <div class="flex justify-between items-center mt-2 text-xs text-on-surface/70">
                             <span id="upload-status">Uploading...</span>
                             <span id="progress-text">0%</span>
                         </div>
@@ -50,43 +56,43 @@
         </main>
     </div>
 
-    <div id="rename-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
-      <div class="bg-surface rounded-lg shadow-xl w-full max-w-sm">
-        <div class="p-6">
-            <h3 class="font-bold text-lg text-on-background">Rename Movie</h3>
-            <div class="relative mt-6">
-                <input type="text" id="rename-input" class="peer w-full bg-transparent border-b-2 border-on-surface/30 focus:border-primary transition-colors outline-none pt-4" placeholder=" ">
-                 <label class="absolute left-0 top-4 text-on-surface/50 peer-focus:top-0 peer-focus:text-xs peer-focus:text-primary transition-all" for="rename-input">New movie name</label>
-            </div>
-        </div>
-        <div class="bg-white/5 px-6 py-3 flex justify-end gap-3 rounded-b-lg">
-            <button id="cancel-rename-btn" class="px-4 py-2 text-on-surface/80 hover:bg-white/10 rounded-md text-sm font-semibold">Cancel</button>
-            <button id="save-rename-btn" class="px-4 py-2 text-primary hover:bg-primary/10 rounded-md text-sm font-semibold">Save</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="delete-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
-      <div class="bg-surface rounded-lg shadow-xl w-full max-w-sm">
-        <div class="p-6">
-            <h3 class="font-bold text-lg text-on-background">Delete Movie</h3>
-            <p class="py-4 text-on-surface/70">Are you sure? This action cannot be undone.</p>
-        </div>
-        <div class="bg-white/5 px-6 py-3 flex justify-end gap-3 rounded-b-lg">
-            <button id="cancel-delete-btn" class="px-4 py-2 text-on-surface/80 hover:bg-white/10 rounded-md text-sm font-semibold">Cancel</button>
-            <button id="confirm-delete-btn" class="px-4 py-2 text-error hover:bg-error/10 rounded-md text-sm font-semibold">Confirm Delete</button>
+    <div id="rename-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 transition-opacity duration-300">
+        <div class="bg-surface rounded-lg shadow-xl w-full max-w-sm">
+          <div class="p-6">
+              <h3 class="font-bold text-lg text-on-background">Rename Movie</h3>
+              <div class="relative mt-6">
+                  <input type="text" id="rename-input" class="peer w-full bg-transparent border-b-2 border-on-surface/30 focus:border-primary transition-colors outline-none pt-4" placeholder=" ">
+                   <label class="absolute left-0 top-4 text-on-surface/50 transition-all peer-focus:top-0 peer-focus:text-xs peer-focus:text-primary peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs" for="rename-input">New movie name</label>
+              </div>
+          </div>
+          <div class="bg-white/5 px-6 py-3 flex justify-end gap-3 rounded-b-lg">
+              <button id="cancel-rename-btn" class="px-4 py-2 text-on-surface/80 hover:bg-white/10 rounded-md text-sm font-semibold">Cancel</button>
+              <button id="save-rename-btn" class="px-4 py-2 text-primary hover:bg-primary/10 rounded-md text-sm font-semibold">Save</button>
+          </div>
         </div>
       </div>
-    </div>
-
-    <div id="toast-container" class="fixed bottom-8 right-8 space-y-3 z-50"></div>
-
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/host.js"></script>
-
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script>lucide.createIcons();</script>
+  
+      <div id="delete-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 transition-opacity duration-300">
+        <div class="bg-surface rounded-lg shadow-xl w-full max-w-sm">
+          <div class="p-6">
+              <h3 class="font-bold text-lg text-on-background">Delete Movie</h3>
+              <p class="py-4 text-on-surface/70">Are you sure? This action cannot be undone.</p>
+          </div>
+          <div class="bg-white/5 px-6 py-3 flex justify-end gap-3 rounded-b-lg">
+              <button id="cancel-delete-btn" class="px-4 py-2 text-on-surface/80 hover:bg-white/10 rounded-md text-sm font-semibold">Cancel</button>
+              <button id="confirm-delete-btn" class="px-4 py-2 text-error hover:bg-error/10 rounded-md text-sm font-semibold">Confirm Delete</button>
+          </div>
+        </div>
+      </div>
+  
+      <div id="toast-container" class="fixed bottom-8 right-8 space-y-3 z-50"></div>
+  
+      <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+      <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+      <script src="js/auth.js"></script>
+      <script src="js/host.js"></script>
+  
+      <script src="https://unpkg.com/lucide@latest"></script>
+      <script>lucide.createIcons();</script>
 </body>
 </html>
