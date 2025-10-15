@@ -1,4 +1,6 @@
-document.addEventListener('DOMContentLoaded', async () => {
+// ---> NEW: Listen for the 'authReady' event to ensure Firebase auth is initialized <---
+document.addEventListener('authReady', () => {
+    // All original code is now safely inside this listener
     const params = new URLSearchParams(window.location.search);
     const fileId = decodeURIComponent(params.get('fileId'));
     const roomCode = params.get('roomCode');
@@ -18,19 +20,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    roomCodeTextEl.textContent = roomCode;
+    if (roomCodeTextEl) {
+        roomCodeTextEl.textContent = roomCode;
+    }
     
     const player = videojs('movie-player', { fluid: true, responsive: true });
 
-    await loadVideo(player, fileId);
-    initializeAuthAndVideoCall(roomCode);
-    setupPlayerControls(player);
-    setupButtonListeners();
+    // We now call the main logic functions from within the event listener
+    loadVideo(player, fileId);
+    initializeAuthAndVideoCall(roomCode, player); // Pass player instance
+    setupButtonListeners(player); // Pass player instance
 
     // --- Core Functions ---
     async function loadVideo(player, fileId) {
         try {
-            const backendUrl = 'https://movienight-backend-veka.onrender.com';
+            // Using localhost for local development
+            const backendUrl = 'http://localhost:3000';
             const token = localStorage.getItem('firebaseIdToken');
             const response = await fetch(`${backendUrl}/api/get-stream-url`, {
                 method: 'POST',
@@ -49,10 +54,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error(`Error loading video: ${error.message}`);
             loadingOverlay.classList.add('hidden');
+            alert('Failed to load the video. Please check the room code or try again.');
         }
     }
 
-    function initializeAuthAndVideoCall(roomCode) {
+    function initializeAuthAndVideoCall(roomCode, player) {
+        // This will now work correctly because `auth` is guaranteed to be initialized
         auth.onAuthStateChanged(user => {
             if (user) {
                 user.getIdToken().then(token => {
@@ -73,7 +80,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function setupVideoSync(player, roomCode, token) {
-        const wsUrl = `wss://movienight-backend-veka.onrender.com?roomCode=${roomCode}&token=${token}`;
+        // ---> FIX: Define wsUrl here, inside the function where it's used <---
+        // Use ws:// for local development
+        const wsUrl = `ws://localhost:3000?roomCode=${roomCode}&token=${token}`;
         const ws = new WebSocket(wsUrl);
         let receivedEvent = false;
         
@@ -83,52 +92,74 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         ws.onerror = (error) => {
             console.error('WebSocket error:', error);
-            alert('Could not connect to the session. Your login might be invalid.');
+            alert('Could not connect to the session. Your login might be invalid or the server is down.');
             window.location.href = 'index.html';
         };
 
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
             receivedEvent = true;
-            switch (data.type) {
-                case 'sync-state': player.currentTime(data.state.currentTime); data.state.isPlaying ? player.play() : player.pause(); break;
-                case 'play': if (player.paused()) player.play(); break;
-                case 'pause': if (!player.paused()) player.pause(); break;
-                case 'seek': player.currentTime(data.time); break;
+            try {
+                switch (data.type) {
+                    case 'sync-state': 
+                        player.currentTime(data.state.currentTime); 
+                        data.state.isPlaying ? player.play() : player.pause(); 
+                        break;
+                    case 'play': 
+                        if (player.paused()) player.play(); 
+                        break;
+                    case 'pause': 
+                        if (!player.paused()) player.pause(); 
+                        break;
+                    case 'seek': 
+                        player.currentTime(data.time); 
+                        break;
+                }
+            } catch (e) {
+                console.error("Error handling player state:", e);
             }
             setTimeout(() => receivedEvent = false, 250);
         };
 
-        const sendEvent = (type, time) => { if (ws.readyState === WebSocket.OPEN && !receivedEvent) { ws.send(JSON.stringify({ type, roomCode, time })); } };
-        player.on('play', () => sendEvent('play'));
-        player.on('pause', () => sendEvent('pause'));
+        const sendEvent = (type, time) => { 
+            if (ws.readyState === WebSocket.OPEN && !receivedEvent) { 
+                ws.send(JSON.stringify({ type, roomCode, time })); 
+            } 
+        };
+        
+        player.on('play', () => sendEvent('play', player.currentTime()));
+        player.on('pause', () => sendEvent('pause', player.currentTime()));
         player.on('seeked', () => sendEvent('seek', player.currentTime()));
+        
+        // Make ws globally available on the window object so it can be closed
         window.ws = ws; 
     }
 
-    function setupPlayerControls(player) {
-        micBtn.addEventListener('click', () => { if (typeof toggleMic === 'function') toggleMic(); });
-        cameraBtn.addEventListener('click', () => { if (typeof toggleCamera === 'function') toggleCamera(); });
-    }
-
     function setupButtonListeners() {
-        exitButtonEl.addEventListener('click', async () => {
-            if (typeof leaveChannel === 'function') await leaveChannel();
-            if (window.ws) window.ws.close();
-            window.location.href = 'index.html';
-        });
+        if(micBtn) micBtn.addEventListener('click', () => { if (typeof toggleMic === 'function') toggleMic(); });
+        if(cameraBtn) cameraBtn.addEventListener('click', () => { if (typeof toggleCamera === 'function') toggleCamera(); });
 
-        copyRoomCodeBtn.addEventListener('click', () => {
-            navigator.clipboard.writeText(roomCode);
-            
-            const originalIcon = copyRoomCodeBtn.innerHTML;
-            copyRoomCodeBtn.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-secondary"></i>`;
-            lucide.createIcons();
+        if(exitButtonEl) {
+            exitButtonEl.addEventListener('click', async () => {
+                if (typeof leaveChannel === 'function') await leaveChannel();
+                if (window.ws) window.ws.close();
+                window.location.href = 'index.html';
+            });
+        }
 
-            setTimeout(() => {
-                copyRoomCodeBtn.innerHTML = originalIcon;
+        if(copyRoomCodeBtn) {
+            copyRoomCodeBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(roomCode);
+                
+                const originalIcon = copyRoomCodeBtn.innerHTML;
+                copyRoomCodeBtn.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-secondary"></i>`;
                 lucide.createIcons();
-            }, 2000);
-        });
+    
+                setTimeout(() => {
+                    copyRoomCodeBtn.innerHTML = originalIcon;
+                    lucide.createIcons();
+                }, 2000);
+            });
+        }
     }
 });

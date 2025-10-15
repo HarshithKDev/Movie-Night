@@ -101,6 +101,20 @@ app.get('/', (req, res) => {
   res.status(200).json({ message: 'Server is awake and running!' });
 });
 
+// --- NEW: Endpoint to provide Firebase config to frontend ---
+app.get('/api/firebase-config', (req, res) => {
+  const firebaseConfig = {
+    apiKey: process.env.FIREBASE_API_KEY,
+    authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET_WEB,
+    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.FIREBASE_APP_ID,
+  };
+  res.json(firebaseConfig);
+});
+
+
 const rooms = {};
 wss.on('connection', (ws, req) => {
     const { query } = url.parse(req.url, true);

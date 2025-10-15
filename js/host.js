@@ -1,4 +1,6 @@
-document.addEventListener('DOMContentLoaded', () => {
+// ---> NEW: Listen for the 'authReady' event from auth.js <---
+document.addEventListener('authReady', () => {
+    // All of the original code now goes inside this listener
     const fileInput = document.getElementById('file-input');
     const uploadContainer = document.getElementById('upload-container');
     const progressContainer = document.getElementById('progress-container');
@@ -16,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
     const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
 
-    const backendUrl = 'https://movienight-backend-veka.onrender.com';
+    const backendUrl = 'http://localhost:3000'; // Using localhost for development
     let currentUser = null;
 
     // --- Helper function to create authorization headers ---
@@ -29,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Authentication and Movie Loading ---
+    // This will now work because 'auth' is guaranteed to be initialized
     auth.onAuthStateChanged(user => {
         if (user) {
             currentUser = user;
