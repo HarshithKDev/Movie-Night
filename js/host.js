@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressText = document.getElementById('progress-text');
     const uploadStatus = document.getElementById('upload-status');
     const movieLibrary = document.getElementById('movie-library');
-    const libraryLoadingMessage = document.getElementById('library-loading-message');
 
     const renameModal = document.getElementById('rename-modal');
     const renameInput = document.getElementById('rename-input');
@@ -20,12 +19,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const backendUrl = 'https://movienight-backend-veka.onrender.com';
     let currentUser = null;
 
+    // --- Helper function to create authorization headers ---
+    function getAuthHeader() {
+        const token = localStorage.getItem('firebaseIdToken');
+        return {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+    }
+
     // --- Authentication and Movie Loading ---
     auth.onAuthStateChanged(user => {
         if (user) {
             currentUser = user;
             loadUserMovies(user.uid);
         } else {
+            // If the user logs out, clear the library and show the login message.
             movieLibrary.innerHTML = `<div class="p-8 text-center text-on-surface/60">Please log in to see your library.</div>`;
         }
     });
@@ -43,15 +52,26 @@ document.addEventListener('DOMContentLoaded', () => {
     uploadContainer.addEventListener('drop', (e) => {
         e.preventDefault();
         uploadContainer.classList.remove('bg-primary/10');
-        handleFileUpload(e.dataTransfer.files[0]);
+        const files = e.dataTransfer.files;
+        if (files.length) {
+            handleFileUpload(files[0]);
+        }
     });
 
 
     // --- Core Functions ---
     async function loadUserMovies(userId) {
         try {
-            const response = await fetch(`${backendUrl}/api/movies/${userId}`);
-            if (!response.ok) throw new Error('Could not fetch movies.');
+            const token = await currentUser.getIdToken();
+            const response = await fetch(`${backendUrl}/api/movies/${userId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Could not fetch movies.');
+            }
             
             const movies = await response.json();
             movieLibrary.innerHTML = ''; 
@@ -64,29 +84,45 @@ document.addEventListener('DOMContentLoaded', () => {
             movies.forEach(movie => {
                 const movieEl = document.createElement('div');
                 movieEl.className = 'flex items-center p-4 hover:bg-white/5';
-                movieEl.innerHTML = `
-                    <i data-lucide="film" class="w-5 h-5 mr-4 text-on-surface/60"></i>
-                    <span class="flex-1 truncate">${movie.fileName}</span>
-                    <div class="flex gap-2">
-                        <button class="host-btn px-3 py-1.5 text-sm font-semibold bg-primary text-on-primary rounded-md hover:bg-opacity-90">Host</button>
-                        <button class="rename-btn px-3 py-1.5 text-sm font-semibold hover:bg-white/10 rounded-md">Rename</button>
-                        <button class="delete-btn px-3 py-1.5 text-sm font-semibold text-error hover:bg-error/10 rounded-md">Delete</button>
-                    </div>
+
+                // Create and append elements safely to prevent XSS
+                const icon = document.createElement('i');
+                icon.setAttribute('data-lucide', 'film');
+                icon.className = 'w-5 h-5 mr-4 text-on-surface/60';
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'flex-1 truncate';
+                nameSpan.textContent = movie.fileName; // Use textContent for safety
+
+                const controlsDiv = document.createElement('div');
+                controlsDiv.className = 'flex gap-2';
+                controlsDiv.innerHTML = `
+                    <button class="host-btn px-3 py-1.5 text-sm font-semibold bg-primary text-on-primary rounded-md hover:bg-opacity-90">Host</button>
+                    <button class="rename-btn px-3 py-1.5 text-sm font-semibold hover:bg-white/10 rounded-md">Rename</button>
+                    <button class="delete-btn px-3 py-1.5 text-sm font-semibold text-error hover:bg-error/10 rounded-md">Delete</button>
                 `;
-                movieEl.querySelector('.host-btn').onclick = () => createRoom(movie.publicUrl);
-                movieEl.querySelector('.rename-btn').onclick = () => openRenameModal(movie._id, movie.fileName, movieEl);
-                movieEl.querySelector('.delete-btn').onclick = () => openDeleteModal(movie._id, movie.filePath, movieEl);
+                
+                movieEl.appendChild(icon);
+                movieEl.appendChild(nameSpan);
+                movieEl.appendChild(controlsDiv);
+
+                // Pass all movie details to the createRoom function
+                controlsDiv.querySelector('.host-btn').onclick = () => createRoom(movie.publicUrl, movie.fileName, movie.filePath);
+                controlsDiv.querySelector('.rename-btn').onclick = () => openRenameModal(movie._id, movie.fileName, nameSpan);
+                controlsDiv.querySelector('.delete-btn').onclick = () => openDeleteModal(movie._id, movie.filePath, movieEl);
+                
                 movieLibrary.appendChild(movieEl);
             });
             lucide.createIcons(); // Re-render icons
         } catch (error) {
+            console.error("Failed to load movies:", error);
             showNotification('Could not load your movies.', 'error');
-            movieLibrary.innerHTML = `<div class="p-8 text-center text-error">Failed to load library.</div>`;
+            movieLibrary.innerHTML = `<div class="p-8 text-center text-error">Failed to load library. Please try again later.</div>`;
         }
     }
 
     // --- Modal Logic ---
-    function openRenameModal(movieId, currentName, movieElement) {
+    function openRenameModal(movieId, currentName, nameSpanElement) {
         renameInput.value = currentName;
         renameModal.classList.remove('hidden');
         renameModal.classList.add('flex');
@@ -95,12 +131,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const newName = renameInput.value.trim();
             if (newName && newName !== currentName) {
                 try {
-                    await fetch(`${backendUrl}/api/movies/${movieId}`, {
+                    const response = await fetch(`${backendUrl}/api/movies/${movieId}`, {
                         method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ newName, userId: currentUser.uid })
+                        headers: getAuthHeader(),
+                        body: JSON.stringify({ newName })
                     });
-                    movieElement.querySelector('span').textContent = newName;
+                    if (!response.ok) throw new Error('Failed to rename on server.');
+                    
+                    nameSpanElement.textContent = newName; // Safely update the text
                     showNotification("Movie renamed successfully!", "success");
                 } catch (error) {
                     showNotification("Could not rename the movie.", "error");
@@ -117,12 +155,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         confirmDeleteBtn.onclick = async () => {
             try {
-                await fetch(`${backendUrl}/api/movies`, {
+                const response = await fetch(`${backendUrl}/api/movies`, {
                     method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ movieId, filePath, userId: currentUser.uid })
+                    headers: getAuthHeader(),
+                    body: JSON.stringify({ movieId, filePath })
                 });
+                if (!response.ok) throw new Error('Failed to delete on server.');
+
                 movieElement.remove();
+                
+                // If the library is now empty, show the empty message
+                if (movieLibrary.children.length === 0) {
+                    movieLibrary.innerHTML = `<div class="text-center p-8 text-on-surface/60"><p>Your movie library is empty. Upload a movie to get started!</p></div>`;
+                }
+
                 showNotification("Movie deleted successfully.", "success");
             } catch (error) {
                 showNotification("Could not delete the movie.", "error");
@@ -152,13 +198,19 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`${backendUrl}/api/generate-upload-url`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeader(),
                 body: JSON.stringify({ fileName: file.name, fileType: file.type }),
             });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.errors ? errorData.errors[0].msg : 'Could not generate upload URL');
+            }
+
             const { signedUrl, publicUrl, filePath } = await response.json();
             
             await uploadFile(signedUrl, file);
-            await createRoom(publicUrl, file.name, filePath, currentUser.uid);
+            await createRoom(publicUrl, file.name, filePath);
 
         } catch (error) {
             uploadStatus.textContent = `Error: ${error.message}`;
@@ -185,15 +237,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    async function createRoom(publicUrl, fileName = null, filePath = null, userId = null) {
+    async function createRoom(publicUrl, fileName, filePath) {
         uploadStatus.textContent = 'Creating room...';
         const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
         
         try {
             await fetch(`${backendUrl}/api/rooms`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ roomCode, fileId: publicUrl, fileName, filePath, userId }),
+                headers: getAuthHeader(),
+                body: JSON.stringify({ roomCode, fileId: publicUrl, fileName, filePath }),
             });
             
             uploadStatus.textContent = 'Success! Redirecting...';
@@ -203,6 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
         } catch (error) {
             showNotification('Failed to create room.', 'error');
+            uploadStatus.textContent = 'Failed to create room.';
         }
     }
 

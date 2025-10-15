@@ -108,19 +108,24 @@ function updateAuthUI() {
 
 // --- Auth State Observer ---
 auth.onAuthStateChanged(user => {
-    // THIS IS THE FIX: Changed .remove('hidden') to .add('hidden')
     if (authLoadingView) authLoadingView.classList.add('hidden');
 
     if (user) {
+        user.getIdToken().then(token => {
+            localStorage.setItem('firebaseIdToken', token);
+        });
+
         if (userNameEl) userNameEl.textContent = user.displayName || user.email;
         if (loggedInView) loggedInView.classList.remove('hidden');
         if (loggedOutView) loggedOutView.classList.add('hidden');
     } else {
+        localStorage.removeItem('firebaseIdToken');
         if (loggedInView) loggedInView.classList.add('hidden');
         if (loggedOutView) loggedOutView.classList.remove('hidden');
-        if (isLoginMode === false) updateAuthUI(); // Ensure correct view on logout
+        if (isLoginMode === false) updateAuthUI();
     }
 });
+
 
 function getFriendlyErrorMessage(errorCode) {
     switch (errorCode) {

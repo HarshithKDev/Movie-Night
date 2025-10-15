@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await loadVideo(player, fileId);
     initializeAuthAndVideoCall(roomCode);
-    setupVideoSync(player, roomCode);
     setupPlayerControls(player);
     setupButtonListeners();
 
@@ -32,9 +31,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function loadVideo(player, fileId) {
         try {
             const backendUrl = 'https://movienight-backend-veka.onrender.com';
+            const token = localStorage.getItem('firebaseIdToken');
             const response = await fetch(`${backendUrl}/api/get-stream-url`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ publicUrl: fileId }),
             });
             if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
@@ -51,22 +54,39 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function initializeAuthAndVideoCall(roomCode) {
         auth.onAuthStateChanged(user => {
-            const userName = user ? (user.displayName || user.email.split('@')[0]) : `Guest${Math.floor(Math.random() * 1000)}`;
-            document.getElementById('local-user-name').textContent = userName;
-            if (typeof joinAndDisplayLocalStream === 'function') {
-                joinAndDisplayLocalStream(roomCode, userName);
+            if (user) {
+                user.getIdToken().then(token => {
+                    localStorage.setItem('firebaseIdToken', token); // Ensure token is fresh
+                    setupVideoSync(player, roomCode, token); // Pass token to WebSocket setup
+                    const userName = user.displayName || user.email.split('@')[0];
+                    document.getElementById('local-user-name').textContent = userName;
+                    if (typeof joinAndDisplayLocalStream === 'function') {
+                        joinAndDisplayLocalStream(roomCode, userName);
+                    }
+                });
+            } else {
+                // Handle user not logged in
+                alert('You must be logged in to join a room.');
+                window.location.href = 'index.html';
             }
         });
     }
 
-    function setupVideoSync(player, roomCode) {
-        const ws = new WebSocket('wss://movienight-backend-veka.onrender.com');
+    function setupVideoSync(player, roomCode, token) {
+        const wsUrl = `wss://movienight-backend-veka.onrender.com?roomCode=${roomCode}&token=${token}`;
+        const ws = new WebSocket(wsUrl);
         let receivedEvent = false;
         
         ws.onopen = () => { 
-            ws.send(JSON.stringify({ type: 'join', roomCode })); 
+            console.log('WebSocket connection established.');
         };
         
+        ws.onerror = (error) => {
+            console.error('WebSocket error:', error);
+            alert('Could not connect to the session. Your login might be invalid.');
+            window.location.href = 'index.html';
+        };
+
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
             receivedEvent = true;
