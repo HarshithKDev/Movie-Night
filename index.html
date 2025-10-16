@@ -29,17 +29,17 @@
                 <div class="p-8">
                     <form id="auth-form" class="space-y-6">
                         <div class="relative">
-                            <input type="text" id="username-input" class="peer w-full bg-transparent border-b-2 border-on-surface/30 focus:border-primary transition-colors outline-none pt-4" placeholder=" " />
-                            <label class="absolute left-0 top-4 text-on-surface/50 transition-all peer-focus:top-0 peer-focus:text-xs peer-focus:text-primary peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs" for="username-input">Username</label>
+                            <input type="text" id="username-input" class="peer w-full bg-transparent rounded-lg border-2 p-4 border-on-surface/30 focus:border-primary transition-colors outline-none" placeholder=" " />
+                            <label for="username-input" class="absolute pointer-events-none text-on-surface/50 transition-all left-4 top-4 peer-focus:-top-3 peer-focus:text-xs peer-focus:text-primary peer-[:not(:placeholder-shown)]:-top-3 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:px-1 peer-focus:px-1 peer-[:not(:placeholder-shown)]:bg-surface peer-focus:bg-surface">Username</label>
                         </div>
                         <div class="relative">
-                            <input type="email" id="email-input" required class="peer w-full bg-transparent border-b-2 border-on-surface/30 focus:border-primary transition-colors outline-none pt-4" placeholder=" " />
-                            <label class="absolute left-0 top-4 text-on-surface/50 transition-all peer-focus:top-0 peer-focus:text-xs peer-focus:text-primary peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs" for="email-input">Email</label>
+                            <input type="email" id="email-input" required class="peer w-full bg-transparent rounded-lg border-2 p-4 border-on-surface/30 focus:border-primary transition-colors outline-none" placeholder=" " />
+                            <label for="email-input" class="absolute pointer-events-none text-on-surface/50 transition-all left-4 top-4 peer-focus:-top-3 peer-focus:text-xs peer-focus:text-primary peer-[:not(:placeholder-shown)]:-top-3 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:px-1 peer-focus:px-1 peer-[:not(:placeholder-shown)]:bg-surface peer-focus:bg-surface">Email</label>
                         </div>
                         <div class="relative">
-                            <input type="password" id="password-input" required class="peer w-full bg-transparent border-b-2 border-on-surface/30 focus:border-primary transition-colors outline-none pt-4" placeholder=" " />
-                            <label class="absolute left-0 top-4 text-on-surface/50 transition-all peer-focus:top-0 peer-focus:text-xs peer-focus:text-primary peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs" for="password-input">Password</label>
-                            <button type="button" id="password-toggle-btn" class="absolute right-0 top-4 text-on-surface/50 hover:text-on-surface">
+                            <input type="password" id="password-input" required class="peer w-full bg-transparent rounded-lg border-2 p-4 border-on-surface/30 focus:border-primary transition-colors outline-none" placeholder=" " />
+                            <label for="password-input" class="absolute pointer-events-none text-on-surface/50 transition-all left-4 top-4 peer-focus:-top-3 peer-focus:text-xs peer-focus:text-primary peer-[:not(:placeholder-shown)]:-top-3 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:px-1 peer-focus:px-1 peer-[:not(:placeholder-shown)]:bg-surface peer-focus:bg-surface">Password</label>
+                            <button type="button" id="password-toggle-btn" class="absolute right-4 top-4 text-on-surface/50 hover:text-on-surface">
                                 <i data-lucide="eye-off" class="w-5 h-5"></i>
                             </button>
                         </div>

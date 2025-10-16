@@ -562,6 +562,10 @@ body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
+.pointer-events-none {
+  pointer-events: none;
+}
+
 .fixed {
   position: fixed;
 }
@@ -590,8 +594,12 @@ body {
   left: 50%;
 }
 
-.right-0 {
-  right: 0px;
+.left-4 {
+  left: 1rem;
+}
+
+.right-4 {
+  right: 1rem;
 }
 
 .right-8 {
@@ -919,16 +927,16 @@ body {
   border-bottom-left-radius: 0.5rem;
 }
 
+.border {
+  border-width: 1px;
+}
+
 .border-2 {
   border-width: 2px;
 }
 
 .border-4 {
   border-width: 4px;
-}
-
-.border {
-  border-width: 1px;
 }
 
 .border-b {
@@ -947,6 +955,11 @@ body {
   border-style: dashed;
 }
 
+.border-error {
+  --tw-border-opacity: 1;
+  border-color: rgb(244 63 94 / var(--tw-border-opacity, 1));
+}
+
 .border-on-surface\/20 {
   border-color: rgb(212 212 212 / 0.2);
 }
@@ -957,11 +970,6 @@ body {
 
 .border-white\/10 {
   border-color: rgb(255 255 255 / 0.1);
-}
-
-.border-error {
-  --tw-border-opacity: 1;
-  border-color: rgb(244 63 94 / var(--tw-border-opacity, 1));
 }
 
 .border-t-primary {
@@ -1295,6 +1303,19 @@ body {
   transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
 }
 
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: #d4d4d4 !important;
+  /* This sets the text color to match your theme */
+  box-shadow: 0 0 0 30px #1a1a1a inset !important;
+  /* This "paints" the background with your surface color */
+  -webkit-transition: background-color 5000s ease-in-out 0s;
+  transition: background-color 5000s ease-in-out 0s;
+  /* A trick to delay the browser style from reappearing */
+}
+
 .hover\:scale-110:hover {
   --tw-scale-x: 1.1;
   --tw-scale-y: 1.1;
@@ -1351,8 +1372,22 @@ body {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
+.peer:focus ~ .peer-focus\:-top-3 {
+  top: -0.75rem;
+}
+
 .peer:focus ~ .peer-focus\:top-0 {
   top: 0px;
+}
+
+.peer:focus ~ .peer-focus\:bg-surface {
+  --tw-bg-opacity: 1;
+  background-color: rgb(26 26 26 / var(--tw-bg-opacity, 1));
+}
+
+.peer:focus ~ .peer-focus\:px-1 {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
 }
 
 .peer:focus ~ .peer-focus\:text-xs {
@@ -1365,12 +1400,40 @@ body {
   color: rgb(147 51 234 / var(--tw-text-opacity, 1));
 }
 
+.peer:not(:-moz-placeholder) ~ .peer-\[\:not\(\:-moz-placeholder\)\]\:-top-3 {
+  top: -0.75rem;
+}
+
+.peer:not(:placeholder-shown) ~ .peer-\[\:not\(\:placeholder-shown\)\]\:-top-3 {
+  top: -0.75rem;
+}
+
 .peer:not(:-moz-placeholder) ~ .peer-\[\:not\(\:-moz-placeholder\)\]\:top-0 {
   top: 0px;
 }
 
 .peer:not(:placeholder-shown) ~ .peer-\[\:not\(\:placeholder-shown\)\]\:top-0 {
   top: 0px;
+}
+
+.peer:not(:-moz-placeholder) ~ .peer-\[\:not\(\:-moz-placeholder\)\]\:bg-surface {
+  --tw-bg-opacity: 1;
+  background-color: rgb(26 26 26 / var(--tw-bg-opacity, 1));
+}
+
+.peer:not(:placeholder-shown) ~ .peer-\[\:not\(\:placeholder-shown\)\]\:bg-surface {
+  --tw-bg-opacity: 1;
+  background-color: rgb(26 26 26 / var(--tw-bg-opacity, 1));
+}
+
+.peer:not(:-moz-placeholder) ~ .peer-\[\:not\(\:-moz-placeholder\)\]\:px-1 {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+.peer:not(:placeholder-shown) ~ .peer-\[\:not\(\:placeholder-shown\)\]\:px-1 {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
 }
 
 .peer:not(:-moz-placeholder) ~ .peer-\[\:not\(\:-moz-placeholder\)\]\:text-xs {

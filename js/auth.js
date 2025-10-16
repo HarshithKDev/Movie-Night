@@ -1,6 +1,7 @@
 // --- State ---
 let isLoginMode = true; // Start in login mode by default
 let auth; // This will be initialized after fetching the config
+let signupInProgress = false; // Flag to prevent UI flash on sign up
 
 // --- Asynchronous Firebase Initialization ---
 async function initializeFirebase() {
@@ -24,7 +25,6 @@ async function initializeFirebase() {
     auth = firebase.auth();
     setupAuthListeners(); // Setup listeners after auth is initialized
 
-    // ---> NEW: Announce that authentication is ready for other scripts <---
     document.dispatchEvent(new CustomEvent('authReady'));
 
   } catch (error) {
@@ -149,17 +149,33 @@ function setupAuthListeners() {
                     });
             } else {
                 if (!username) {
-                    authErrorEl.textContent = 'Please enter a username.';
+                    showNotification('Please enter a username.');
                     return;
                 }
+                signupInProgress = true; // Set flag to pause onAuthStateChanged
                 auth.createUserWithEmailAndPassword(email, password)
                     .then(userCredential => {
                         return userCredential.user.updateProfile({
                             displayName: username
                         });
                     })
+                    .then(() => {
+                        // Profile is updated. Now manually trigger the UI update.
+                        const user = auth.currentUser;
+                        if (user) {
+                             user.getIdToken().then(token => {
+                                localStorage.setItem('firebaseIdToken', token);
+                            });
+                            if (userNameEl) userNameEl.textContent = user.displayName;
+                            if (loggedInView) loggedInView.classList.remove('hidden');
+                            if (loggedOutView) loggedOutView.classList.add('hidden');
+                        }
+                    })
                     .catch(error => {
                         showNotification(getFriendlyErrorMessage(error.code));
+                    })
+                    .finally(() => {
+                        signupInProgress = false; // Always reset the flag
                     });
             }
         });
@@ -174,6 +190,12 @@ function setupAuthListeners() {
     // --- Auth State Observer ---
     auth.onAuthStateChanged(user => {
         if (authLoadingView) authLoadingView.classList.add('hidden');
+
+        // If a sign-up is happening, the submit handler will manage the UI.
+        // This prevents the flash of the email address.
+        if (signupInProgress) {
+            return;
+        }
 
         if (user) {
             user.getIdToken().then(token => {
@@ -201,14 +223,14 @@ function getFriendlyErrorMessage(errorCode) {
         case 'auth/user-not-found':
         case 'auth/wrong-password':
         case 'auth/invalid-credential':
-        case 'auth/invalid-login-credentials': // Added this to handle the new error code
+        case 'auth/invalid-login-credentials':
             return 'Invalid email or password.';
         case 'auth/email-already-in-use':
             return 'An account with this email already exists.';
         case 'auth/weak-password':
             return 'Password should be at least 6 characters.';
         default:
-            console.error("Unhandled Firebase Auth Error:", errorCode); // For future debugging
+            console.error("Unhandled Firebase Auth Error:", errorCode);
             return 'An unexpected error occurred. Please try again.';
     }
 }
