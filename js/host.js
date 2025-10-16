@@ -215,8 +215,9 @@ document.addEventListener('authReady', () => {
             await uploadFile(signedUrl, file);
             await createRoom(publicUrl, file.name, filePath);
         } catch (error) {
-            uploadStatus.textContent = `Error: ${error.message}`;
-            // SECURITY FIX: Use a generic error message
+            // FIXED: Show generic error to user and log detailed one
+            console.error("File upload process failed:", error);
+            uploadStatus.textContent = `Error: Upload failed.`;
             showNotification("Upload failed. Please try again.", "error");
         }
     }
@@ -234,7 +235,7 @@ document.addEventListener('authReady', () => {
                     uploadStatus.textContent = `Uploading...`;
                 }
             };
-            xhr.onload = () => (xhr.status === 200 ? resolve() : reject(new Error('Upload failed')));
+            xhr.onload = () => (xhr.status === 200 ? resolve() : reject(new Error('Upload failed with status ' + xhr.status)));
             xhr.onerror = () => reject(new Error('Network error during upload.'));
             xhr.send(file);
         });
@@ -256,6 +257,7 @@ document.addEventListener('authReady', () => {
             }, 1500);
         } catch (error) {
             // SECURITY FIX: Use a generic error message
+            console.error("Failed to create room:", error);
             showNotification('Failed to create room. Please try again.', 'error');
             uploadStatus.textContent = 'Failed to create room.';
         }

@@ -30,7 +30,7 @@ const port = process.env.PORT || 3000;
 
 // --- Security Middleware ---
 
-// 1. Helmet with specific CSP for WebSockets
+// 1. Helmet with enhanced security headers
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -52,6 +52,14 @@ app.use(
             "wss://*.sd-rtn.com:*"
         ],
       },
+    },
+    // Add other security headers for best practice
+    xContentTypeOptions: {}, // Prevents MIME-sniffing
+    xFrameOptions: { action: "deny" }, // Prevents clickjacking
+    strictTransportSecurity: {
+      maxAge: 31536000, // 1 year in seconds
+      includeSubDomains: true,
+      preload: true,
     },
   })
 );
@@ -130,17 +138,7 @@ async function run() {
 
     wss.on('connection', async (ws, req) => {
         const origin = req.headers.origin || 'no-origin';
-        const isDevelopment = process.env.DEV_MODE === 'true';
-
-        console.log(`\n--- [WebSocket] New Connection Attempt ---`);
-        console.log(`> Origin: ${origin}`);
-        console.log(`> DEV_MODE flag is set to: ${process.env.DEV_MODE}`);
-        console.log(`> Server is in Development Mode: ${isDevelopment}`);
-
-        // Origin check is now handled by Helmet's CSP and CORS for HTTP, this is a fallback log
-        if (isDevelopment) {
-            console.log(`[WebSocket INFO] Development mode detected.`);
-        }
+        console.log(`\n--- [WebSocket] New Connection Attempt from ${origin} ---`);
 
         try {
             const { query } = url.parse(req.url, true);
@@ -157,15 +155,22 @@ async function run() {
                 return ws.terminate();
             }
             
+            // FIXED: Verify the room exists before authenticating the user for it
+            const room = await roomsCollection.findOne({ roomCode });
+            if (!room) {
+                console.error(`[WebSocket REJECT] Room not found: ${roomCode}`);
+                return ws.terminate();
+            }
+
             const user = await admin.auth().verifyIdToken(token);
-            console.log(`[WebSocket SUCCESS] Token validated for user: ${user.uid}`);
+            console.log(`[WebSocket SUCCESS] Token validated for user: ${user.uid} in room ${roomCode}`);
 
             ws.roomCode = roomCode;
             if (!activeRooms[roomCode]) activeRooms[roomCode] = new Set();
             activeRooms[roomCode].add(ws);
 
-            const room = await roomsCollection.findOne({ roomCode });
-            if (room) ws.send(JSON.stringify({ type: 'sync-state', state: room.state }));
+            // Send initial state from the found room object
+            ws.send(JSON.stringify({ type: 'sync-state', state: room.state }));
 
             ws.on('message', async (message) => {
                 try {
@@ -243,7 +248,7 @@ async function run() {
         try {
             const { fileName, fileType } = req.body;
             const uniqueFileName = `${uuidv4()}${path.extname(fileName)}`;
-            const filePath = `videos/${uniqueFileName}`;
+            const filePath = `videos/${req.user.uid}/${uniqueFileName}`; // Scoped to user
             const file = bucket.file(filePath);
             const options = { version: 'v4', action: 'write', expires: Date.now() + 15 * 60 * 1000, contentType: fileType };
             const [signedUrl] = await file.getSignedUrl(options);
@@ -259,7 +264,7 @@ async function run() {
         try {
             const { publicUrl } = req.body;
             const urlParts = new URL(publicUrl);
-            const filePath = urlParts.pathname.substring(1).split('/').slice(1).join('/');
+            const filePath = decodeURIComponent(urlParts.pathname.substring(1).split('/').slice(1).join('/'));
             const file = bucket.file(filePath);
             const options = { version: 'v4', action: 'read', expires: Date.now() + 60 * 60 * 1000 };
             const [streamUrl] = await file.getSignedUrl(options);
@@ -275,15 +280,24 @@ async function run() {
         res.status(200).json(movies);
     });
 
+    // FIXED: IDOR vulnerability
     app.delete('/api/movies/:movieId', authenticateUser, [
         param('movieId').isMongoId()
     ], handleValidationErrors, async (req, res) => {
         try {
             const { movieId } = req.params;
+            // First, find the movie to ensure it exists AND belongs to the authenticated user.
             const movie = await moviesCollection.findOne({ _id: new ObjectId(movieId), userId: req.user.uid });
-            if (!movie) return res.status(404).json({ message: 'Movie not found or user not authorized' });
+            
+            // If no movie is found, the user is either not the owner or the movie doesn't exist.
+            if (!movie) {
+                return res.status(404).json({ message: 'Movie not found or you are not authorized to delete it.' });
+            }
+
+            // If the movie is found and belongs to the user, proceed with deletion.
             await bucket.file(movie.filePath).delete();
-            await moviesCollection.deleteOne({ _id: new ObjectId(movieId) });
+            await moviesCollection.deleteOne({ _id: new ObjectId(movieId), userId: req.user.uid });
+            
             res.status(200).json({ message: 'Movie deleted successfully' });
         } catch (error) {
             console.error('Error deleting movie:', error);
@@ -302,7 +316,7 @@ async function run() {
         if (!existingMovie) {
             await moviesCollection.insertOne({ userId: req.user.uid, fileName, publicUrl: fileId, filePath, createdAt: new Date() });
         }
-        const newRoom = { roomCode, fileId, createdAt: new Date(), state: { isPlaying: false, currentTime: 0, lastUpdated: Date.now() } };
+        const newRoom = { roomCode, fileId, hostId: req.user.uid, createdAt: new Date(), state: { isPlaying: false, currentTime: 0, lastUpdated: Date.now() } };
         await roomsCollection.insertOne(newRoom);
         res.status(201).json(newRoom);
     });
