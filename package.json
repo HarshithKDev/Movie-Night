@@ -6,9 +6,8 @@
     "build": "tailwindcss -i ./input.css -o ./output.css --watch"
   },
   "devDependencies": {
-  "autoprefixer": "^10.4.19",
-  "daisyui": "^5.3.3",
-  "postcss": "^8.4.38",
-  "tailwindcss": "^3.4.1"
-}
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.1"
+  }
 }
