@@ -170,7 +170,7 @@ document.addEventListener('authReady', () => {
             exitButtonEl.addEventListener('click', async () => {
                 if (typeof leaveChannel === 'function') await leaveChannel();
                 if (window.ws) window.ws.close();
-                window.location.href = 'index.html';
+                window.location.href = '../index.html';
             });
         }
         if(copyRoomCodeBtn) {

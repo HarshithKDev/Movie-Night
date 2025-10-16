@@ -257,7 +257,7 @@ document.addEventListener('authReady', () => {
 
             uploadStatus.textContent = 'Success! Redirecting...';
             setTimeout(() => {
-                window.location.href = `watch.html?movieId=${movieId}&roomCode=${roomCode}`;
+                window.location.href = `html/watch.html?movieId=${movieId}&roomCode=${roomCode}`;
             }, 1500);
         } catch (error) {
             console.error("Failed to create room:", error);
