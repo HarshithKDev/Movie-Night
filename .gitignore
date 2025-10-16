@@ -3,4 +3,4 @@ node_modules
 
 backend/.env
 backend/node_modules
-backend/firebase-service-account-key.json
+output.css
