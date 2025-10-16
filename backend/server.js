@@ -53,11 +53,10 @@ app.use(
         ],
       },
     },
-    // Add other security headers for best practice
-    xContentTypeOptions: {}, // Prevents MIME-sniffing
-    xFrameOptions: { action: "deny" }, // Prevents clickjacking
+    xContentTypeOptions: {}, 
+    xFrameOptions: { action: "deny" },
     strictTransportSecurity: {
-      maxAge: 31536000, // 1 year in seconds
+      maxAge: 31536000, 
       includeSubDomains: true,
       preload: true,
     },
@@ -155,7 +154,6 @@ async function run() {
                 return ws.terminate();
             }
             
-            // FIXED: Verify the room exists before authenticating the user for it
             const room = await roomsCollection.findOne({ roomCode });
             if (!room) {
                 console.error(`[WebSocket REJECT] Room not found: ${roomCode}`);
@@ -169,7 +167,6 @@ async function run() {
             if (!activeRooms[roomCode]) activeRooms[roomCode] = new Set();
             activeRooms[roomCode].add(ws);
 
-            // Send initial state from the found room object
             ws.send(JSON.stringify({ type: 'sync-state', state: room.state }));
 
             ws.on('message', async (message) => {
@@ -248,7 +245,7 @@ async function run() {
         try {
             const { fileName, fileType } = req.body;
             const uniqueFileName = `${uuidv4()}${path.extname(fileName)}`;
-            const filePath = `videos/${req.user.uid}/${uniqueFileName}`; // Scoped to user
+            const filePath = `videos/${req.user.uid}/${uniqueFileName}`;
             const file = bucket.file(filePath);
             const options = { version: 'v4', action: 'write', expires: Date.now() + 15 * 60 * 1000, contentType: fileType };
             const [signedUrl] = await file.getSignedUrl(options);
@@ -260,14 +257,25 @@ async function run() {
         }
     });
 
-    app.post('/api/get-stream-url', authenticateUser, [body('publicUrl').isURL()], handleValidationErrors, async (req, res) => {
+    app.get('/api/movies/:movieId/stream-url', authenticateUser, [
+        param('movieId').isMongoId()
+    ], handleValidationErrors, async (req, res) => {
         try {
-            const { publicUrl } = req.body;
-            const urlParts = new URL(publicUrl);
-            const filePath = decodeURIComponent(urlParts.pathname.substring(1).split('/').slice(1).join('/'));
-            const file = bucket.file(filePath);
+            const { movieId } = req.params;
+            
+            const movie = await moviesCollection.findOne({ 
+                _id: new ObjectId(movieId), 
+                userId: req.user.uid 
+            });
+
+            if (!movie) {
+                return res.status(404).json({ message: 'Movie not found or you do not have permission to access it.' });
+            }
+
+            const file = bucket.file(movie.filePath);
             const options = { version: 'v4', action: 'read', expires: Date.now() + 60 * 60 * 1000 };
             const [streamUrl] = await file.getSignedUrl(options);
+            
             res.status(200).json({ streamUrl });
         } catch (error) {
             console.error("Error generating stream URL:", error);
@@ -280,21 +288,17 @@ async function run() {
         res.status(200).json(movies);
     });
 
-    // FIXED: IDOR vulnerability
     app.delete('/api/movies/:movieId', authenticateUser, [
         param('movieId').isMongoId()
     ], handleValidationErrors, async (req, res) => {
         try {
             const { movieId } = req.params;
-            // First, find the movie to ensure it exists AND belongs to the authenticated user.
             const movie = await moviesCollection.findOne({ _id: new ObjectId(movieId), userId: req.user.uid });
             
-            // If no movie is found, the user is either not the owner or the movie doesn't exist.
             if (!movie) {
                 return res.status(404).json({ message: 'Movie not found or you are not authorized to delete it.' });
             }
 
-            // If the movie is found and belongs to the user, proceed with deletion.
             await bucket.file(movie.filePath).delete();
             await moviesCollection.deleteOne({ _id: new ObjectId(movieId), userId: req.user.uid });
             
@@ -312,11 +316,20 @@ async function run() {
         body('filePath').notEmpty().trim()
     ], handleValidationErrors, async (req, res) => {
         const { roomCode, fileId, fileName, filePath } = req.body;
-        const existingMovie = await moviesCollection.findOne({ filePath, userId: req.user.uid });
-        if (!existingMovie) {
-            await moviesCollection.insertOne({ userId: req.user.uid, fileName, publicUrl: fileId, filePath, createdAt: new Date() });
+        
+        let movie = await moviesCollection.findOne({ filePath, userId: req.user.uid });
+        if (!movie) {
+            const result = await moviesCollection.insertOne({ userId: req.user.uid, fileName, publicUrl: fileId, filePath, createdAt: new Date() });
+            movie = { _id: result.insertedId };
         }
-        const newRoom = { roomCode, fileId, hostId: req.user.uid, createdAt: new Date(), state: { isPlaying: false, currentTime: 0, lastUpdated: Date.now() } };
+
+        const newRoom = { 
+            roomCode, 
+            movieId: movie._id,
+            hostId: req.user.uid, 
+            createdAt: new Date(), 
+            state: { isPlaying: false, currentTime: 0, lastUpdated: Date.now() } 
+        };
         await roomsCollection.insertOne(newRoom);
         res.status(201).json(newRoom);
     });
@@ -326,8 +339,11 @@ async function run() {
     ], handleValidationErrors, async (req, res) => {
       const { roomCode } = req.params;
       const room = await roomsCollection.findOne({ roomCode });
-      if (room) res.status(200).json({ fileId: room.fileId });
-      else res.status(404).json({ message: 'Room not found' });
+      if (room) {
+        res.status(200).json({ movieId: room.movieId });
+      } else {
+        res.status(404).json({ message: 'Room not found' });
+      }
     });
 
     server.listen(port, "0.0.0.0", () => {

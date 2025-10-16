@@ -1,11 +1,8 @@
-// ---> NEW: Listen for the 'authReady' event to ensure Firebase auth is initialized <---
 document.addEventListener('authReady', () => {
-    // All original code is now safely inside this listener
     const params = new URLSearchParams(window.location.search);
-    const fileId = decodeURIComponent(params.get('fileId'));
+    const movieId = params.get('movieId');
     const roomCode = params.get('roomCode');
 
-    // --- DOM Elements ---
     const roomCodeTextEl = document.getElementById('room-code-text');
     const copyRoomCodeBtn = document.getElementById('copy-room-code-btn');
     const exitButtonEl = document.getElementById('exit-button');
@@ -13,8 +10,7 @@ document.addEventListener('authReady', () => {
     const cameraBtn = document.getElementById('camera-btn');
     const loadingOverlay = document.getElementById('loading-overlay');
 
-    // --- Initialization ---
-    if (!fileId || !roomCode) {
+    if (!movieId || !roomCode) {
         alert('Missing room information. Redirecting...');
         window.location.href = 'index.html';
         return;
@@ -26,27 +22,26 @@ document.addEventListener('authReady', () => {
     
     const player = videojs('movie-player', { fluid: true, responsive: true });
 
-    // We now call the main logic functions from within the event listener
-    loadVideo(player, fileId);
-    initializeAuthAndVideoCall(roomCode, player); // Pass player instance
-    setupButtonListeners(player); // Pass player instance
+    loadVideo(player, movieId);
+    initializeAuthAndVideoCall(roomCode, player);
+    setupButtonListeners(player);
 
-    // --- Core Functions ---
-    async function loadVideo(player, fileId) {
+    async function loadVideo(player, movieId) {
         try {
             const backendUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
                 ? 'http://localhost:3000'
                 : 'https://movienight-backend-veka.onrender.com';
             const token = localStorage.getItem('firebaseIdToken');
-            const response = await fetch(`${backendUrl}/api/get-stream-url`, {
-                method: 'POST',
+            
+            const response = await fetch(`${backendUrl}/api/movies/${movieId}/stream-url`, {
+                method: 'GET',
                 headers: { 
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ publicUrl: fileId }),
+                }
             });
+
             if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
+            
             const data = await response.json();
             player.src({ src: data.streamUrl, type: 'video/mp4' });
             player.ready(() => {
@@ -55,17 +50,17 @@ document.addEventListener('authReady', () => {
         } catch (error) {
             console.error(`Error loading video: ${error.message}`);
             loadingOverlay.classList.add('hidden');
-            alert('Failed to load the video. Please check the room code or try again.');
+            alert('Failed to load the video. You may not have permission or the room is invalid.');
+            window.location.href = 'index.html';
         }
     }
 
     function initializeAuthAndVideoCall(roomCode, player) {
-        // This will now work correctly because `auth` is guaranteed to be initialized
         auth.onAuthStateChanged(user => {
             if (user) {
                 user.getIdToken().then(token => {
-                    localStorage.setItem('firebaseIdToken', token); // Ensure token is fresh
-                    setupVideoSync(player, roomCode, token); // Pass token to WebSocket setup
+                    localStorage.setItem('firebaseIdToken', token);
+                    setupVideoSync(player, roomCode, token);
                     const userName = user.displayName || user.email.split('@')[0];
                     document.getElementById('local-user-name').textContent = userName;
                     if (typeof joinAndDisplayLocalStream === 'function') {
@@ -73,7 +68,6 @@ document.addEventListener('authReady', () => {
                     }
                 });
             } else {
-                // Handle user not logged in
                 alert('You must be logged in to join a room.');
                 window.location.href = 'index.html';
             }
@@ -134,7 +128,6 @@ document.addEventListener('authReady', () => {
         player.on('pause', () => sendEvent('pause', player.currentTime()));
         player.on('seeked', () => sendEvent('seek', player.currentTime()));
         
-        // Make ws globally available on the window object so it can be closed
         window.ws = ws; 
     }
 

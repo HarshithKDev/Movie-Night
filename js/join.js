@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('Room not found');
             
             const data = await response.json();
-            window.location.href = `watch.html?fileId=${encodeURIComponent(data.fileId)}&roomCode=${enteredCode}`;
+            window.location.href = `watch.html?movieId=${data.movieId}&roomCode=${enteredCode}`;
         } catch (error) {
             showLoading(false);
             showError(`Room "${enteredCode}" not found. Please check the code.`);

@@ -1,6 +1,4 @@
-// ---> NEW: Listen for the 'authReady' event from auth.js <---
 document.addEventListener('authReady', () => {
-    // All of the original code now goes inside this listener
     const fileInput = document.getElementById('file-input');
     const uploadContainer = document.getElementById('upload-container');
     const progressContainer = document.getElementById('progress-container');
@@ -23,7 +21,6 @@ document.addEventListener('authReady', () => {
         : 'https://movienight-backend-veka.onrender.com';
     let currentUser = null;
 
-    // --- Helper function to create authorization headers ---
     function getAuthHeader() {
         const token = localStorage.getItem('firebaseIdToken');
         return {
@@ -32,19 +29,15 @@ document.addEventListener('authReady', () => {
         };
     }
 
-    // --- Authentication and Movie Loading ---
-    // This will now work because 'auth' is guaranteed to be initialized
     auth.onAuthStateChanged(user => {
         if (user) {
             currentUser = user;
             loadUserMovies();
         } else {
-            // If the user logs out, clear the library and show the login message.
             movieLibrary.innerHTML = `<div class="p-8 text-center text-on-surface/60">Please log in to see your library.</div>`;
         }
     });
 
-    // --- File Upload Listeners ---
     fileInput.addEventListener('change', (e) => handleFileUpload(e.target.files[0]));
     uploadContainer.addEventListener('dragover', (e) => {
         e.preventDefault();
@@ -63,8 +56,6 @@ document.addEventListener('authReady', () => {
         }
     });
 
-
-    // --- Core Functions ---
     async function loadUserMovies() {
         try {
             const token = await currentUser.getIdToken();
@@ -125,13 +116,11 @@ document.addEventListener('authReady', () => {
             lucide.createIcons();
         } catch (error) {
             console.error("Failed to load movies:", error);
-            // SECURITY FIX: Use a generic error message for the user.
             showNotification('Could not load your library. Please try again.', 'error');
             movieLibrary.innerHTML = `<div class="p-8 text-center text-error">Failed to load library. Please try again later.</div>`;
         }
     }
 
-    // --- Modal Logic ---
     function openRenameModal(movieId, currentName, nameSpanElement) {
         renameInput.value = currentName;
         renameModal.classList.remove('hidden');
@@ -150,7 +139,6 @@ document.addEventListener('authReady', () => {
                     nameSpanElement.textContent = newName;
                     showNotification("Movie renamed successfully!", "success");
                 } catch (error) {
-                    // SECURITY FIX: Use a generic error message for the user.
                     showNotification("An error occurred. Please try again.", "error");
                 }
             }
@@ -176,7 +164,6 @@ document.addEventListener('authReady', () => {
                 }
                 showNotification("Movie deleted successfully.", "success");
             } catch (error) {
-                // SECURITY FIX: Use a generic error message for the user.
                 showNotification("An error occurred. Please try again.", "error");
             }
             closeModal(deleteModal);
@@ -189,7 +176,6 @@ document.addEventListener('authReady', () => {
         modal.classList.remove('flex');
     }
 
-    // --- Upload and Room Creation ---
     async function handleFileUpload(file) {
         if (!file || file.type !== 'video/mp4') {
             showNotification('Please select a valid MP4 video file.', 'error');
@@ -208,14 +194,12 @@ document.addEventListener('authReady', () => {
                 body: JSON.stringify({ fileName: file.name, fileType: file.type }),
             });
             if (!response.ok) {
-                // SECURITY FIX: Use a generic error message
                 throw new Error('Could not prepare the upload.');
             }
             const { signedUrl, publicUrl, filePath } = await response.json();
             await uploadFile(signedUrl, file);
             await createRoom(publicUrl, file.name, filePath);
         } catch (error) {
-            // FIXED: Show generic error to user and log detailed one
             console.error("File upload process failed:", error);
             uploadStatus.textContent = `Error: Upload failed.`;
             showNotification("Upload failed. Please try again.", "error");
@@ -246,24 +230,30 @@ document.addEventListener('authReady', () => {
         const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
         
         try {
-            await fetch(`${backendUrl}/api/rooms`, {
+            const response = await fetch(`${backendUrl}/api/rooms`, {
                 method: 'POST',
                 headers: getAuthHeader(),
                 body: JSON.stringify({ roomCode, fileId: publicUrl, fileName, filePath }),
             });
+
+            if (!response.ok) {
+                throw new Error('Server responded with an error creating the room.');
+            }
+
+            const newRoom = await response.json();
+            const movieId = newRoom.movieId;
+
             uploadStatus.textContent = 'Success! Redirecting...';
             setTimeout(() => {
-                window.location.href = `watch.html?fileId=${encodeURIComponent(publicUrl)}&roomCode=${roomCode}`;
+                window.location.href = `watch.html?movieId=${movieId}&roomCode=${roomCode}`;
             }, 1500);
         } catch (error) {
-            // SECURITY FIX: Use a generic error message
             console.error("Failed to create room:", error);
             showNotification('Failed to create room. Please try again.', 'error');
             uploadStatus.textContent = 'Failed to create room.';
         }
     }
 
-    // --- Notification Toast ---
     function showNotification(message, type = 'info') {
         const toastContainer = document.getElementById('toast-container');
         const colors = {
@@ -282,7 +272,6 @@ document.addEventListener('authReady', () => {
         }, 3000);
     }
 
-    // Add animation keyframes
     if (!document.getElementById('toast-animations')) {
         const style = document.createElement('style');
         style.id = 'toast-animations';
