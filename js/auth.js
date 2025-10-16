@@ -39,6 +39,44 @@ async function initializeFirebase() {
 // Start the initialization process when the script loads
 document.addEventListener('DOMContentLoaded', initializeFirebase);
 
+function showNotification(message, type = 'error') {
+    const toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) return;
+
+    const colors = {
+        success: 'bg-secondary text-black',
+        error: 'bg-black text-error border border-error',
+        info: 'bg-surface text-on-surface',
+    };
+
+    const icons = {
+        error: 'alert-circle',
+        success: 'check-circle',
+        info: 'info'
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `flex items-center gap-3 px-4 py-3 rounded-md shadow-lg text-sm font-semibold animate-enter whitespace-nowrap ${colors[type]}`;
+
+    const icon = document.createElement('i');
+    icon.setAttribute('data-lucide', icons[type]);
+    icon.className = 'w-5 h-5';
+
+    const textNode = document.createTextNode(message);
+
+    toast.appendChild(icon);
+    toast.appendChild(textNode);
+
+    toastContainer.appendChild(toast);
+    lucide.createIcons();
+
+    setTimeout(() => {
+        toast.classList.remove('animate-enter');
+        toast.classList.add('animate-leave');
+        toast.addEventListener('animationend', () => toast.remove());
+    }, 3000);
+}
+
 
 // This function contains all the logic that depends on 'auth' being initialized
 function setupAuthListeners() {
@@ -107,7 +145,7 @@ function setupAuthListeners() {
             if (isLoginMode) {
                 auth.signInWithEmailAndPassword(email, password)
                     .catch(error => {
-                        authErrorEl.textContent = getFriendlyErrorMessage(error.code);
+                        showNotification(getFriendlyErrorMessage(error.code));
                     });
             } else {
                 if (!username) {
@@ -121,7 +159,7 @@ function setupAuthListeners() {
                         });
                     })
                     .catch(error => {
-                        authErrorEl.textContent = getFriendlyErrorMessage(error.code);
+                        showNotification(getFriendlyErrorMessage(error.code));
                     });
             }
         });
@@ -163,12 +201,14 @@ function getFriendlyErrorMessage(errorCode) {
         case 'auth/user-not-found':
         case 'auth/wrong-password':
         case 'auth/invalid-credential':
+        case 'auth/invalid-login-credentials': // Added this to handle the new error code
             return 'Invalid email or password.';
         case 'auth/email-already-in-use':
             return 'An account with this email already exists.';
         case 'auth/weak-password':
             return 'Password should be at least 6 characters.';
         default:
+            console.error("Unhandled Firebase Auth Error:", errorCode); // For future debugging
             return 'An unexpected error occurred. Please try again.';
     }
 }
