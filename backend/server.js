@@ -147,71 +147,6 @@ app.get('/api/firebase-config', (req, res) => {
   res.json(firebaseConfig);
 });
 
-
-const rooms = {};
-wss.on('connection', (ws, req) => {
-    const { query } = url.parse(req.url, true);
-    const roomCode = query.roomCode;
-    const user = req.user; // User object from verifyClient
-
-    if (!roomCode) {
-        ws.close(1008, 'Room code is required');
-        return;
-    }
-
-    // SECURITY FIX: Periodically check if the auth token has expired
-    const tokenExpirationCheck = setInterval(() => {
-        const currentTimeInSeconds = Math.floor(Date.now() / 1000);
-        if (user.exp < currentTimeInSeconds) {
-            console.log(`Closing WebSocket for user ${user.uid} due to expired token.`);
-            ws.close(4001, 'Authentication token expired');
-        }
-    }, 15 * 60 * 1000); // Check every 15 minutes
-
-    ws.roomCode = roomCode;
-    if (!rooms[roomCode]) {
-        rooms[roomCode] = { clients: new Set(), state: { isPlaying: false, currentTime: 0, lastUpdated: Date.now() } };
-    }
-    rooms[roomCode].clients.add(ws);
-    ws.send(JSON.stringify({ type: 'sync-state', state: rooms[roomCode].state }));
-    
-    ws.on('message', (message) => {
-        try {
-            const data = JSON.parse(message);
-
-            // --- WebSocket Input Sanitization ---
-            const allowedTypes = ['play', 'pause', 'seek'];
-            if (!allowedTypes.includes(data.type)) {
-                return; // Ignore messages with unknown types
-            }
-            if (data.time !== undefined && typeof data.time !== 'number') {
-                return; // Ignore messages with invalid time
-            }
-
-            if (rooms[ws.roomCode]) {
-                rooms[ws.roomCode].state.isPlaying = data.type === 'play';
-                if (data.time !== undefined) rooms[ws.roomCode].state.currentTime = data.time;
-                rooms[ws.roomCode].state.lastUpdated = Date.now();
-                rooms[ws.roomCode].clients.forEach(client => {
-                    if (client !== ws && client.readyState === client.OPEN) {
-                        client.send(JSON.stringify(data));
-                    }
-                });
-            }
-        } catch (error) { console.error('WS message error:', error); }
-    });
-
-    ws.on('close', () => {
-        clearInterval(tokenExpirationCheck); // Stop checking on disconnect
-        if (ws.roomCode && rooms[ws.roomCode]) {
-            rooms[ws.roomCode].clients.delete(ws);
-            if (rooms[ws.roomCode].clients.size === 0) {
-                delete rooms[ws.roomCode];
-            }
-        }
-    });
-});
-
 const client = new MongoClient(process.env.MONGO_URI, {
   serverApi: { version: ServerApiVersion.v1, strict: true, deprecationErrors: true }
 });
@@ -232,6 +167,79 @@ async function run() {
     const db = client.db("movieNightDB");
     const roomsCollection = db.collection("rooms");
     const moviesCollection = db.collection("movies");
+    const activeRooms = {}; // Still use in-memory for WebSocket clients, but not for room state
+
+    wss.on('connection', (ws, req) => {
+        const { query } = url.parse(req.url, true);
+        const roomCode = query.roomCode;
+        const user = req.user;
+    
+        if (!roomCode) {
+            ws.close(1008, 'Room code is required');
+            return;
+        }
+    
+        const tokenExpirationCheck = setInterval(() => {
+            const currentTimeInSeconds = Math.floor(Date.now() / 1000);
+            if (user.exp < currentTimeInSeconds) {
+                console.log(`Closing WebSocket for user ${user.uid} due to expired token.`);
+                ws.close(4001, 'Authentication token expired');
+            }
+        }, 15 * 60 * 1000);
+    
+        ws.roomCode = roomCode;
+        if (!activeRooms[roomCode]) {
+            activeRooms[roomCode] = new Set();
+        }
+        activeRooms[roomCode].add(ws);
+    
+        roomsCollection.findOne({ roomCode }).then(room => {
+            if (room) {
+                ws.send(JSON.stringify({ type: 'sync-state', state: room.state }));
+            }
+        });
+    
+        ws.on('message', (message) => {
+            try {
+                const data = JSON.parse(message);
+    
+                const allowedTypes = ['play', 'pause', 'seek'];
+                if (!allowedTypes.includes(data.type)) {
+                    return;
+                }
+                if (data.time !== undefined && typeof data.time !== 'number') {
+                    return;
+                }
+    
+                const newState = {
+                    isPlaying: data.type === 'play',
+                    currentTime: data.time,
+                    lastUpdated: Date.now()
+                };
+    
+                roomsCollection.updateOne({ roomCode: ws.roomCode }, { $set: { state: newState } })
+                    .then(() => {
+                        if (activeRooms[ws.roomCode]) {
+                            activeRooms[ws.roomCode].forEach(client => {
+                                if (client !== ws && client.readyState === client.OPEN) {
+                                    client.send(JSON.stringify(data));
+                                }
+                            });
+                        }
+                    });
+            } catch (error) { console.error('WS message error:', error); }
+        });
+    
+        ws.on('close', () => {
+            clearInterval(tokenExpirationCheck);
+            if (ws.roomCode && activeRooms[ws.roomCode]) {
+                activeRooms[ws.roomCode].delete(ws);
+                if (activeRooms[ws.roomCode].size === 0) {
+                    delete activeRooms[ws.roomCode];
+                }
+            }
+        });
+    });
 
     app.put('/api/movies/:movieId', authenticateUser, [
         param('movieId').isMongoId(),
@@ -324,7 +332,12 @@ async function run() {
         if (!existingMovie) {
             await moviesCollection.insertOne({ userId: req.user.uid, fileName, publicUrl: fileId, filePath, createdAt: new Date() });
         }
-        const newRoom = { roomCode, fileId, createdAt: new Date() };
+        const newRoom = {
+            roomCode,
+            fileId,
+            createdAt: new Date(),
+            state: { isPlaying: false, currentTime: 0, lastUpdated: Date.now() }
+        };
         await roomsCollection.insertOne(newRoom);
         res.status(201).json(newRoom);
     });

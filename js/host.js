@@ -150,13 +150,12 @@ document.addEventListener('authReady', () => {
     function openDeleteModal(movieId, filePath, movieElement) {
         deleteModal.classList.remove('hidden');
         deleteModal.classList.add('flex');
-
+    
         confirmDeleteBtn.onclick = async () => {
             try {
-                const response = await fetch(`${backendUrl}/api/movies`, {
+                const response = await fetch(`${backendUrl}/api/movies/${movieId}`, {
                     method: 'DELETE',
                     headers: getAuthHeader(),
-                    body: JSON.stringify({ movieId, filePath })
                 });
                 if (!response.ok) throw new Error('Failed to delete on server.');
                 movieElement.remove();
