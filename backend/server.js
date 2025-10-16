@@ -145,19 +145,20 @@ async function run() {
         try {
             const { query } = url.parse(req.url, true);
             const token = query.token;
-            if (!token) {
-                console.error('[WebSocket REJECT] No token provided.');
+            const roomCode = query.roomCode;
+
+            if (!token || !roomCode) {
+                console.error('[WebSocket REJECT] Missing token or roomCode.');
                 return ws.terminate();
             }
-
+            
+            if (typeof roomCode !== 'string' || !/^[A-Z0-9]{6}$/.test(roomCode)) {
+                console.error('[WebSocket REJECT] Invalid roomCode format.');
+                return ws.terminate();
+            }
+            
             const user = await admin.auth().verifyIdToken(token);
             console.log(`[WebSocket SUCCESS] Token validated for user: ${user.uid}`);
-
-            const roomCode = query.roomCode;
-            if (!roomCode) {
-                console.error('[WebSocket REJECT] No room code provided.');
-                return ws.terminate();
-            }
 
             ws.roomCode = roomCode;
             if (!activeRooms[roomCode]) activeRooms[roomCode] = new Set();
@@ -269,9 +270,8 @@ async function run() {
         }
     });
 
-    app.get('/api/movies/:userId', authenticateUser, [param('userId').isString()], handleValidationErrors, async (req, res) => {
-        if (req.params.userId !== req.user.uid) return res.status(403).json({ message: 'Forbidden' });
-        const movies = await moviesCollection.find({ userId: req.params.userId }).toArray();
+    app.get('/api/movies', authenticateUser, async (req, res) => {
+        const movies = await moviesCollection.find({ userId: req.user.uid }).toArray();
         res.status(200).json(movies);
     });
 
@@ -307,7 +307,9 @@ async function run() {
         res.status(201).json(newRoom);
     });
 
-    app.get('/api/rooms/:roomCode', async (req, res) => {
+    app.get('/api/rooms/:roomCode', [
+        param('roomCode').isLength({ min: 6, max: 6 }).isAlphanumeric().trim()
+    ], handleValidationErrors, async (req, res) => {
       const { roomCode } = req.params;
       const room = await roomsCollection.findOne({ roomCode });
       if (room) res.status(200).json({ fileId: room.fileId });

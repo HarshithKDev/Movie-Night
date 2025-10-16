@@ -37,7 +37,7 @@ document.addEventListener('authReady', () => {
     auth.onAuthStateChanged(user => {
         if (user) {
             currentUser = user;
-            loadUserMovies(user.uid);
+            loadUserMovies();
         } else {
             // If the user logs out, clear the library and show the login message.
             movieLibrary.innerHTML = `<div class="p-8 text-center text-on-surface/60">Please log in to see your library.</div>`;
@@ -65,10 +65,10 @@ document.addEventListener('authReady', () => {
 
 
     // --- Core Functions ---
-    async function loadUserMovies(userId) {
+    async function loadUserMovies() {
         try {
             const token = await currentUser.getIdToken();
-            const response = await fetch(`${backendUrl}/api/movies/${userId}`, {
+            const response = await fetch(`${backendUrl}/api/movies`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -271,7 +271,8 @@ document.addEventListener('authReady', () => {
         };
         const toast = document.createElement('div');
         toast.className = `px-4 py-3 rounded-md shadow-lg text-sm font-semibold animate-fade-in-up ${colors[type]}`;
-        toast.textContent = message;
+        const textNode = document.createTextNode(message);
+        toast.appendChild(textNode);
         toastContainer.appendChild(toast);
         setTimeout(() => {
             toast.classList.add('animate-fade-out-down');
