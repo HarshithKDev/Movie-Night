@@ -65,14 +65,14 @@ async function handleUserPublished(user, mediaType) {
         if (!participantDiv) {
             participantDiv = document.createElement('div');
             participantDiv.id = `participant-${userId}`;
-            participantDiv.className = 'flex flex-col gap-2 participant-container';
+            participantDiv.className = 'flex flex-col gap-1 w-40 flex-shrink-0 participant-container';
 
             const remotePlayer = document.createElement('div');
             remotePlayer.id = `remote-player-${userId}`;
             remotePlayer.className = 'w-full aspect-video bg-background rounded-md overflow-hidden';
 
             const nameElement = document.createElement('p');
-            nameElement.className = 'font-medium text-sm text-center truncate';
+            nameElement.className = 'font-medium text-xs text-center truncate';
             nameElement.textContent = userId;
 
             participantDiv.appendChild(remotePlayer);

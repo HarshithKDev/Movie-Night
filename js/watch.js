@@ -3,6 +3,7 @@ document.addEventListener('authReady', () => {
     const movieId = params.get('movieId');
     const roomCode = params.get('roomCode');
 
+    // --- DOM Elements ---
     const roomCodeTextEl = document.getElementById('room-code-text');
     const copyRoomCodeBtn = document.getElementById('copy-room-code-btn');
     const exitButtonEl = document.getElementById('exit-button');

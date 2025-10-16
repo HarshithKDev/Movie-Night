@@ -10,52 +10,48 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://apis.google.com https://unpkg.com https://download.agora.io https://vjs.zencdn.net 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://vjs.zencdn.net; img-src 'self' data:; media-src 'self' https://storage.googleapis.com blob:; font-src 'self' https://vjs.zencdn.net data:; frame-src 'self' https://movienight-firebase.firebaseapp.com; connect-src 'self' http://localhost:3000 ws://localhost:3000 https://movienight-backend-veka.onrender.com wss://movienight-backend-veka.onrender.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://www.gstatic.com https://unpkg.com https://*.agora.io wss://*.agora.io:* https://*.sd-rtn.com wss://*.sd-rtn.com:*; object-src 'none';">
     <style>
         .video-js { width: 100%; height: 100%; background-color: #000; }
-        /* Removed custom styles for .vjs-big-play-button to use the default style */
         .aspect-video { aspect-ratio: 16 / 9; }
     </style>
 </head>
 <body class="h-screen flex flex-col bg-background text-on-background">
 
     <header class="flex-shrink-0 h-16 flex items-center justify-between px-4 bg-surface border-b border-white/10 z-20">
-        <div class="flex items-center gap-2">
-            <a href="index.html" class="font-bold text-xl text-on-background normal-case">Movie Night</a>
-        </div>
+        <a href="index.html" class="font-bold text-xl text-on-background normal-case">Movie Night</a>
+        
         <div class="flex items-center gap-4">
-            <div class="hidden sm:flex items-center gap-2 text-sm text-on-surface/70 bg-background rounded-full">
+            <div class="flex items-center gap-2 text-sm text-on-surface/70 bg-background rounded-full">
                 <span class="pl-4">Room:</span>
                 <span id="room-code-text" class="px-2 py-1 text-on-surface font-sans tracking-wider">...</span>
                 <button id="copy-room-code-btn" class="w-8 h-8 flex items-center justify-center rounded-full transition-transform duration-200 hover:scale-110 active:scale-100 mr-1">
                     <i data-lucide="clipboard-copy" class="w-4 h-4"></i>
                 </button>
             </div>
+
             <button id="exit-button" class="w-10 h-10 flex items-center justify-center rounded-full text-error hover:bg-error/10 transition-colors">
                 <i data-lucide="log-out" class="w-5 h-5"></i>
             </button>
         </div>
     </header>
 
-    <div class="flex flex-1 overflow-hidden">
-        <main class="flex-1 flex flex-col bg-black">
-            <section class="flex-1 flex items-center justify-center relative">
-                 <video id="movie-player" class="video-js vjs-big-play-centered" controls preload="auto" data-setup='{}'></video>
-            </section>
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <main class="flex-1 flex items-center justify-center bg-black relative">
+             <video id="movie-player" class="video-js vjs-big-play-centered" controls preload="auto" data-setup='{}'></video>
         </main>
 
-        <aside id="sidebar" class="hidden lg:flex w-80 flex-shrink-0 flex-col bg-surface border-l border-white/10 p-4">
-            <h2 class="text-lg font-semibold text-center mb-4 text-on-background">Participants</h2>
-            <div id="participants-container" class="flex flex-col gap-4 overflow-y-auto">
-                <div class="flex flex-col gap-2">
+        <footer id="participants-bar" class="flex-shrink-0 bg-surface p-2 border-t border-white/10">
+            <div id="participants-container" class="flex justify-center items-center gap-4 h-full overflow-x-auto">
+                <div class="flex flex-col gap-1 w-40 flex-shrink-0">
                     <div id="local-player-container" class="w-full aspect-video bg-background rounded-md overflow-hidden relative"></div>
                     <div class="flex items-center justify-between">
-                        <p id="local-user-name" class="font-medium text-sm truncate">You</p>
-                        <div class="flex items-center gap-2">
+                        <p id="local-user-name" class="font-medium text-xs truncate">You</p>
+                        <div class="flex items-center gap-1">
                             <button id="mic-btn" class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-white/10"><i data-lucide="mic" class="w-4 h-4"></i></button>
                             <button id="camera-btn" class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-white/10"><i data-lucide="video" class="w-4 h-4"></i></button>
                         </div>
                     </div>
                 </div>
-            </div>
-        </aside>
+                </div>
+        </footer>
     </div>
 
     <div id="loading-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50"><div class="flex flex-col items-center gap-4 text-on-background"><span class="animate-spin h-8 w-8 border-4 border-t-primary rounded-full"></span></div></div>

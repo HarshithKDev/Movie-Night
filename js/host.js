@@ -87,21 +87,33 @@ document.addEventListener('authReady', () => {
                 nameSpan.className = 'flex-1 truncate';
                 nameSpan.textContent = movie.fileName;
                 const controlsDiv = document.createElement('div');
-                controlsDiv.className = 'flex gap-2';
+                controlsDiv.className = 'flex items-center gap-3';
 
+                // Host Button (with responsive icon/text)
                 const hostBtn = document.createElement('button');
-                hostBtn.className = 'host-btn px-3 py-1.5 text-sm font-semibold bg-primary text-on-primary rounded-md hover:bg-opacity-90';
-                hostBtn.textContent = 'Host';
+                hostBtn.className = 'host-btn flex items-center justify-center p-2 sm:px-3 sm:py-1.5 text-sm font-semibold text-primary rounded-md hover:bg-primary/10';
+                hostBtn.innerHTML = `
+                    <i data-lucide="tv" class="w-4 h-4 sm:hidden"></i>
+                    <span class="hidden sm:inline">Host</span>
+                `;
                 hostBtn.onclick = () => createRoom(movie.publicUrl, movie.fileName, movie.filePath);
 
+                // Rename Button (with responsive icon/text)
                 const renameBtn = document.createElement('button');
-                renameBtn.className = 'rename-btn px-3 py-1.5 text-sm font-semibold hover:bg-white/10 rounded-md';
-                renameBtn.textContent = 'Rename';
+                renameBtn.className = 'rename-btn flex items-center justify-center p-2 sm:px-3 sm:py-1.5 text-sm font-semibold hover:bg-white/10 rounded-md';
+                renameBtn.innerHTML = `
+                    <i data-lucide="edit" class="w-4 h-4 sm:hidden"></i>
+                    <span class="hidden sm:inline">Rename</span>
+                `;
                 renameBtn.onclick = () => openRenameModal(movie._id, movie.fileName, nameSpan);
 
+                // Delete Button (with responsive icon/text)
                 const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'delete-btn px-3 py-1.5 text-sm font-semibold text-error hover:bg-error/10 rounded-md';
-                deleteBtn.textContent = 'Delete';
+                deleteBtn.className = 'delete-btn flex items-center justify-center p-2 sm:px-3 sm:py-1.5 text-sm font-semibold text-error hover:bg-error/10 rounded-md';
+                deleteBtn.innerHTML = `
+                    <i data-lucide="trash-2" class="w-4 h-4 sm:hidden"></i>
+                    <span class="hidden sm:inline">Delete</span>
+                `;
                 deleteBtn.onclick = () => openDeleteModal(movie._id, movie.filePath, movieEl);
 
                 controlsDiv.appendChild(hostBtn);
