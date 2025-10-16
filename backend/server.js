@@ -67,7 +67,7 @@ app.use(cors({
       return callback(null, true);
     }
     
-    if (allowedOrigins.includes(origin) || !origin) {
+    if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
 

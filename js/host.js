@@ -97,17 +97,29 @@ document.addEventListener('authReady', () => {
                 nameSpan.textContent = movie.fileName;
                 const controlsDiv = document.createElement('div');
                 controlsDiv.className = 'flex gap-2';
-                controlsDiv.innerHTML = `
-                    <button class="host-btn px-3 py-1.5 text-sm font-semibold bg-primary text-on-primary rounded-md hover:bg-opacity-90">Host</button>
-                    <button class="rename-btn px-3 py-1.5 text-sm font-semibold hover:bg-white/10 rounded-md">Rename</button>
-                    <button class="delete-btn px-3 py-1.5 text-sm font-semibold text-error hover:bg-error/10 rounded-md">Delete</button>
-                `;
+
+                const hostBtn = document.createElement('button');
+                hostBtn.className = 'host-btn px-3 py-1.5 text-sm font-semibold bg-primary text-on-primary rounded-md hover:bg-opacity-90';
+                hostBtn.textContent = 'Host';
+                hostBtn.onclick = () => createRoom(movie.publicUrl, movie.fileName, movie.filePath);
+
+                const renameBtn = document.createElement('button');
+                renameBtn.className = 'rename-btn px-3 py-1.5 text-sm font-semibold hover:bg-white/10 rounded-md';
+                renameBtn.textContent = 'Rename';
+                renameBtn.onclick = () => openRenameModal(movie._id, movie.fileName, nameSpan);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn px-3 py-1.5 text-sm font-semibold text-error hover:bg-error/10 rounded-md';
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.onclick = () => openDeleteModal(movie._id, movie.filePath, movieEl);
+
+                controlsDiv.appendChild(hostBtn);
+                controlsDiv.appendChild(renameBtn);
+                controlsDiv.appendChild(deleteBtn);
+
                 movieEl.appendChild(icon);
                 movieEl.appendChild(nameSpan);
                 movieEl.appendChild(controlsDiv);
-                controlsDiv.querySelector('.host-btn').onclick = () => createRoom(movie.publicUrl, movie.fileName, movie.filePath);
-                controlsDiv.querySelector('.rename-btn').onclick = () => openRenameModal(movie._id, movie.fileName, nameSpan);
-                controlsDiv.querySelector('.delete-btn').onclick = () => openDeleteModal(movie._id, movie.filePath, movieEl);
                 movieLibrary.appendChild(movieEl);
             });
             lucide.createIcons();

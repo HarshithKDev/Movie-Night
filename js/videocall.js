@@ -66,10 +66,17 @@ async function handleUserPublished(user, mediaType) {
             participantDiv = document.createElement('div');
             participantDiv.id = `participant-${userId}`;
             participantDiv.className = 'flex flex-col gap-2 participant-container';
-            participantDiv.innerHTML = `
-                <div id="remote-player-${userId}" class="w-full aspect-video bg-background rounded-md overflow-hidden"></div>
-                <p class="font-medium text-sm text-center truncate">${userId}</p>
-            `;
+
+            const remotePlayer = document.createElement('div');
+            remotePlayer.id = `remote-player-${userId}`;
+            remotePlayer.className = 'w-full aspect-video bg-background rounded-md overflow-hidden';
+
+            const nameElement = document.createElement('p');
+            nameElement.className = 'font-medium text-sm text-center truncate';
+            nameElement.textContent = userId;
+
+            participantDiv.appendChild(remotePlayer);
+            participantDiv.appendChild(nameElement);
             participantsContainer.appendChild(participantDiv);
         }
         user.videoTrack.play(`remote-player-${userId}`);
