@@ -7,7 +7,9 @@ let agoraAppId = null; // To store the fetched App ID
 // --- NEW: Function to fetch Agora App ID ---
 async function fetchAgoraAppId() {
     try {
-        const backendUrl = 'http://localhost:3000';
+        const backendUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:3000'
+            : 'https://movienight-backend-veka.onrender.com';
         const token = localStorage.getItem('firebaseIdToken');
         const response = await fetch(`${backendUrl}/api/agora-appid`, {
             headers: {

@@ -5,7 +5,10 @@ let auth; // This will be initialized after fetching the config
 // --- Asynchronous Firebase Initialization ---
 async function initializeFirebase() {
   try {
-    const backendUrl = 'http://localhost:3000'; // Using localhost for development
+    const backendUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:3000'
+      : 'https://movienight-backend-veka.onrender.com';
+
     const response = await fetch(`${backendUrl}/api/firebase-config`);
 
     if (!response.ok) {

@@ -18,7 +18,9 @@ document.addEventListener('authReady', () => {
     const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
     const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
 
-    const backendUrl = 'http://localhost:3000'; // Using localhost for development
+    const backendUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:3000'
+        : 'https://movienight-backend-veka.onrender.com';
     let currentUser = null;
 
     // --- Helper function to create authorization headers ---

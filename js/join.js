@@ -17,7 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
         showLoading(true);
 
         try {
-           const backendUrl = 'http://localhost:3000'; 
+           const backendUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                ? 'http://localhost:3000'
+                : 'https://movienight-backend-veka.onrender.com';
             const response = await fetch(`${backendUrl}/api/rooms/${enteredCode}`);
             if (!response.ok) throw new Error('Room not found');
             

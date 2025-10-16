@@ -34,8 +34,9 @@ document.addEventListener('authReady', () => {
     // --- Core Functions ---
     async function loadVideo(player, fileId) {
         try {
-            // Using localhost for local development
-            const backendUrl = 'http://localhost:3000';
+            const backendUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                ? 'http://localhost:3000'
+                : 'https://movienight-backend-veka.onrender.com';
             const token = localStorage.getItem('firebaseIdToken');
             const response = await fetch(`${backendUrl}/api/get-stream-url`, {
                 method: 'POST',
@@ -80,9 +81,11 @@ document.addEventListener('authReady', () => {
     }
 
     function setupVideoSync(player, roomCode, token) {
-        // ---> FIX: Define wsUrl here, inside the function where it's used <---
-        // Use ws:// for local development
-        const wsUrl = `ws://localhost:3000?roomCode=${roomCode}&token=${token}`;
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const wsProtocol = isLocal ? 'ws' : 'wss';
+        const wsHost = isLocal ? 'localhost:3000' : 'movienight-backend-veka.onrender.com';
+        const wsUrl = `${wsProtocol}://${wsHost}?roomCode=${roomCode}&token=${token}`;
+
         const ws = new WebSocket(wsUrl);
         let receivedEvent = false;
         
