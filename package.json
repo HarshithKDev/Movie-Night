@@ -7,8 +7,8 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.19",
-    "daisyui": "^4.12.10",
+    "daisyui": "^5.3.3",
     "postcss": "^8.4.38",
-    "tailwindcss": "^4.0.0-alpha.15" 
+    "tailwindcss": "^4.0.0-alpha.15"
   }
 }

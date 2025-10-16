@@ -1,20 +1,21 @@
 require('dotenv').config();
-const express = a('express');
-const { MongoClient, ServerApiVersion, ObjectId } = a('mongodb');
-const http = a('http');
-const { WebSocketServer } = a('ws');
-const admin = a('firebase-admin');
-const cors = a('cors');
-const { body, param, validationResult } = a('express-validator');
-const url = a('url');
-const rateLimit = a('express-rate-limit');
-const { v4: uuidv4 } = a('uuid');
-const path = a('path');
+const express = require('express');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const http = require('http');
+const { WebSocketServer } = require('ws');
+const admin = require('firebase-admin');
+const cors = require('cors');
+const { body, param, validationResult } = require('express-validator');
+const url = require('url');
+const rateLimit = require('express-rate-limit');
+const { v4: uuidv4 } = require('uuid');
+const path = require('path');
+const helmet = require('helmet');
 
 // --- Firebase Admin SDK Initialization ---
 const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
   ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
-  : a('./firebase-service-account-key.json');
+  : require('./firebase-service-account-key.json');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -29,23 +30,34 @@ const port = process.env.PORT || 3000;
 
 // --- Security Middleware ---
 
-// 1. CORS Configuration
+// 1. Helmet for security headers
+app.use(helmet());
+
+// 2. CORS Configuration
 const allowedOrigins = ['https://movienightlive.netlify.app'];
-if (process.env.NODE_ENV === 'development') {
-    allowedOrigins.push('http://localhost:3000', 'http://127.0.0.1:5500');
+
+// For development, allow requests from local servers
+if (process.env.NODE_ENV !== 'production') {
+    allowedOrigins.push('http://127.0.0.1:5500');
+    allowedOrigins.push('http://localhost:3000');
 }
+
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
     }
+    return callback(null, true);
   }
 };
 app.use(cors(corsOptions));
 
-// 2. Rate Limiting
+
+// 3. Rate Limiting
 const apiLimiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
 	max: 100,
@@ -166,17 +178,25 @@ wss.on('connection', (ws, req) => {
     ws.on('message', (message) => {
         try {
             const data = JSON.parse(message);
-            if (['play', 'pause', 'seek'].includes(data.type)) {
-                if (rooms[ws.roomCode]) {
-                    rooms[ws.roomCode].state.isPlaying = data.type === 'play';
-                    if (data.time !== undefined) rooms[ws.roomCode].state.currentTime = data.time;
-                    rooms[ws.roomCode].state.lastUpdated = Date.now();
-                    rooms[ws.roomCode].clients.forEach(client => {
-                        if (client !== ws && client.readyState === client.OPEN) {
-                            client.send(JSON.stringify(data));
-                        }
-                    });
-                }
+
+            // --- WebSocket Input Sanitization ---
+            const allowedTypes = ['play', 'pause', 'seek'];
+            if (!allowedTypes.includes(data.type)) {
+                return; // Ignore messages with unknown types
+            }
+            if (data.time !== undefined && typeof data.time !== 'number') {
+                return; // Ignore messages with invalid time
+            }
+
+            if (rooms[ws.roomCode]) {
+                rooms[ws.roomCode].state.isPlaying = data.type === 'play';
+                if (data.time !== undefined) rooms[ws.roomCode].state.currentTime = data.time;
+                rooms[ws.roomCode].state.lastUpdated = Date.now();
+                rooms[ws.roomCode].clients.forEach(client => {
+                    if (client !== ws && client.readyState === client.OPEN) {
+                        client.send(JSON.stringify(data));
+                    }
+                });
             }
         } catch (error) { console.error('WS message error:', error); }
     });
