@@ -53,31 +53,34 @@ app.use(
         ],
       },
     },
-    xContentTypeOptions: {},
+    xContentTypeOptions: {}, 
     xFrameOptions: { action: "deny" },
     strictTransportSecurity: {
-      maxAge: 31536000,
+      maxAge: 31536000, 
       includeSubDomains: true,
       preload: true,
     },
   })
 );
 
-
 // 2. CORS Configuration for HTTP requests
+const allowedOrigins = [
+    'https://movienightlive.netlify.app'
+];
+
 app.use(cors({
   origin: (origin, callback) => {
-    const allowedOrigins = ['https://movienightlive.netlify.app'];
-    const isDevelopment = process.env.DEV_MODE === 'true';
-
-    if (isDevelopment && (!origin || origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1'))) {
+    // Allow development origins and server-to-server requests (no origin)
+    if (!origin || origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
       return callback(null, true);
     }
     
+    // Check if the production origin is in our allowed list
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
 
+    // If not allowed, block the request
     return callback(new Error('The CORS policy for this site does not allow access from the specified Origin.'));
   }
 }));
