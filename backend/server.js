@@ -53,10 +53,10 @@ app.use(
         ],
       },
     },
-    xContentTypeOptions: {}, 
+    xContentTypeOptions: {},
     xFrameOptions: { action: "deny" },
     strictTransportSecurity: {
-      maxAge: 31536000, 
+      maxAge: 31536000,
       includeSubDomains: true,
       preload: true,
     },
@@ -264,8 +264,7 @@ async function run() {
             const { movieId } = req.params;
             
             const movie = await moviesCollection.findOne({ 
-                _id: new ObjectId(movieId), 
-                userId: req.user.uid 
+                _id: new ObjectId(movieId)
             });
 
             if (!movie) {
