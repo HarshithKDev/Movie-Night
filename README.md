@@ -110,7 +110,7 @@ You will also need to set up accounts for:
 ## Project Structure
 
 The project has a clear separation between the frontend and backend code.
-
+```
 /
 ├── backend/                # Node.js & Express Backend
 │   ├── server.js           # API endpoints and WebSocket logic
@@ -130,7 +130,7 @@ The project has a clear separation between the frontend and backend code.
 │
 ├── index.html              # Main entry point for the frontend
 └── package.json            # Frontend development dependencies
-
+```
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
