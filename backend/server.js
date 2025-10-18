@@ -253,4 +253,8 @@ async function run() {
   } catch(err) { console.error("❌ Failed to connect to MongoDB", err); }
 }
 
+app.get('/ping', (_, res) => {
+  res.status(200).send('OK');
+});
+
 run();
